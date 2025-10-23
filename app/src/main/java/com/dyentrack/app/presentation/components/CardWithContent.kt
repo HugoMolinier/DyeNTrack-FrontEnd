@@ -76,7 +76,7 @@ fun CardWithContent (text: String, subText: String, leftIcon:ImageVector?=null, 
                     ) {
                         Text(
                             text = text,
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                         )
                         Text(
                             text = subText,

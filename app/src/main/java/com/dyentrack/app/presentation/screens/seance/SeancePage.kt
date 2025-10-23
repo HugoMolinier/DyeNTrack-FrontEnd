@@ -50,8 +50,12 @@ import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
+import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
+import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
+import com.dyentrack.app.presentation.screens.seance.component.SetRow
 import com.dyentrack.app.presentation.theme.TertiaOne
 
 @Composable
@@ -66,7 +70,6 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
         }
     }
 
-    val searchQueryState = remember { mutableStateOf(TextFieldValue(state.searchQuery)) }
     LaunchedEffect(Unit) {
         viewModel.loadMasterData()
     }
@@ -79,12 +82,12 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
             TopNavigationBar("Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 rightSide = {
                     IconButton (
-                    onClick = {},
+                    onClick = {viewModel.saveToAPISeance()},
                     Modifier
 
                         .size(40.dp)
                 ) {
-                        if (state.exerciseOfTheSeance.isNotEmpty()){
+                        if (state.seancesParJour[state.daySelected]?.exerciseIds?.isNotEmpty() == true && state.seancesParJour[state.daySelected]?.save == false){
                         Icon(
                             Icons.Default.Save,
                             contentDescription = "Save",
@@ -94,13 +97,17 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                     }
                 })
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.exerciseOfTheSeance) { exerciseId ->
+            DateSelectorRange()
+
+            SectionSelector()
+
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 20.dp)) {
+                items(state.seancesParJour[state.daySelected]?.exerciseIds?:listOf()) { exerciseId ->
 
                     val exercise =
                         state.masterDataStatic.officialExercise.find { it.idExercise == exerciseId }
                             ?: return@items
-                    val exerciseSets = state.setsMap[exerciseId] ?: listOf()
+                    val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]//viewModel.getSetOfSeance(exerciseId)
                     CardWithContent(
                         exercise.nameFR,
                         canExtend = true,
@@ -195,64 +202,8 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
 
                                 }
 
-                                exerciseSets.forEachIndexed { index, set ->
-                                    val chargeState =
-                                        remember { mutableStateOf(TextFieldValue(set.charge?.toString()?:"",
-                                            TextRange(0,6)
-                                        )) }
-                                    val rirState =
-                                        remember { mutableStateOf(TextFieldValue(set.rir?.toString()?:"",TextRange(0,3))) }
-                                    val repsState =
-                                        remember { mutableStateOf(TextFieldValue(set.reps?.toString()?:"",TextRange(0,3))) }
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(15.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 8.dp)
-                                    ) {
-                                        Badge(
-                                            content = {
-                                                if (set.type == SetType.EFFECTIVE) Text((index + 1).toString())
-                                                else Text(set.type.toString().uppercase())
-                                            },
-                                            modifier = Modifier
-                                                .width(24.dp)
-                                                .height(24.dp)
-                                        )
-
-                                        InputCustom(
-                                            text = chargeState,
-                                            placeholder = "Charge",
-                                            modifier = Modifier.weight(1f),
-                                            keyboardType = KeyboardType.Decimal
-                                        )
-                                        LaunchedEffect(chargeState.value.text) {
-                                            set.charge =
-                                                chargeState.value.text.toDoubleOrNull() ?: 0.0
-                                        }
-
-                                        InputCustom(
-                                            text = rirState,
-                                            placeholder = "RIR",
-                                            modifier = Modifier.weight(1f),
-                                            keyboardType = KeyboardType.Number
-                                        )
-                                        LaunchedEffect(rirState.value.text) {
-                                            set.rir = rirState.value.text.toIntOrNull() ?: 0
-                                        }
-
-                                        InputCustom(
-                                            text = repsState,
-                                            placeholder = "Reps",
-                                            modifier = Modifier.weight(1f),
-                                            keyboardType = KeyboardType.Number
-                                        )
-                                        LaunchedEffect(repsState.value.text) {
-                                            set.reps = repsState.value.text.toIntOrNull() ?: 0
-                                        }
-                                    }
+                                exerciseSets?.forEachIndexed { index, set ->
+                                    SetRow(set,index)
                                 }
                             }
                         }
@@ -263,7 +214,7 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
 
         }
         FloatingActionButton(
-            onClick = {    viewModel.setExerciseToAdd(state.exerciseOfTheSeance)
+            onClick = {    viewModel.setExerciseToAdd(state.seancesParJour[state.daySelected]?.exerciseIds?:listOf())
             viewModel.toggleBottomSheet(true)},
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -293,10 +244,14 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
         onDismiss = { viewModel.toggleBottomSheet(false) },
         childrenForExtend = {
             InputCustom(
-                text = searchQueryState,
+                text = remember { mutableStateOf(TextFieldValue(state.searchQuery)) },
+                onValueChange = { newValue ->
+                    viewModel.updateSearchQuery(newValue)
+                },
                 placeholder = "Search",
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                modifier = Modifier.padding(12.dp, 20.dp)
+                leadingIcon = Icons.Default.Search,
+                modifier = Modifier.padding(12.dp, 20.dp),
+                variant = InputVariant.OUTLINED
             )
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {

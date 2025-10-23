@@ -1,5 +1,6 @@
 package com.dyentrack.app.data.network
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -27,6 +28,7 @@ object NetworkModule {
                     .addHeader("Authorization", "Bearer $TestToken")
                     .addHeader("Accept", "application/json")
                 val request = requestBuilder.build()
+                Log.d("REQUEST API", " : ${request}")
                 chain.proceed(request)
             }
             .build()

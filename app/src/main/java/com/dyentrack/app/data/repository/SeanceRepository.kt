@@ -16,4 +16,8 @@ class SeanceRepository @Inject constructor(
     suspend fun saveDayData(dayDataRequest: DayDataRequest): ApiResponse<DayDataRequest> {
         return api.saveDayData(dayDataRequest)
     }
+
+    suspend fun getAllDayData(): ApiResponse<List<DayDataRequest>> {
+        return api.getAllDayDataByDay()
+    }
 }
