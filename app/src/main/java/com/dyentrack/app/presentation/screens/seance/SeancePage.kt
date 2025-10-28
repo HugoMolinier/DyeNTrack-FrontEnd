@@ -1,5 +1,8 @@
 package com.dyentrack.app.presentation.screens.seance
 
+import AnalyseRow
+import android.os.Bundle
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,11 +59,15 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
 import com.dyentrack.app.presentation.screens.seance.component.SetRow
+import com.dyentrack.app.presentation.screens.seance.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.theme.TertiaOne
+
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 
 @Composable
 
-fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewModel()) {
+fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = hiltViewModel(),navController: NavController) {
 
     val state by viewModel.uiState.collectAsState()
 
@@ -80,6 +87,7 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar("Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                onClickLeft = {navController.navigate("home")},
                 rightSide = {
                     IconButton (
                     onClick = {viewModel.saveToAPISeance()},
@@ -97,11 +105,11 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                     }
                 })
 
-            DateSelectorRange()
 
-            SectionSelector()
+            LazyColumn {
+                item { DateSelectorRange() }
+                item { SectionSelector() }
 
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 20.dp)) {
                 items(state.seancesParJour[state.daySelected]?.exerciseIds?:listOf()) { exerciseId ->
 
                     val exercise =
@@ -122,6 +130,13 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                         } else {
                             Icons.Default.ArrowDropDown
                         },
+                        menuOnLongClick = mapOf(
+                            "Voir Exercice" to {
+                                navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
+                                navController.navigate("exercise")
+                            },
+                            "Supprimer" to { viewModel.deleteExercice(exerciseId) }
+                        ),
                         subTextEmphasis = SubTextEmphasis.SECONDARY,
 
                         childrenForExtend = {
@@ -133,7 +148,7 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 20.dp)
+                                        .padding(bottom = 8.dp)
                                         .height(32.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
@@ -165,31 +180,38 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                                         listOfSelectableItem = state.masterDataStatic.equipment.map { it.nameFR }
                                     )
                                     IconButton(
-                                        onClick = {},
+                                        onClick = {
+                                            viewModel.toggleShowAnalyseData()
+                                            viewModel.getLastExercicePerfBetweenDate(state.daySelected,"2025-10-20")},
                                         Modifier
                                             .border(
                                                 1.dp,
-                                                color = TertiaOne,
+                                                color = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else TertiaOne,
                                                 shape = CircleShape
                                             )
+
                                             .size(22.dp)
                                     ) {
                                         Icon(
                                             Icons.Default.QueryStats,
                                             contentDescription = "Voir stats",
-                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            tint = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.padding(4.dp)
                                         )
                                     }
                                     IconButton(
-                                        onClick = {},
+                                        onClick = {
+
+
+
+                                                  },
                                         Modifier
                                             .border(
                                                 1.dp,
                                                 color = TertiaOne,
                                                 shape = CircleShape
                                             )
-                                            .size(22.dp)
+                                            .size(30.dp)
                                     ) {
                                         Icon(
                                             Icons.Default.Info,
@@ -201,6 +223,7 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
 
 
                                 }
+                                AnalyseRow()
 
                                 exerciseSets?.forEachIndexed { index, set ->
                                     SetRow(set,index)
@@ -209,8 +232,12 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
                         }
                     )
                 }
+                item { ShowInfoOfSeance() }
 
             }
+
+
+
 
         }
         FloatingActionButton(
@@ -272,7 +299,7 @@ fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = viewM
         },
         footerComponent = {
             Row(
-                Modifier.fillMaxWidth().padding(12.dp, 20.dp),
+                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 20.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 CustomButton(

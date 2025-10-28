@@ -16,7 +16,9 @@ class MasterDataRepository @Inject constructor(private val api: ApiInterface,
 
         val response = api.getMasterDataStatic()
         if (response.status == 200) {
-            localDataSource.saveMasterData(response.data)
+            if (response.data.officialExercise.isNotEmpty() && response.data.muscles.isNotEmpty() && response.data.musclesGroup.isNotEmpty()) {
+                localDataSource.saveMasterData(response.data)
+            }
             return response.data
         } else {
             throw Exception("Erreur: ${response.message}")

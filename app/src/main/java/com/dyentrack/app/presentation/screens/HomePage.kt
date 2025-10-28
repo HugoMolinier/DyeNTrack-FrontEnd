@@ -26,11 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.presentation.components.CardWithContent
 
 @Composable
-fun HomePage (modifier: Modifier = Modifier){
+fun HomePage (modifier: Modifier = Modifier,navController: NavController){
     Greetings()
 }
 

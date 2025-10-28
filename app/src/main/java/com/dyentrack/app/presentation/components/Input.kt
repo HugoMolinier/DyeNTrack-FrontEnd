@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,15 +18,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.dyentrack.app.presentation.theme.PrimaryTextColor
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -39,21 +37,22 @@ fun InputCustom(
     onValueChange: ((String) -> Unit)? = null,
     leadingIcon:   ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    variant : InputVariant ?= InputVariant.FILLED
+    variant : InputVariant ?= InputVariant.FILLED,
+    singleLine:Boolean = true
 ) {
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .height(40.dp)
-            .background(color = TertiaOne, shape = RoundedCornerShape(5.dp))
+            .height(44.dp)
+            .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == InputVariant.OUTLINED) 12.dp else 5.dp))
 
             .then(
                 if (variant == InputVariant.OUTLINED) Modifier.border(
                     width = 1.dp,
                     color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(5.dp)
+                    shape = RoundedCornerShape(12.dp)
                 ) else Modifier
-            ).padding(horizontal = 8.dp, vertical = 10.dp),
+            ).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -61,11 +60,13 @@ fun InputCustom(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
+                tint = secondaryTextColor.copy(alpha = 0.5f)
             )
         }
         BasicTextField(
             value = text.value,
             modifier=Modifier.fillMaxSize(),
+
             onValueChange = { newValue ->
                 val filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
@@ -79,20 +80,29 @@ fun InputCustom(
                 )
                 onValueChange?.invoke(filteredText)
             },
-            singleLine = true,
+            singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
                 color = PrimaryTextColor
 
             ),
             decorationBox = { innerTextField ->
-                if (text.value.text.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style =  MaterialTheme.typography.bodySmall.copy(
-                            color = secondaryTextColor,),
-                    )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = if(singleLine) Alignment.CenterStart else Alignment.TopStart
+                ) {
+                    if (text.value.text.isEmpty()) {
+                        Text(
+                            text = placeholder,
+
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = secondaryTextColor.copy(alpha = 0.5f),
+
+                                textAlign = TextAlign.Center
+                            ),
+                        )
+                    }
+                    innerTextField()
                 }
-                innerTextField()
             }
         )
     }

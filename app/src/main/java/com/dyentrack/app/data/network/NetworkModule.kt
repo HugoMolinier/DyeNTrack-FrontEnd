@@ -16,8 +16,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL: String = "http://10.0.2.2:8080/api/"
-    private const val TestToken : String ="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6IjEiLCJpYXQiOjE3NjA5ODA4MTUsImV4cCI6MTc2MTU4NTYxNX0.YJqJyHUFLsJnuYSxRxlnHyf9offaO3cmXB7xikkTH3o"
+    private const val BASE_URL: String = "http://4.233.56.101:8080/api/"
+    private const val TestToken : String ="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6IjEiLCJpYXQiOjE3NjE1OTEyMzcsImV4cCI6MTc2MjE5NjAzN30.Ipr7gQcA_iAh-y0is8jW8Fyov9lKRNtYS_PJAvqo1qE"
+
+    private const val Apikey : String ="gK7WOGlkQQxEiDQeYxweqbKluRfulBxkXHzqUP8k3U0="
 
     @Provides
     @Singleton
@@ -26,6 +28,7 @@ object NetworkModule {
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                     .addHeader("Authorization", "Bearer $TestToken")
+                    .addHeader("X-API-KEY", Apikey)
                     .addHeader("Accept", "application/json")
                 val request = requestBuilder.build()
                 Log.d("REQUEST API", " : ${request}")

@@ -21,7 +21,7 @@ import com.dyentrack.app.presentation.theme.TertiaOne
 fun SectionSelector(modifier: Modifier= Modifier){
     val colorScheme = MaterialTheme.colorScheme
 
-    Row (modifier = Modifier.fillMaxWidth().padding(start = 12.dp,top=5.dp, end = 12.dp) .drawBehind {
+    Row (modifier = Modifier.fillMaxWidth().padding(start = 12.dp,top=5.dp, end = 12.dp, bottom = 20.dp) .drawBehind {
         val strokeWidth = 2.dp.toPx()
         drawLine(
             color = TertiaOne,

@@ -66,13 +66,13 @@ fun BottomSheetContent(
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.9f)
+                .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.85f)
         ) {
             if (title.isNotBlank() || closeButtonTitle) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 4.dp),
+                        .padding(start = 20.dp, top = 4.dp, bottom = 4.dp,end=4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {

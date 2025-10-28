@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.SetData
 import java.time.LocalDate
@@ -20,13 +21,22 @@ data class SeanceUiState(
 
     val expandedExerciseId: Long? = null,
     val isBottomSheetVisible: Boolean = false,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+
+
+
+    // résultats d’analyse
+    val showAnalyseData:Boolean = false,
+    val analyseData: Map<String, List<SetData>> = emptyMap()
+
+
 )
 
 data class SeanceDuJour(
     val exerciseIds: SnapshotStateList<Long> = mutableStateListOf(),
     val save: Boolean = false,
-    val setsMap: MutableMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf()
+    val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
+    val note: String?=null,
 )
 
 

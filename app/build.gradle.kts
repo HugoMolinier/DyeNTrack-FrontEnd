@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.hilt.android)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -57,9 +58,16 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    val nav_version = "2.9.5"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.30.1")
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

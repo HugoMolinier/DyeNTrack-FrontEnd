@@ -58,7 +58,7 @@ fun CustomButton(
             .semantics { contentDescription = accessibilityLabel }
     ) {
         Text(text = label,
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
 
     }

@@ -82,16 +82,7 @@ fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
                 chargeState.value.text.toDoubleOrNull()
         }
 
-        InputCustom(
-            text = rirState,
-            placeholder = "RIR",
-            modifier = Modifier.weight(1f),
-            keyboardType = KeyboardType.Number,
-            onValueChange = {viewModel.changeSaveStatus(false)}
-        )
-        LaunchedEffect(rirState.value.text) {
-            set.rir = rirState.value.text.toIntOrNull() ?: 0
-        }
+
 
         InputCustom(
             text = repsState,
@@ -103,6 +94,17 @@ fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
         LaunchedEffect(repsState.value.text) {
             set.reps = repsState.value.text.toIntOrNull() ?: 0
         }
+        InputCustom(
+            text = rirState,
+            placeholder = "RIR",
+            modifier = Modifier.weight(1f),
+            keyboardType = KeyboardType.Number,
+            onValueChange = {viewModel.changeSaveStatus(false)}
+        )
+        LaunchedEffect(rirState.value.text) {
+            set.rir = rirState.value.text.toIntOrNull() ?: 0
+        }
+
     }
 
 }

@@ -58,12 +58,19 @@ class SeanceViewModel @Inject constructor(private val getMasterDataUseCase: GetM
     }
 
     fun changeDaySelected(dateFormat: String){
-        _uiState.update { it.copy(daySelected=dateFormat) }
+        _uiState.update { it.copy(daySelected=dateFormat, showAnalyseData = false) }
     }
     fun toggleBottomSheet(show: Boolean) {
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
 
+    fun toggleShowAnalyseData(show: Boolean? = null) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showAnalyseData = show ?: !currentState.showAnalyseData
+            )
+        }
+    }
     fun updateSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
     }
@@ -91,7 +98,9 @@ class SeanceViewModel @Inject constructor(private val getMasterDataUseCase: GetM
 
 
     fun addExerciseToSeance() {
-        val todaySeance = _uiState.value.seancesParJour.getOrPut(_uiState.value.daySelected) { SeanceDuJour() }
+        val day = _uiState.value.daySelected
+        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
+
         todaySeance.exerciseIds.clear()
         todaySeance.exerciseIds.addAll(_uiState.value.exerciseToAdd)
 
@@ -109,17 +118,48 @@ class SeanceViewModel @Inject constructor(private val getMasterDataUseCase: GetM
         }
     }
 
+    fun deleteExercice(exerciseId: Long){
+        _uiState.update { currentState ->
+            val day = currentState.daySelected
+            val oldDay = currentState.seancesParJour[day]!!
+            oldDay.exerciseIds.remove(exerciseId)
+            oldDay.setsMap.remove(exerciseId)
+            val newSeancesParJour = currentState.seancesParJour.toMutableMap().apply { put(day, oldDay) }
+            currentState.copy(seancesParJour = newSeancesParJour)
+
+
+        }
+        changeSaveStatus(false)
+
+    }
+
     fun addSetToExercise(exerciseId: Long) {
         val seance = getOrCreateSeanceOfADay()
-        val sets = getOrCreateSetOfSeance(exerciseId)
-        sets.add(SetData(SetType.EFFECTIVE, null, null, null))
-        _uiState.value.seancesParJour[_uiState.value.daySelected] = seance
+        val sets = seance.setsMap.getOrPut(exerciseId) { mutableStateListOf() }
+
+        val lastCharge = sets.lastOrNull()?.charge
+        sets.add(SetData(SetType.EFFECTIVE, lastCharge, null, null))
+
         changeSaveStatus(false)
     }
 
+    fun getLastExercicePerfBetweenDate(dateRecent: String,dateBefore: String){
+        val result = mutableMapOf<String, MutableList<SetData>>()
+        generateSequence( LocalDate.parse(dateRecent)) { it.minusDays(1) }
+            .takeWhile { !it.isBefore(LocalDate.parse(dateBefore)) }
+            .forEach { day ->
+                val dataOfTheDay = uiState.value.seancesParJour[day.format(DateTimeFormatter.ISO_DATE)]
+                if (dataOfTheDay?.setsMap[uiState.value.expandedExerciseId]?.isNotEmpty() == true){
+                    result.getOrPut(day.toString()) { mutableListOf() }.addAll(dataOfTheDay.setsMap[uiState.value.expandedExerciseId]!!.toList())
+
+                }
+            }
+        Log.e("Log Info", "info: ${result}")
+        _uiState.value = _uiState.value.copy(analyseData = result)
+    }
 
     fun expandExercise(exerciseId: Long?) {
-        _uiState.update { it.copy(expandedExerciseId = exerciseId) }
+        _uiState.update { it.copy(expandedExerciseId = exerciseId, showAnalyseData = false) }
     }
     fun getExerciseToAdd(): List<Long>{
         return _uiState.value.exerciseToAdd
@@ -177,21 +217,11 @@ class SeanceViewModel @Inject constructor(private val getMasterDataUseCase: GetM
                             ?.map { it.exerciseId }
                             ?.toMutableStateList() ?: mutableStateListOf()
 
-                        val setsMap: MutableMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf()
+                        val setsMap = mutableStateMapOf<Long, SnapshotStateList<SetData>>()
                         daySeance.seanceTrack?.plannedExercises?.forEach { plannedExercise ->
-                            val setsList = plannedExercise.sets?.map { setDTO ->
-                                SetData(
-                                    reps = setDTO.repsNumber,
-                                    rir = setDTO.rir,
-                                    charge = setDTO.charge,
-                                    type = when(setDTO.typeOfSet) {
-                                        SetType.WARMUP -> SetType.WARMUP
-                                        SetType.TEMPO -> SetType.TEMPO
-                                        else -> SetType.EFFECTIVE
-                                    }
-                                )
-                            }?.toMutableStateList()
-                            setsMap[plannedExercise.exerciseId] = setsList?: mutableStateListOf()
+                            setsMap[plannedExercise.exerciseId] = plannedExercise.sets
+                                ?.map { SetData(it.typeOfSet, it.charge, it.rir, it.repsNumber) }
+                                ?.toMutableStateList() ?: mutableStateListOf()
                         }
 
                         newMap[day] = oldDay.copy(
@@ -201,7 +231,7 @@ class SeanceViewModel @Inject constructor(private val getMasterDataUseCase: GetM
                         )
                     }
 
-                    // Un seul update global
+
                     _uiState.update { it.copy(seancesParJour = newMap) }
                     Log.d("DEBUG_API", "Jour reçu: ${_uiState.value.seancesParJour}")
                 }

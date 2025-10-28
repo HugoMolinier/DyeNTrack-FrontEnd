@@ -24,12 +24,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.dyentrack.app.domain.model.NavItem
+import com.dyentrack.app.domain.model.exercise.Exercise
+import com.dyentrack.app.presentation.screens.ExercisePage
 import com.dyentrack.app.presentation.screens.HomePage
 import com.dyentrack.app.presentation.screens.MainPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -38,6 +51,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
 
         setContent {
             DyeNTrackTheme() {
@@ -50,40 +64,53 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
-    var selectedItem by remember { mutableStateOf(0) } // Pour suivre l'onglet sélectionné
+    val navController = rememberNavController()
+
     val navItemsList = listOf(
-        NavItem("Home",Icons.Default.Home),
-        NavItem("Séance", Icons.Default.Analytics),
-        NavItem("Analyse", Icons.Default.Settings),
+        NavItem("Home",Icons.Default.Home,route= "home"),
+        NavItem("Séance", Icons.Default.Analytics,"seance"),
+        NavItem("Analyse", Icons.Default.Settings,"analyse"),
     )
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
     Scaffold (
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.background ) {
-                navItemsList.forEachIndexed { index, item ->
+            NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
+                navItemsList.forEach { item ->
                     NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = item.icon, contentDescription = "icon"
-                            )
-                        },
+                        icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
-                        selected = selectedItem == index,
-                        onClick = { selectedItem = index }
+                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     )
                 }
             }
+
         }
     ) { innerPadding ->
-        Surface(modifier = modifier.padding(innerPadding),
-                color = MaterialTheme.colorScheme.background
+        NavHost(navController, startDestination = "home",
+            modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
         ) {
-
-                when (selectedItem) {
-                    0 -> HomePage()
-                    1 -> SeancePage()
-                    2 -> MainPage()
+            composable("home") { HomePage(navController=navController) }
+            composable("seance") { SeancePage(navController=navController) }
+            composable("analyse") { MainPage(navController=navController) }
+            composable("exercise") { backStackEntry ->
+                val exercise = navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<Exercise>("exercise")
+                if (exercise != null) {
+                    ExercisePage(navController = navController, exercise = exercise)
                 }
+            }
 
         }
     }
