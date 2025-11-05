@@ -31,7 +31,7 @@ import com.dyentrack.app.R
 import com.dyentrack.app.presentation.components.CardWithContent
 
 @Composable
-fun HomePage (modifier: Modifier = Modifier,navController: NavController){
+fun HomePage (){
     Greetings()
 }
 
@@ -42,7 +42,7 @@ private fun Greetings(
 ) {
     LazyColumn(modifier = modifier.padding(vertical = 4.dp)) {
         items(items = names) { name ->
-            CardWithContent(name,"sub")
+            CardWithContent(text = name, subText = "sub")
         }
     }
 }

@@ -1,8 +1,5 @@
 package com.dyentrack.app.domain.model
 
-import com.google.gson.annotations.SerializedName
-import java.util.Objects
-
 
 data class DayDataRequest(
     val idDayData:Long?,
@@ -54,5 +51,6 @@ data class SetVO(
     val repsNumber: Int,
     val rir: Int,
     val charge: Double,
-    val typeOfSet: SetType = SetType.EFFECTIVE
+    val typeOfSet: SetType = SetType.EFFECTIVE,
+    val side : SetSide= SetSide.BOTH
 )

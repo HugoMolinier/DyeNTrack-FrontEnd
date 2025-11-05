@@ -1,5 +1,8 @@
 package com.dyentrack.app.data.local
 
+import com.dyentrack.app.data.local.datasource.FileLocalDataSource
+import com.dyentrack.app.data.local.datasource.LocalDataSource
+
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,4 +18,7 @@ abstract class LocalDataSourceModule {
     abstract fun bindLocalDataSource(
         fileLocalDataSource: FileLocalDataSource
     ): LocalDataSource
+
+
+
 }

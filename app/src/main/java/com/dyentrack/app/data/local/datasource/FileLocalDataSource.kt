@@ -1,12 +1,12 @@
-package com.dyentrack.app.data.local
+package com.dyentrack.app.data.local.datasource
 
 import android.content.Context
+import androidx.core.content.edit
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
-import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Singleton
 class FileLocalDataSource @Inject constructor(
@@ -23,4 +23,6 @@ class FileLocalDataSource @Inject constructor(
         val json = Gson().toJson(masterDataStatic)
         prefs.edit { putString("master_data_static", json) }
     }
+
+
 }

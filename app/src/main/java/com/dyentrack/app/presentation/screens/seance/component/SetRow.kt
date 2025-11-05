@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -22,16 +22,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.viewModel.SeanceViewModel
 
 @Composable
-fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
+fun SetRow(
+    set: SetData,
+    index: Int,
+    viewModel: SeanceViewModel = viewModel(),
+    setRightForUni: SetData? = null,
+    lockInput: Boolean
+) {
     val chargeState = remember {
         mutableStateOf(
             TextFieldValue(
                 text = set.charge?.toString() ?: "",
 
-            )
+                )
         )
     }
 
@@ -40,9 +47,10 @@ fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
             TextFieldValue(
                 text = set.rir?.toString() ?: "",
 
-            )
+                )
         )
     }
+
 
     val repsState = remember {
         mutableStateOf(
@@ -50,6 +58,9 @@ fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
                 text = set.reps?.toString() ?: "",
             )
         )
+    }
+    val repsRightState = remember(setRightForUni) {
+        mutableStateOf(TextFieldValue(text = setRightForUni?.reps?.toString() ?: ""))
     }
 
     Row(
@@ -66,43 +77,77 @@ fun SetRow(set: SetData,index: Int, viewModel: SeanceViewModel = viewModel()){
             },
             modifier = Modifier
                 .width(24.dp)
-                .height(24.dp)
+                .height(24.dp),
+            containerColor = when (set.type) {
+
+                SetType.EFFECTIVE -> if (rirState.value.text.toIntOrNull() == 0) addColor.setEch else MaterialTheme.colorScheme.primary
+                else -> addColor.setWarm
+            },
+            contentColor = when (set.type) {
+                SetType.WARMUP -> MaterialTheme.colorScheme.onSurface
+                else -> MaterialTheme.colorScheme.background
+            },
         )
+
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+
+
+            InputCustom(
+                text = repsState,
+                enabled = !lockInput,
+                placeholder = if (setRightForUni != null) "L" else "Reps",
+                modifier = Modifier.weight(1f),
+                keyboardType = KeyboardType.Number,
+                onValueChange = { viewModel.changeSaveStatus(false) }
+            )
+            LaunchedEffect(repsState.value.text) {
+                set.reps = repsState.value.text.toIntOrNull() ?: 0
+            }
+            if (setRightForUni != null) {
+                InputCustom(
+                    text = repsRightState,
+                    placeholder = "R",
+                    enabled = !lockInput,
+                    modifier = Modifier.weight(1f),
+                    keyboardType = KeyboardType.Number,
+                    onValueChange = { viewModel.changeSaveStatus(false) }
+                )
+                LaunchedEffect(repsRightState.value.text) {
+                    setRightForUni.reps = repsRightState.value.text.toIntOrNull() ?: 0
+                }
+            }
+        }
 
         InputCustom(
             text = chargeState,
             placeholder = "Charge",
+            enabled = !lockInput,
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Decimal,
-                    onValueChange = {viewModel.changeSaveStatus(false)}
+            onValueChange = { viewModel.changeSaveStatus(false) }
 
         )
         LaunchedEffect(chargeState.value.text) {
-            set.charge =
-                chargeState.value.text.toDoubleOrNull()
+            val value = chargeState.value.text.toDoubleOrNull()
+            set.charge = value
+            setRightForUni?.charge = value
         }
 
 
 
-        InputCustom(
-            text = repsState,
-            placeholder = "Reps",
-            modifier = Modifier.weight(1f),
-            keyboardType = KeyboardType.Number,
-            onValueChange = {viewModel.changeSaveStatus(false)}
-        )
-        LaunchedEffect(repsState.value.text) {
-            set.reps = repsState.value.text.toIntOrNull() ?: 0
-        }
         InputCustom(
             text = rirState,
             placeholder = "RIR",
-            modifier = Modifier.weight(1f),
+            enabled = !lockInput,
+            modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,
-            onValueChange = {viewModel.changeSaveStatus(false)}
+            onValueChange = { viewModel.changeSaveStatus(false) }
         )
         LaunchedEffect(rirState.value.text) {
-            set.rir = rirState.value.text.toIntOrNull() ?: 0
+            val rirValue = rirState.value.text.toIntOrNull() ?: 0
+            set.rir = rirValue
+            setRightForUni?.rir = rirValue
+
         }
 
     }

@@ -11,5 +11,5 @@ data class Exercise(
     val description: String?="",
     val muscleInfos : List<MuscleInfos>?=listOf(),
     val linkVideo:String?=null,
-    val idCreator: String?=null
+    val idCreator: Long?=null
 ): Parcelable

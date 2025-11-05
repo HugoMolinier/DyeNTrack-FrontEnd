@@ -1,324 +1,248 @@
 package com.dyentrack.app.presentation.screens.seance
 
-import AnalyseRow
-import android.os.Bundle
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.Badge
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dyentrack.app.domain.model.SetType
-import com.dyentrack.app.presentation.components.BottomSheetContent
-import com.dyentrack.app.presentation.components.ButtonEmphasis
-import com.dyentrack.app.presentation.components.CardWithContent
-import com.dyentrack.app.presentation.components.ChipDropDown
-import com.dyentrack.app.presentation.components.CustomButton
-import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
-import com.dyentrack.app.presentation.components.SubTextEmphasis
-import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
-import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
-import com.dyentrack.app.presentation.screens.seance.component.SetRow
-import com.dyentrack.app.presentation.screens.seance.component.ShowInfoOfSeance
-import com.dyentrack.app.presentation.theme.TertiaOne
-
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.screens.seance.component.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
+import com.dyentrack.app.presentation.screens.seance.component.ExerciseCard
+import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
+import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
+import com.dyentrack.app.presentation.screens.seance.component.ShowInfoOfSeance
+import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.viewModel.AppViewModel
+import com.dyentrack.app.presentation.viewModel.SeanceViewModel
+import kotlin.math.roundToInt
 
 @Composable
 
-fun SeancePage(modifier: Modifier = Modifier, viewModel: SeanceViewModel = hiltViewModel(),navController: NavController) {
+fun SeancePage(
+    modifier: Modifier = Modifier,
+    viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
+    appViewModel: AppViewModel,
+    navController: NavController
+) {
 
     val state by viewModel.uiState.collectAsState()
-
-    val filteredExercises = remember(state.searchQuery, state.masterDataStatic.officialExercise) {
-        state.masterDataStatic.officialExercise.filter {
-            it.nameFR.contains(state.searchQuery, ignoreCase = true)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.loadMasterData()
-    }
+    val appState by appViewModel.infoAllUser.collectAsState()
 
 
+    val lateriteNameMap = appViewModel.masterData?.lateralites?.map { it.nameFR } ?: emptyList()
+    val equipmentNameMap = appViewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         Column {
-            TopNavigationBar("Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = {navController.navigate("home")},
+            TopNavigationBar(
+                "Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                onClickLeft = { navController.navigate("home") },
                 rightSide = {
-                    IconButton (
-                    onClick = {viewModel.saveToAPISeance()},
-                    Modifier
+                    if (state.isLoadingRequest) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    } else {
 
-                        .size(40.dp)
-                ) {
-                        if (state.seancesParJour[state.daySelected]?.exerciseIds?.isNotEmpty() == true && state.seancesParJour[state.daySelected]?.save == false){
-                        Icon(
-                            Icons.Default.Save,
-                            contentDescription = "Save",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(4.dp)
-                        )}
+
+                        ModeMenu(
+                            currentMode = state.exerciseMode,
+                            onToggleMode = { mode ->
+                                viewModel.toggleMode(mode) // la fonction dans le ViewModel gère NORMAL / LOCK / CHANGE_ORDER
+                            }
+                        )
                     }
                 })
 
 
             LazyColumn {
-                item { DateSelectorRange() }
+                item { DateSelectorRange(uiState = state, viewModel = viewModel) }
                 item { SectionSelector() }
 
-                items(state.seancesParJour[state.daySelected]?.exerciseIds?:listOf()) { exerciseId ->
+                val exercises =
+                    state.seancesParJour[state.daySelected]?.exercisesInSceance ?: listOf()
 
-                    val exercise =
-                        state.masterDataStatic.officialExercise.find { it.idExercise == exerciseId }
-                            ?: return@items
-                    val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]//viewModel.getSetOfSeance(exerciseId)
-                    CardWithContent(
-                        exercise.nameFR,
-                        canExtend = true,
-                        subText = "0",
-                        expanded = state.expandedExerciseId == exerciseId, // état centralisé
-                        onExpandChange = { expanded ->
-                            viewModel.expandExercise(if (expanded) exerciseId else null)
-                        },
-                        modifier = Modifier.padding(10.dp, 4.dp),
-                        iconRightForAction = if (state.expandedExerciseId == exerciseId) {
-                            Icons.Default.ArrowDropUp
-                        } else {
-                            Icons.Default.ArrowDropDown
-                        },
-                        menuOnLongClick = mapOf(
-                            "Voir Exercice" to {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
-                                navController.navigate("exercise")
-                            },
-                            "Supprimer" to { viewModel.deleteExercice(exerciseId) }
-                        ),
-                        subTextEmphasis = SubTextEmphasis.SECONDARY,
+                if (exercises.isNotEmpty()) {
+                    itemsIndexed(exercises, key = { _, ex -> ex.exerciseId }) { _, exInSeance ->
+                        var offsetY by remember { mutableFloatStateOf(0f) }
 
-                        childrenForExtend = {
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
+                        Box(
+                            modifier = Modifier
+                                .offset { IntOffset(0, offsetY.roundToInt()) }
+                                .then(
+                                    if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                        Modifier.pointerInput(exInSeance) {
+                                            detectDragGestures(
+                                                onDragStart = { },
+                                                onDrag = { change, dragAmount ->
+                                                    offsetY += dragAmount.y
+                                                    change.consume()
+                                                    val threshold = 70.dp.toPx()
+                                                    val lastIndex = exercises.lastIndex
+
+
+                                                    val currentIndex = exercises.indexOf(exInSeance)
+
+                                                    if (offsetY > threshold && currentIndex < lastIndex) {
+                                                        viewModel.swapExercise(
+                                                            state.daySelected,
+                                                            currentIndex,
+                                                            currentIndex + 1
+                                                        )
+                                                        offsetY = 0f
+                                                    } else if (offsetY < -threshold && currentIndex > 0) {
+                                                        viewModel.swapExercise(
+                                                            state.daySelected,
+                                                            currentIndex,
+                                                            currentIndex - 1
+                                                        )
+                                                        offsetY = 0f
+                                                    }
+                                                },
+                                                onDragEnd = {
+                                                    offsetY = 0f
+
+                                                },
+                                                onDragCancel = {
+                                                    offsetY = 0f
+
+                                                }
+                                            )
+                                        }
+                                    } else Modifier
+                                )
+                        ) {
+                            ExerciseCard(
+                                exInSeance,
+                                appViewModel,
+                                state,
+                                viewModel,
+                                navController,
+                                lateriteNameMap,
+                                equipmentNameMap
+                            )
+                        }
+                    }
+                    item { ShowInfoOfSeance(appViewModel = appViewModel) }
+                    if (state.seancesParJour[state.daySelected]?.exercisesInSceance?.isNotEmpty() == true && state.seancesParJour[state.daySelected]?.saveAPI == false) {
+                        item {
+                            Row(
+                                modifier = Modifier.padding(
+                                    start = 24.dp,
+                                    end = 24.dp,
+                                    bottom = 12.dp,
+                                ), horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 8.dp)
-                                        .height(32.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-
+                                IconButton(
+                                    onClick = { viewModel.saveToAPISeance() },
+                                    Modifier.size(24.dp)
                                 ) {
-                                    IconButton(
-                                        onClick = { viewModel.addSetToExercise(exerciseId) },
-                                        Modifier
-                                            .border(
-                                                1.dp,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                shape = CircleShape
-                                            )
-                                            .height(24.dp)
-                                            .width(24.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            contentDescription = "Ajouter",
-
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.padding(4.dp) // espace autour de l'icône
-                                        )
-                                    }
-                                    ChipDropDown(
-                                        listOfSelectableItem = state.masterDataStatic.lateralites.map { it.nameFR }
+                                    Icon(
+                                        Icons.Default.Save,
+                                        contentDescription = "Save",
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(4.dp)
                                     )
-                                    ChipDropDown(
-                                        listOfSelectableItem = state.masterDataStatic.equipment.map { it.nameFR }
-                                    )
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.toggleShowAnalyseData()
-                                            viewModel.getLastExercicePerfBetweenDate(state.daySelected,"2025-10-20")},
-                                        Modifier
-                                            .border(
-                                                1.dp,
-                                                color = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else TertiaOne,
-                                                shape = CircleShape
-                                            )
-
-                                            .size(22.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.QueryStats,
-                                            contentDescription = "Voir stats",
-                                            tint = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.padding(4.dp)
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = {
-
-
-
-                                                  },
-                                        Modifier
-                                            .border(
-                                                1.dp,
-                                                color = TertiaOne,
-                                                shape = CircleShape
-                                            )
-                                            .size(30.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Info,
-                                            contentDescription = "Ajouter",
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.padding(4.dp)
-                                        )
-                                    }
-
-
-                                }
-                                AnalyseRow()
-
-                                exerciseSets?.forEachIndexed { index, set ->
-                                    SetRow(set,index)
                                 }
                             }
                         }
-                    )
+                    }
+
+                } else {
+                    item {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "Aucun exercice pour le moment",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                "Ajouter un exercice ou une routine",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                            )
+                            //image
+
+                        }
+                    }
                 }
-                item { ShowInfoOfSeance() }
 
             }
 
 
-
-
-        }
-        FloatingActionButton(
-            onClick = {    viewModel.setExerciseToAdd(state.seancesParJour[state.daySelected]?.exerciseIds?:listOf())
-            viewModel.toggleBottomSheet(true)},
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 12.dp, bottom = 16.dp),
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Ajouter",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(12.dp) // espace autour de l'icône
-            )
-
-        }
         }
 
-
-
-
-
-
-
-    BottomSheetContent(
-        title = "Ajouter un exercice",
-        showBottomSheet = state.isBottomSheetVisible,
-        onDismiss = { viewModel.toggleBottomSheet(false) },
-        childrenForExtend = {
-            InputCustom(
-                text = remember { mutableStateOf(TextFieldValue(state.searchQuery)) },
-                onValueChange = { newValue ->
-                    viewModel.updateSearchQuery(newValue)
+        if (state.exerciseMode != ExerciseMode.LOCK) {
+            FloatingActionButton(
+                onClick = {
+                    viewModel.setExerciseToAdd(
+                        state.seancesParJour[state.daySelected]?.exercisesInSceance
+                            ?.map { it.exerciseId }
+                            ?.toList()
+                            ?: listOf()
+                    )
+                    viewModel.toggleBottomSheet(true)
                 },
-                placeholder = "Search",
-                leadingIcon = Icons.Default.Search,
-                modifier = Modifier.padding(12.dp, 20.dp),
-                variant = InputVariant.OUTLINED
-            )
-
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(filteredExercises) { exercise ->
-                    val isSelected = exercise.idExercise in state.exerciseToAdd
-                    CardWithContent(
-                        exercise.nameFR,
-                        subText = state.masterDataStatic.musclesGroup
-                            .firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase() ?: "NaN",
-                        modifier = Modifier.padding(12.dp, 4.dp),
-                        iconRightForAction = Icons.Default.StarBorder,
-                        subTextEmphasis = SubTextEmphasis.PRIMARY,
-                        onClick = { viewModel.toggleExerciseSelection(exercise.idExercise) },
-                        badgeText = if (isSelected) (state.exerciseToAdd.indexOf(exercise.idExercise) + 1).toString() else null
-                    )
-                }
-            }
-        },
-        footerComponent = {
-            Row(
-                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 20.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 12.dp, bottom = 16.dp),
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
-                CustomButton(
-                    label = "Annuler",
-                    emphasis = ButtonEmphasis.SECONDARY,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        viewModel.toggleBottomSheet(false)
-                    }
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Ajouter",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.padding(12.dp) // espace autour de l'icône
                 )
-                CustomButton(
-                    label = "Ajouter",
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        viewModel.addExerciseToSeance()
-                    }
-                )
-            }
 
+            }
         }
-    )
+    }
+
+
+
+
+
+
+
+    BottomSheetSelectionExercise(state, appState, viewModel, appViewModel, navController)
 }

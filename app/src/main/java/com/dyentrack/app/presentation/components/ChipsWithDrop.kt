@@ -19,28 +19,32 @@ import androidx.compose.runtime.setValue
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.TertiaThree
 
+enum class ChipsEmphasys { PRIMARY, SECONDARY }
 @Composable
 fun ChipDropDown(
     listOfSelectableItem: List<String>,
+    canChange: Boolean = true,
+    emphasys : ChipsEmphasys ?= ChipsEmphasys.PRIMARY,
+    defaultSelected: String,
+    onSelected: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf(listOfSelectableItem.firstOrNull().orEmpty()) }
 
     Box {
         FilterChip(
-            selected = selectedOption.isNotEmpty(),
-            onClick = { expanded = true },
-            label = { Text(selectedOption) },
+            selected = defaultSelected.isNotEmpty(),
+            onClick = { if (canChange) expanded = true },
+            label = { Text(defaultSelected) },
             trailingIcon = {
-                Icon(
+                if (canChange) Icon(
                     if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null
                 )
             },
             shape = MaterialTheme.shapes.large,
             colors = FilterChipDefaults.filterChipColors(
-                containerColor = TertiaThree,
-                selectedContainerColor = TertiaThree,
+                containerColor = if (emphasys == ChipsEmphasys.PRIMARY) TertiaThree else TertiaOne,
+                selectedContainerColor = if (emphasys == ChipsEmphasys.PRIMARY) TertiaThree else TertiaOne,
                 labelColor = MaterialTheme.colorScheme.onSurface,
                 selectedLabelColor = MaterialTheme.colorScheme.onSurface
             ),
@@ -53,13 +57,16 @@ fun ChipDropDown(
         )
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            for (selectableItem: String in listOfSelectableItem)
+            listOfSelectableItem.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(selectableItem) },
+                    text = { Text(item) },
                     onClick = {
-                        selectedOption = selectableItem
                         expanded = false
-                    })
+                        if (canChange) onSelected(item)
+                    }
+                )
+            }
+
         }
     }
 

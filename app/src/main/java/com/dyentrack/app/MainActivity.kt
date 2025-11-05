@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,55 +16,52 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.navigation.toRoute
 import com.dyentrack.app.domain.model.NavItem
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.presentation.screens.ExercisePage
 import com.dyentrack.app.presentation.screens.HomePage
 import com.dyentrack.app.presentation.screens.MainPage
+import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
+import com.dyentrack.app.presentation.viewModel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-
         setContent {
+            val mainViewModel: AppViewModel by viewModels()
             DyeNTrackTheme() {
-                MyApp(modifier = Modifier.fillMaxSize())
+                MyApp(appViewModel = mainViewModel)
             }
         }
     }
+
 }
 
 
+
 @Composable
-fun MyApp(modifier: Modifier = Modifier) {
+fun MyApp(appViewModel: AppViewModel) {
     val navController = rememberNavController()
 
     val navItemsList = listOf(
@@ -100,15 +98,15 @@ fun MyApp(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            composable("home") { HomePage(navController=navController) }
-            composable("seance") { SeancePage(navController=navController) }
+            composable("home") { HomePage() }
+            composable("seance") { SeancePage(navController=navController, appViewModel = appViewModel) }
             composable("analyse") { MainPage(navController=navController) }
             composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<Exercise>("exercise")
                 if (exercise != null) {
-                    ExercisePage(navController = navController, exercise = exercise)
+                    ExercisePage(navController = navController, exercise = exercise , appViewModel = appViewModel)
                 }
             }
 

@@ -1,4 +1,4 @@
-package com.dyentrack.app.data.local
+package com.dyentrack.app.data.local.datasource
 
 import com.dyentrack.app.domain.model.MasterDataStatic
 

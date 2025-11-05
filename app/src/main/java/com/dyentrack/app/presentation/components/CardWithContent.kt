@@ -1,9 +1,11 @@
 package com.dyentrack.app.presentation.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,7 +24,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,38 +33,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 enum class SubTextEmphasis { PRIMARY, SECONDARY }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardWithContent (text: String, subText: String, leftIcon:ImageVector?=null,     badgeText: String? = null, iconRightForAction: ImageVector?=null,     onClick: (() -> Unit)? = null,
-                     modifier: Modifier = Modifier,     canExtend: Boolean = false,
-                     expanded: Boolean = false,
-                     onExpandChange: ((Boolean) -> Unit)? = null,
-                     menuOnLongClick: Map<String,()-> Unit>?=null,
-                     childrenForExtend: @Composable (() -> Unit)? = null,
-                     subTextEmphasis : SubTextEmphasis= SubTextEmphasis.SECONDARY,){
+fun CardWithContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    subText: String,
+    @DrawableRes leftIcon: Int ? = null,
+    badgeText: String? = null,
+    componentRight: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    canExtend: Boolean = false,
+    expanded: Boolean = false,
+    onExpandChange: ((Boolean) -> Unit)? = null,
+    menuOnLongClick: Map<String, () -> Unit>? = null,
+    childrenForExtend: @Composable (() -> Unit)? = null,
+    subTextEmphasis: SubTextEmphasis = SubTextEmphasis.SECONDARY,
+) {
 
     var showMenu by remember() { mutableStateOf(false) }
     Box {
         Card(
-            modifier = modifier.fillMaxWidth()
-                .combinedClickable(
-                    onClick = {
-                        onClick?.invoke()
-                        if (canExtend) onExpandChange?.invoke(!expanded)
-                    },
-                    onLongClick = {
-                        if (!menuOnLongClick.isNullOrEmpty()) showMenu = true
-                    }
-                ).animateContentSize(
+            modifier = modifier
+                .fillMaxWidth()
+
+                .animateContentSize(
                     animationSpec = spring(
                         stiffness = Spring.StiffnessLow
                     )
@@ -74,28 +79,44 @@ fun CardWithContent (text: String, subText: String, leftIcon:ImageVector?=null, 
             ) {
             Column() {
                 Row(
-                    modifier = modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 14.dp)
-                        .height(40.dp), horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = modifier
+                        .fillMaxWidth().combinedClickable(
+                            onClick = {
+                                onClick?.invoke()
+                                if (canExtend) onExpandChange?.invoke(!expanded)
+                            },
+                            onLongClick = {
+                                if (!menuOnLongClick.isNullOrEmpty()) showMenu = true
+                            }
+                        )
+                        .padding( start=8.dp, end = 20.dp, top = 6.dp, bottom = 6.dp)
+                        .height(58.dp), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 
+                        Box(
+                            modifier = Modifier
+                                .height(58.dp)
+                                .width(58.dp)
+                                .background(
+                                    color =  if (leftIcon == null) TertiaOne else TertiaOne.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(5.dp)
+                                )
+
+
+                        ){
                         if (leftIcon != null) {
-                            Icon(imageVector = leftIcon, contentDescription = "icon")
-                        } else {
-                            Box(
-                                modifier = Modifier.width(40.dp).height(40.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.onSurface,
-                                        shape = RoundedCornerShape(5.dp)
-                                    )
-
-
+                            Image(
+                                painter = painterResource(id = leftIcon),
+                                contentDescription = "Image de l'exercise",
+                                modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Fit
                             )
-                        }
+                        } }
                         Column(
                             verticalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxHeight()
+                            modifier = Modifier.fillMaxHeight().padding(vertical =8.dp )
                         ) {
                             Text(
                                 text = text,
@@ -121,8 +142,8 @@ fun CardWithContent (text: String, subText: String, leftIcon:ImageVector?=null, 
                                 Text(badgeText)
                             }
                         }
-                        if (iconRightForAction != null) {
-                            Icon(imageVector = iconRightForAction, contentDescription = "icon")
+                        if (componentRight != null) {
+                            componentRight()
                         }
                     }
 
@@ -137,7 +158,8 @@ fun CardWithContent (text: String, subText: String, leftIcon:ImageVector?=null, 
             }
 
         }
-        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false },
+        DropdownMenu(
+            expanded = showMenu, onDismissRequest = { showMenu = false },
             offset = DpOffset(x = (-66).dp, y = (-10).dp),
             shape = MaterialTheme.shapes.medium
         ) {

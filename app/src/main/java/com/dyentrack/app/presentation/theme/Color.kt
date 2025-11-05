@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.theme
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val PrimaryColor = Color(0xFF3BB266)
@@ -16,6 +15,9 @@ val TertiaTwo = Color (0xFF181818)
 val TertiaThree = Color(0xFF0E0E0E)
 
 object  addColor{
+
+    val setWarm = Color(0xFF2B3038)
+    val setEch = Color(0xFFB23B3B)
 
     val TertiaOne = Color(0xFF1E1E1E)
     val TertiaTwo = Color (0xFF181818)

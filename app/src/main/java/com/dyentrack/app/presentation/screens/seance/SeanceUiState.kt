@@ -1,42 +1,42 @@
 package com.dyentrack.app.presentation.screens.seance
 
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateListOf
-
-import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+enum class ExerciseMode { NORMAL, LOCK, CHANGE_ORDER }
 data class SeanceUiState(
-    val masterDataStatic: MasterDataStatic = MasterDataStatic(emptyList(), emptyList(), emptyList(), emptyList(), emptyList()),
-
-    val seancesParJour: MutableMap<String, SeanceDuJour> = mutableStateMapOf(),
+    val seancesParJour: SnapshotStateMap<String, SeanceDuJour> = mutableStateMapOf(),
 
     val exerciseToAdd: List<Long> = emptyList(),
-    val daySelected: String= LocalDate.now().format(DateTimeFormatter.ISO_DATE),
+    val daySelected: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
 
     val expandedExerciseId: Long? = null,
     val isBottomSheetVisible: Boolean = false,
     val searchQuery: String = "",
 
 
-
+    val exerciseMode: ExerciseMode = ExerciseMode.NORMAL,
     // résultats d’analyse
-    val showAnalyseData:Boolean = false,
+    val showAnalyseData: Boolean = false,
+    val isLoadingRequest: Boolean = false,
     val analyseData: Map<String, List<SetData>> = emptyMap()
 
 
 )
 
 data class SeanceDuJour(
-    val exerciseIds: SnapshotStateList<Long> = mutableStateListOf(),
-    val save: Boolean = false,
+    //séparé pouur éviter les recomposition
+    val exercisesInSceance: SnapshotStateList<ExerciseInSeance> = mutableStateListOf(),
+    val saveAPI: Boolean = false,
+    val saveLocal: Boolean = false,
     val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
-    val note: String?=null,
+    val note: String? = null,
 )
 
 
