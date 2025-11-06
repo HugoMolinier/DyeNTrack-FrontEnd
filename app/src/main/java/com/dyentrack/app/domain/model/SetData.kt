@@ -1,5 +1,7 @@
 package com.dyentrack.app.domain.model
 
+import kotlinx.serialization.Serializable
+
 data class SetData(
     var type: SetType = SetType.EFFECTIVE,
     var charge: Double ?,
@@ -9,12 +11,14 @@ data class SetData(
     var linkedRightSet: SetData? = null
 )
 
+@Serializable
 enum class SetType {
     EFFECTIVE,
     TEMPO,
     WARMUP
 }
 
+@Serializable
 enum class SetSide {
     LEFT, RIGHT, BOTH
 }

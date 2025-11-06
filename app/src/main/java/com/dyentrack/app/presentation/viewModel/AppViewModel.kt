@@ -31,7 +31,6 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 masterData = getMasterDataUseCase()
-                Log.d("AppViewModel", "✅ $masterData")
                 if (_infoAllUser.value.isEmpty()) {
                     _infoAllUser.value = mapperOfInfoExerciseUser(getInfoExerciseUser())
                     Log.d("AppViewModel", "✅ Données utilisateur chargées depuis l'API")
@@ -65,7 +64,6 @@ class AppViewModel @Inject constructor(
                         idExercise = idExercise
                     )
                 )
-                Log.d("ici la response", "${response}response")
                 currentMap[idExercise] = saveInfoExerciseUserUseCase(
                     InfoExerciseUser(
                         favorite ?: current.favorite,

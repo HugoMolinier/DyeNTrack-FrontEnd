@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -7,6 +8,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.BackoffPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.dyentrack.app.data.worker.SaveSeanceWorker
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.PlannedExerciseVO
@@ -18,25 +25,27 @@ import com.dyentrack.app.domain.model.SetVO
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.usecase.GetLast30DaysUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.daydata.SaveDayDataUseCase
 import com.dyentrack.app.presentation.screens.seance.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
-    private val saveDayDataUseCase: SaveDayDataUseCase,
     getLast30DaysUseCase: GetLast30DaysUseCase,
     private val getDayDataUseCase: GetDayDataUseCase,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
@@ -61,6 +70,7 @@ class SeanceViewModel @Inject constructor(
             }
         }
     }
+
 
     fun swapExercise(day: String, fromIndex: Int, toIndex: Int) {
         val seance = _uiState.value.seancesParJour[day] ?: return
@@ -253,7 +263,7 @@ class SeanceViewModel @Inject constructor(
 
                 }
             }
-        Log.e("Log Info", "info: ${result}")
+        Log.e("Log Info", "info: $result")
         _uiState.value = _uiState.value.copy(analyseData = result)
     }
 
@@ -275,76 +285,59 @@ class SeanceViewModel @Inject constructor(
         return _uiState.value.exerciseToAdd
     }
 
+    private var autoSaveJob: kotlinx.coroutines.Job? = null
     fun changeSaveStatus(status: Boolean = false) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
         _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
-    }
-
-    fun saveToAPISeance() {
-        val seanceDuJour = _uiState.value.seancesParJour.get(_uiState.value.daySelected)
-        val plannedExerciseVO = seanceDuJour?.exercisesInSceance?.mapIndexed { index, exInSeance ->
-            val sets =
-                seanceDuJour.setsMap[exInSeance.exerciseId]?.flatMapIndexed { index, setData ->
-                    val leftSetVO = SetVO(
-                        (index),
-                        setData.reps ?: 0,
-                        setData.rir ?: 0,
-                        setData.charge ?: 0.0,
-                        setData.type,
-                        setData.side
-                    )
-                    val rightSetVO = setData.linkedRightSet?.let { linked ->
-                        SetVO(
-                            (index),
-                            linked.reps ?: 0,
-                            linked.rir ?: 0,
-                            linked.charge ?: 0.0,
-                            linked.type,
-                            linked.side
-                        )
-                    }
-                    listOf(leftSetVO) + listOfNotNull(rightSetVO)
-                } ?: listOf()
-
-            PlannedExerciseVO(
-                null,
-                index,
-                exInSeance.exerciseId,
-                exInSeance.laterite ?: 1L,
-                exInSeance.equipment ?: 1L,
-                sets
-            )
-
-        } ?: listOf()
-
-        val request = DayDataRequest(
-            idDayData = null,
-            dayData = _uiState.value.daySelected,
-            seanceTrack = SeanceTrack(null, null, plannedExercises = plannedExerciseVO),
-            null,
-            null
-        )
-        viewModelScope.launch {
-            try {
-                val response = saveDayDataUseCase(request)
-                if (response?.status == 200 || response?.status == 201) {
-                    changeSaveStatus(true)
-                } else {
-                    Log.d("DEBUG_API", "not 200 201: ${response}")
-                }
-            } catch (e: Exception) {
-                println("Exception API : ${e}")
+        if (!status) {
+            autoSaveJob?.cancel()
+            autoSaveJob = viewModelScope.launch {
+                kotlinx.coroutines.delay(15_000L)
+                autoSaveSeanceIfNeeded()
             }
         }
     }
+
+    fun autoSaveSeanceIfNeeded() {
+        val day = _uiState.value.daySelected
+        val seance = _uiState.value.seancesParJour[day] ?: return
+        if (seance.saveAPI) return
+
+        val request = buildDayDataRequest(day, seance)
+
+        val json = Json.encodeToString(DayDataRequest.serializer(), request)
+
+        val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
+            .setInputData(workDataOf("payload" to json))
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
+            .build()
+
+        val workManager = WorkManager.getInstance(context)
+
+        workManager.enqueueUniqueWork(
+            "auto_save_seance_$day",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+
+        workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever { workInfo ->
+            if (workInfo != null && workInfo.state.isFinished) {
+                if (workInfo.state == androidx.work.WorkInfo.State.SUCCEEDED) {
+                    changeSaveStatus(true)
+                }
+            }
+        }
+
+    }
+
 
     fun getSaveToApiSeance() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingRequest = true) }
             try {
                 val response = getDayDataUseCase()
-                Log.d("DEBUG_API", "Response: ${response}")
+
                 if (response.status == 200 || response.status == 201 || response.status == 100) {
                     // Créer un nouveau mapComp global
                     val newMap = _uiState.value.seancesParJour.toMutableMap()
@@ -365,36 +358,40 @@ class SeanceViewModel @Inject constructor(
                         val setsMap = mutableStateMapOf<Long, SnapshotStateList<SetData>>()
                         daySeance.seanceTrack.plannedExercises.forEach { plannedExercise ->
                             val sets = plannedExercise.sets?.mapNotNull { setVO ->
-                                if (setVO.side == SetSide.BOTH) {
-                                    SetData(
-                                        type = setVO.typeOfSet,
-                                        charge = setVO.charge,
-                                        rir = setVO.rir,
-                                        reps = setVO.repsNumber,
-                                        side = SetSide.BOTH
-                                    )
-                                } else if (setVO.side == SetSide.LEFT) {
-                                    val rightSetVO =
-                                        plannedExercise.sets.firstOrNull { it.setOrder == setVO.setOrder && it.side == SetSide.RIGHT }
-                                    SetData(
-                                        type = setVO.typeOfSet,
-                                        charge = setVO.charge,
-                                        rir = setVO.rir,
-                                        reps = setVO.repsNumber,
-                                        side = SetSide.LEFT
-                                    ).apply {
-                                        linkedRightSet = rightSetVO?.let {
-                                            SetData(
-                                                it.typeOfSet,
-                                                it.charge,
-                                                it.rir,
-                                                it.repsNumber,
-                                                SetSide.RIGHT
-                                            )
+                                when (setVO.side) {
+                                    SetSide.BOTH -> {
+                                        SetData(
+                                            type = setVO.typeOfSet,
+                                            charge = setVO.charge,
+                                            rir = setVO.rir,
+                                            reps = setVO.repsNumber,
+                                            side = SetSide.BOTH
+                                        )
+                                    }
+                                    SetSide.LEFT -> {
+                                        val rightSetVO =
+                                            plannedExercise.sets.firstOrNull { it.setOrder == setVO.setOrder && it.side == SetSide.RIGHT }
+                                        SetData(
+                                            type = setVO.typeOfSet,
+                                            charge = setVO.charge,
+                                            rir = setVO.rir,
+                                            reps = setVO.repsNumber,
+                                            side = SetSide.LEFT
+                                        ).apply {
+                                            linkedRightSet = rightSetVO?.let {
+                                                SetData(
+                                                    it.typeOfSet,
+                                                    it.charge,
+                                                    it.rir,
+                                                    it.repsNumber,
+                                                    SetSide.RIGHT
+                                                )
+                                            }
                                         }
                                     }
-                                } else {
-                                    null
+                                    else -> {
+                                        null
+                                    }
                                 }
                             }?.toMutableStateList() ?: mutableStateListOf()
 
@@ -410,7 +407,7 @@ class SeanceViewModel @Inject constructor(
 
                     Log.d("DEBUG_API", "Jour reçu: ${_uiState.value.seancesParJour}")
                 } else {
-                    Log.d("DEBUG_API", "Error Not 200 201: ${response}")
+                    Log.d("DEBUG_API", "Error Not 200 201: $response")
                 }
             } catch (e: HttpException) {
                 Log.e("API", "Erreur serveur : ${e.code()} - ${e.message()}")
@@ -421,6 +418,30 @@ class SeanceViewModel @Inject constructor(
             }
         }
     }
+
+    private fun buildDayDataRequest(day: String, seance: SeanceDuJour): DayDataRequest {
+        val plannedExercises = seance.exercisesInSceance.mapIndexed { exIndex, exercise ->
+            val sets = seance.setsMap[exercise.exerciseId]?.flatMapIndexed { setIndex, setData ->
+                val leftSet = SetVO(setIndex, setData.reps ?: 0, setData.rir ?: 0,
+                    setData.charge ?: 0.0, setData.type, setData.side)
+                val rightSet = setData.linkedRightSet?.let {
+                    SetVO(setIndex, it.reps ?: 0, it.rir ?: 0, it.charge ?: 0.0, it.type, it.side)
+                }
+                listOf(leftSet) + listOfNotNull(rightSet)
+            } ?: emptyList()
+
+            PlannedExerciseVO(null, exIndex, exercise.exerciseId,
+                exercise.laterite ?: 1L, exercise.equipment ?: 1L, sets)
+        }
+
+        return DayDataRequest(
+            idDayData = null,
+            dayData = day,
+            seanceTrack = SeanceTrack(null, null, plannedExercises),
+            null,null
+        )
+    }
+
 
 
 }

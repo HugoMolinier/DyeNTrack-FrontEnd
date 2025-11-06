@@ -158,29 +158,7 @@ fun SeancePage(
                         }
                     }
                     item { ShowInfoOfSeance(appViewModel = appViewModel) }
-                    if (state.seancesParJour[state.daySelected]?.exercisesInSceance?.isNotEmpty() == true && state.seancesParJour[state.daySelected]?.saveAPI == false) {
-                        item {
-                            Row(
-                                modifier = Modifier.padding(
-                                    start = 24.dp,
-                                    end = 24.dp,
-                                    bottom = 12.dp,
-                                ), horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                IconButton(
-                                    onClick = { viewModel.saveToAPISeance() },
-                                    Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Save,
-                                        contentDescription = "Save",
-                                        tint = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(4.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+
 
                 } else {
                     item {

@@ -119,7 +119,7 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
                                             },
                                         )
                                         Text(
-                                            "${set.reps} x ${set.charge}kg",
+                                            "${set.reps}${set.linkedRightSet?.let { "/${it.reps}" } ?: ""} x ${set.charge}kg",
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                         )
 

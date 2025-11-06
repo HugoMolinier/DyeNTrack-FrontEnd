@@ -5,13 +5,12 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.hilt.android)
     id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "1.9.10"
 }
 
 android {
     namespace = "com.dyentrack.app"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dyentrack.app"
@@ -19,9 +18,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -33,6 +30,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -45,48 +43,60 @@ android {
         compose = true
     }
 }
+
 hilt {
     enableAggregatingTask = false
 }
 
 dependencies {
+    // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation(libs.androidx.activity.compose)
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    val nav_version = "2.9.5"
-
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
-
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.30.1")
-
-    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
-
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-
-
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.material:material-icons-extended")
+
+    // Navigation
+    val nav_version = "2.9.5"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.30.1")
+
+    // Networking
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
+    // Hilt & WorkManager
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation("androidx.hilt:hilt-work:1.1.0")
+    ksp("androidx.hilt:hilt-compiler:1.1.0")
+    implementation("androidx.work:work-runtime-ktx:2.11.0")
+
+    // YouTube Player
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
+    // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

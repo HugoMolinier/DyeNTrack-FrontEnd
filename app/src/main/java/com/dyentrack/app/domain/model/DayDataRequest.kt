@@ -1,6 +1,8 @@
 package com.dyentrack.app.domain.model
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DayDataRequest(
     val idDayData:Long?,
     val dayData: String,
@@ -9,6 +11,7 @@ data class DayDataRequest(
     val physioTrack: PhysioTrack?
 )
 
+@Serializable
 data class NutritionTrack(
     val calories: Int?=0,
     val proteins: Int?=0,
@@ -18,18 +21,23 @@ data class NutritionTrack(
     val cafeins: Int?=0
 )
 
+@Serializable
 data class PhysioTrack(
     val weight: Double?=70.0,
     val step: Int?=0,
     val hourOfSleep: Double?=8.0,
     val mood: String?=""
 )
+
+
+@Serializable
 data class SeanceTrack(
     val startHour: StartHour?,
     val presetSeanceId: Long? ,
     val plannedExercises: List<PlannedExerciseVO>
 )
 
+@Serializable
 data class StartHour(
     val hour: Int,
     val minute: Int,
@@ -37,6 +45,7 @@ data class StartHour(
     val nano: Int?
 )
 
+@Serializable
 data class PlannedExerciseVO(
     val id : Long?,
     val exerciseOrder: Int,
@@ -46,6 +55,7 @@ data class PlannedExerciseVO(
     val sets: List<SetVO>? = emptyList()
 )
 
+@Serializable
 data class SetVO(
     val setOrder: Int,
     val repsNumber: Int,
