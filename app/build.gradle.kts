@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.core:core-splashscreen:1.0.0")
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

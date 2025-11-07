@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.DyeNTrack" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.DyeNTrack.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/icon_foreground</item>
+
+        <!-- Fond du SplashScreen -->
+        <item name="windowSplashScreenBackground">@color/back</item>
+        <item name="postSplashScreenTheme">@style/Theme.DyeNTrack</item>
+    </style>
+
 </resources>

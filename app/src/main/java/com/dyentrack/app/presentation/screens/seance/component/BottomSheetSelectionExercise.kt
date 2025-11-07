@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import com.dyentrack.app.R
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -173,7 +174,7 @@ fun BottomSheetSelectionExercise(
                             ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
                             ?: "NaN",
 
-                        leftIcon = ExerciseImages.map[exercise.idExercise],
+                        leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
                         componentRight = {
                             FavoriteIconButton(
                                 isFavorite = appState[exercise.idExercise]?.favorite ?: false,

@@ -23,7 +23,7 @@ fun SectionSelector(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(start = 12.dp, top = 5.dp, end = 12.dp, bottom = 20.dp)
             .drawBehind {
-                val strokeWidth = 2.dp.toPx()
+                val strokeWidth = 1.dp.toPx()
                 drawLine(
                     color = TertiaOne,
                     start = Offset(0f, size.height),
@@ -35,7 +35,7 @@ fun SectionSelector(modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxWidth()
                 .drawBehind {
-                    val strokeWidth = 2.dp.toPx()
+                    val strokeWidth = 1.dp.toPx()
                     drawLine(
                         color = colorScheme.primary,
                         start = Offset(0f, size.height),
@@ -50,6 +50,7 @@ fun SectionSelector(modifier: Modifier = Modifier) {
             Text(
                 "Séances",
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -68,7 +69,7 @@ fun SectionSelector(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
             )
 
         }

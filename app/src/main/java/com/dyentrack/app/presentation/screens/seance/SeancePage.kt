@@ -190,6 +190,7 @@ fun SeancePage(
 
         if (state.exerciseMode != ExerciseMode.LOCK) {
             FloatingActionButton(
+
                 onClick = {
                     viewModel.setExerciseToAdd(
                         state.seancesParJour[state.daySelected]?.exercisesInSceance
@@ -201,15 +202,16 @@ fun SeancePage(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 12.dp, bottom = 16.dp),
+                    .padding(end = 12.dp, bottom = 16.dp)
+                    .size(58.dp),
                 shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
             ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = "Ajouter",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(12.dp) // espace autour de l'icône
+                    tint = MaterialTheme.colorScheme.background,
+                    modifier = Modifier.padding(12.dp)
                 )
 
             }

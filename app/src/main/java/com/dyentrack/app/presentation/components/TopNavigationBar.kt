@@ -32,7 +32,7 @@ fun TopNavigationBar(
             .fillMaxWidth()
             .background(colorScheme.background)
             .drawBehind {
-                val strokeWidth = 2.dp.toPx()
+                val strokeWidth = 1.dp.toPx()
                 drawLine(
                     color = colorScheme.primary,
                     start = Offset(0f, 0f),

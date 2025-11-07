@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.seance.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,6 +46,7 @@ fun ModeMenu(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
+            , modifier = Modifier.background(color = MaterialTheme.colorScheme.surface)
         ) {
             // Lock Mode
             DropdownMenuItem(

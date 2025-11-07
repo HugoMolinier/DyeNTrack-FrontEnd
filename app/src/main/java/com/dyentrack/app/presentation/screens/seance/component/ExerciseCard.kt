@@ -40,6 +40,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.components.CardWithContent
@@ -106,7 +107,7 @@ fun ExerciseCard(
         exercise.nameFR,
         canExtend = state.exerciseMode != ExerciseMode.CHANGE_ORDER,
         subText = textSub,
-        leftIcon = ExerciseImages.map[exercise.idExercise],
+        leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
         expanded = state.expandedExerciseId == exerciseId,
         onExpandChange = { expanded ->
             viewModel.expandExercise(if (expanded) exerciseId else null)
