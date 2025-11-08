@@ -256,7 +256,7 @@ class SeanceViewModel @Inject constructor(
         val sets = seance.setsMap.getOrPut(exerciseId) { mutableStateListOf() }
 
         val lastCharge = sets.lastOrNull()?.charge
-        val lastRir = sets.lastOrNull()?.rir
+        val lastRir = sets.lastOrNull()?.rir?:1
         val set = SetData(
             type = SetType.EFFECTIVE,
             charge = lastCharge,
@@ -344,7 +344,7 @@ class SeanceViewModel @Inject constructor(
 
         val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
             .setInputData(workDataOf("payload" to json))
-            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 8, TimeUnit.SECONDS)
             .build()
 
         val workManager = WorkManager.Companion.getInstance(context)
@@ -404,17 +404,39 @@ class SeanceViewModel @Inject constructor(
 
         val setsMap = mutableStateMapOf<Long, SnapshotStateList<SetData>>()
         seanceTrack.plannedExercises.forEach { plannedExercise ->
-            val sets = plannedExercise.sets?.map { setVO ->
-                SetData(
-                    type = setVO.typeOfSet,
-                    charge = setVO.charge,
-                    reps = setVO.repsNumber,
-                    rir = setVO.rir,
-                    side = setVO.side
-                ).apply {
-                    linkedRightSet = null // si tu veux, tu peux gérer la linkedRightSet comme avant
+            val sets = plannedExercise.sets?.mapNotNull { setVO ->
+                when (setVO.side) {
+                    SetSide.BOTH -> SetData(
+                        type = setVO.typeOfSet,
+                        charge = setVO.charge,
+                        reps = setVO.repsNumber,
+                        rir = setVO.rir,
+                        side = SetSide.BOTH
+                    )
+                    SetSide.LEFT -> {
+                        val rightSetVO = plannedExercise.sets.firstOrNull { it.setOrder == setVO.setOrder && it.side == SetSide.RIGHT }
+                        SetData(
+                            type = setVO.typeOfSet,
+                            charge = setVO.charge,
+                            reps = setVO.repsNumber,
+                            rir = setVO.rir,
+                            side = SetSide.LEFT
+                        ).apply {
+                            linkedRightSet = rightSetVO?.let {
+                                SetData(
+                                    it.typeOfSet,
+                                    it.charge,
+                                    it.rir,
+                                    it.repsNumber,
+                                    SetSide.RIGHT
+                                )
+                            }
+                        }
+                    }
+                    else -> null
                 }
             }?.toMutableStateList() ?: mutableStateListOf()
+
             setsMap[plannedExercise.exerciseId] = sets
         }
 
