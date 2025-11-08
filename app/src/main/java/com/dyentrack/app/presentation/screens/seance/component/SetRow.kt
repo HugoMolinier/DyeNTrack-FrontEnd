@@ -23,7 +23,7 @@ import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.theme.addColor
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
 @Composable
 fun SetRow(

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import com.dyentrack.app.R
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.InfoExerciseUser
+import com.dyentrack.app.R
 import com.dyentrack.app.presentation.components.BottomSheetContent
 import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.CardWithContent
@@ -38,40 +38,37 @@ import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
-import com.dyentrack.app.presentation.viewModel.AppViewModel
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
 
 @Composable
 fun BottomSheetSelectionExercise(
     state: SeanceUiState,
-    appState: Map<Long, InfoExerciseUser>, // ou le type que tu utilises
     viewModel: SeanceViewModel,
-    appViewModel: AppViewModel,
     navController: NavController
 ) {
     var typeFilter by remember { mutableStateOf("Tous") }
     var groupFilter by remember { mutableStateOf("Groupes Musculaires") }
-
+    val infoMapState by viewModel.infoExerciseUserFlow.collectAsState()
     val filteredExercises = remember(
         state.searchQuery,
         typeFilter,
         groupFilter,
-        appViewModel.masterData?.officialExercise
+        viewModel.masterData?.officialExercise
     ) {
-        appViewModel.masterData?.officialExercise?.filter { exercise ->
+        viewModel.masterData?.officialExercise?.filter { exercise ->
             val matchesSearch = exercise.nameFR.contains(state.searchQuery, ignoreCase = true)
 
             val typeSearch = when (typeFilter) {
                 "Officiel" -> exercise.idCreator == null
-                "Favorie" -> appState[exercise.idExercise]?.favorite ?: false
+                "Favorie" -> infoMapState[exercise.idExercise]?.favorite ?: false
                 "Non Officiel" -> exercise.idCreator != null
                 else -> true
             }
 
             val groupFilter =
-                groupFilter == "Groupes Musculaires" || appViewModel.masterData?.musclesGroup
+                groupFilter == "Groupes Musculaires" || viewModel.masterData?.musclesGroup
                     ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR == groupFilter
 
 
@@ -125,7 +122,7 @@ fun BottomSheetSelectionExercise(
                             ) { typeFilter = it }
                             ChipDropDown(
                                 listOfSelectableItem = listOf("Groupes Musculaires") +
-                                        appViewModel.masterData?.musclesGroup?.map { it.nameFR }
+                                        viewModel.masterData?.musclesGroup?.map { it.nameFR }
                                             .orEmpty(),
                                 defaultSelected = groupFilter,
                                 emphasys = ChipsEmphasys.SECONDARY
@@ -155,7 +152,7 @@ fun BottomSheetSelectionExercise(
                                 )
                             }
                             Text(
-                                "${filteredExercises?.count()}/${appViewModel.masterData?.officialExercise?.count()}",
+                                "${filteredExercises?.count()}/${viewModel.masterData?.officialExercise?.count()}",
                                 style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                             )
                         }
@@ -170,18 +167,18 @@ fun BottomSheetSelectionExercise(
                     CardWithContent(
                         modifier = Modifier.padding(12.dp, 4.dp),
                         exercise.nameFR,
-                        subText = appViewModel.masterData?.musclesGroup
+                        subText = viewModel.masterData?.musclesGroup
                             ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
                             ?: "NaN",
 
                         leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
                         componentRight = {
                             FavoriteIconButton(
-                                isFavorite = appState[exercise.idExercise]?.favorite ?: false,
+                                isFavorite = infoMapState[exercise.idExercise]?.favorite ?: false,
                                 onClick = {
                                     val currentFavorite =
-                                        appState[exercise.idExercise]?.favorite ?: false
-                                    appViewModel.updateInfoExerciseUser(
+                                        infoMapState[exercise.idExercise]?.favorite ?: false
+                                    viewModel.updateInfoExerciseUser(
                                         exercise.idExercise,
                                         !currentFavorite,
                                         null

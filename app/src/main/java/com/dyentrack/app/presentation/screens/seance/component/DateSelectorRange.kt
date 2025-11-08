@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

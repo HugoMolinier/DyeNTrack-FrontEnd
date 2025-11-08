@@ -1,7 +1,5 @@
 package com.dyentrack.app.presentation.screens.seance.component
 
-import AnalyseRow
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -48,18 +46,16 @@ import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.screens.seance.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
-import com.dyentrack.app.presentation.viewModel.AppViewModel
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
 import kotlin.math.roundToInt
 
-@SuppressLint("AutoboxingStateCreation")
+
 @Composable
 fun ExerciseCard(
     exInSeance: ExerciseInSeance,
-    appViewModel: AppViewModel,
     state: SeanceUiState,
     viewModel: SeanceViewModel,
     navController: NavController,
@@ -68,11 +64,11 @@ fun ExerciseCard(
 ) {
     val exerciseId = exInSeance.exerciseId
     val exercise =
-        appViewModel.masterData?.officialExercise?.find { it.idExercise == exerciseId } ?: return
+        viewModel.masterData?.officialExercise?.find { it.idExercise == exerciseId } ?: return
     val lateriteName =
-        appViewModel.masterData?.lateralites?.find { it.id == exInSeance.laterite }?.nameFR ?: ""
+        viewModel.masterData?.lateralites?.find { it.id == exInSeance.laterite }?.nameFR ?: ""
     val equipmentName =
-        appViewModel.masterData?.equipment?.find { it.id == exInSeance.equipment }?.nameFR ?: ""
+        viewModel.masterData?.equipment?.find { it.id == exInSeance.equipment }?.nameFR ?: ""
 
     val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]
 
@@ -184,7 +180,7 @@ fun ExerciseCard(
                         canChange = !isLock
 
                     ) { selected ->
-                        val lateriteId = appViewModel.masterData?.lateralites
+                        val lateriteId = viewModel.masterData?.lateralites
                             ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
                         viewModel.updateLaterite(exInSeance.exerciseId, lateriteId)
                     }
@@ -193,7 +189,7 @@ fun ExerciseCard(
                         defaultSelected = equipmentName,
                         canChange = !isLock
                     ) { selected ->
-                        val equipmentId = appViewModel.masterData?.equipment
+                        val equipmentId = viewModel.masterData?.equipment
                             ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
                         viewModel.updateEquipment(exInSeance.exerciseId, equipmentId)
                     }

@@ -13,15 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
-import com.dyentrack.app.presentation.viewModel.AppViewModel
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
 @Composable
-fun ShowInfoOfSeance(viewModel: SeanceViewModel = viewModel(), appViewModel: AppViewModel) {
+fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
 
     val state by viewModel.uiState.collectAsState()
 
@@ -37,7 +35,7 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel = viewModel(), appViewModel: App
 
 
     val (exercises, mainFocusOfSeance, totalSets) = remember(state) {
-        val exercisesList = appViewModel.masterData?.officialExercise
+        val exercisesList = viewModel.masterData?.officialExercise
             ?.filter { exercise ->
                 state.seancesParJour[state.daySelected]?.exercisesInSceance
                     ?.any { it.exerciseId == exercise.idExercise } ?: false
@@ -45,7 +43,7 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel = viewModel(), appViewModel: App
 
         val mainFocusSet: Set<String> = run {
             val mainFocusIds = exercisesList.mapNotNull { it.mainFocusGroup }.toSet()
-            appViewModel.masterData?.musclesGroup
+            viewModel.masterData?.musclesGroup
                 ?.filter { it.id in mainFocusIds }
                 ?.map { it.nameFR }
                 ?.toSet()

@@ -1,9 +1,11 @@
 package com.dyentrack.app.domain.repository
 
 import com.dyentrack.app.domain.model.InfoExerciseUser
+import kotlinx.coroutines.flow.StateFlow
 
 
 interface InfoExerciseUserRepository {
-    suspend fun saveInfoExerciseUser(infoExerciseUser: InfoExerciseUser): InfoExerciseUser
-    suspend fun getInfoExerciseUser(): List<InfoExerciseUser>
+    val infoExerciseUserFlow: StateFlow<Map<Long, InfoExerciseUser>>
+    suspend fun fetchInfoExerciseUser()
+    suspend fun updateInfoExerciseUser(infoExerciseUser: InfoExerciseUser): Int
 }

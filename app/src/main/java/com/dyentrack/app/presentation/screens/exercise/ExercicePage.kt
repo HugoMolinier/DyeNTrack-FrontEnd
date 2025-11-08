@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.presentation.components.FavoriteIconButton
@@ -35,16 +36,15 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.screens.exercise.component.SectionSelector
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.viewModel.AppViewModel
 
 @Composable
-fun ExercisePage (modifier: Modifier = Modifier,navController: NavController,exercise: Exercise,
-                  appViewModel: AppViewModel ) {
+fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
+                  exerciseViewModel : ExerciseViewModel= hiltViewModel<ExerciseViewModel>(),) {
 
 
     val idUser = 1.toLong()
 
-    val appState by appViewModel.infoAllUser.collectAsState()
+    val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -75,10 +75,10 @@ fun ExercisePage (modifier: Modifier = Modifier,navController: NavController,exe
 
 
                             FavoriteIconButton(
-                                isFavorite = appState[exercise.idExercise]?.favorite?:false,
+                                isFavorite = infoMapState[exercise.idExercise]?.favorite?:false,
                                 onClick = {
-                                    val currentFavorite = appState[exercise.idExercise]?.favorite ?: false
-                                    appViewModel.updateInfoExerciseUser(exercise.idExercise,!currentFavorite,null)
+                                    val currentFavorite = infoMapState[exercise.idExercise]?.favorite ?: false
+                                    exerciseViewModel.updateInfoExerciseUser(exercise.idExercise,!currentFavorite,null)
                                 }
                             )
                         }
@@ -108,7 +108,7 @@ fun ExercisePage (modifier: Modifier = Modifier,navController: NavController,exe
                 }
 
                 if (exercise.muscleInfos?.isNotEmpty() == true) {
-                    val muscleUse = appViewModel.masterData?.muscles
+                    val muscleUse = exerciseViewModel.masterData?.muscles
                         ?.filter { it.id in exercise.muscleInfos.map { it -> it.idMuscle } }
                         ?.map { it.nameFR } ?: emptySet()
 
@@ -128,19 +128,19 @@ fun ExercisePage (modifier: Modifier = Modifier,navController: NavController,exe
                             value =  exercise.muscleInfos
                                 .firstOrNull { it.principal }
                                 ?.idMuscle
-                                ?.let { id -> appViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
+                                ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
                                 ?: "Aucun",
                         )
                         InfoRow(
                             label = "Equipement possible",
-                            value = appViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
+                            value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
                                 ?: "Aucun",
                         border = true
                             )
 
                         InfoRow(
                             label = "Exécution possible",
-                            value = appViewModel.masterData?.lateralites?.joinToString(", ") { it.nameFR }
+                            value = exerciseViewModel.masterData?.lateralites?.joinToString(", ") { it.nameFR }
                                 ?: "Aucune",
                         )
 
@@ -150,13 +150,13 @@ fun ExercisePage (modifier: Modifier = Modifier,navController: NavController,exe
 
                     }
                     item{
-                        val noteState = remember { mutableStateOf(TextFieldValue(appState[exercise.idExercise]?.note ?: "")) }
+                        val noteState = remember { mutableStateOf(TextFieldValue(infoMapState[exercise.idExercise]?.note ?: "")) }
 
 
                         InputCustom(modifier = Modifier.padding(top=12.dp).height(70.dp), noteState, placeholder = "Ajouter une note", variant = InputVariant.OUTLINED,
                             singleLine = false,
                             onFocusLost = { finalText ->
-                                appViewModel.updateInfoExerciseUser(exercise.idExercise, null,finalText)
+                                exerciseViewModel.updateInfoExerciseUser(exercise.idExercise, null,finalText)
                             }
                         )
 

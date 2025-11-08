@@ -4,7 +4,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -16,11 +15,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,8 +41,6 @@ import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
 import com.dyentrack.app.presentation.screens.seance.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.viewModel.AppViewModel
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
 import kotlin.math.roundToInt
 
 @Composable
@@ -53,16 +48,14 @@ import kotlin.math.roundToInt
 fun SeancePage(
     modifier: Modifier = Modifier,
     viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
-    appViewModel: AppViewModel,
     navController: NavController
 ) {
 
     val state by viewModel.uiState.collectAsState()
-    val appState by appViewModel.infoAllUser.collectAsState()
 
 
-    val lateriteNameMap = appViewModel.masterData?.lateralites?.map { it.nameFR } ?: emptyList()
-    val equipmentNameMap = appViewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
+    val lateriteNameMap = viewModel.masterData?.lateralites?.map { it.nameFR } ?: emptyList()
+    val equipmentNameMap = viewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
 
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -148,7 +141,6 @@ fun SeancePage(
                         ) {
                             ExerciseCard(
                                 exInSeance,
-                                appViewModel,
                                 state,
                                 viewModel,
                                 navController,
@@ -157,7 +149,7 @@ fun SeancePage(
                             )
                         }
                     }
-                    item { ShowInfoOfSeance(appViewModel = appViewModel) }
+                    item { ShowInfoOfSeance(viewModel ) }
 
 
                 } else {
@@ -224,5 +216,5 @@ fun SeancePage(
 
 
 
-    BottomSheetSelectionExercise(state, appState, viewModel, appViewModel, navController)
+    BottomSheetSelectionExercise(state, viewModel, navController)
 }

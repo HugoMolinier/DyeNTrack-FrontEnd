@@ -1,8 +1,7 @@
 package com.dyentrack.app.data.repository
 
-import com.dyentrack.app.domain.repository.APISeanceRepository
+import com.dyentrack.app.domain.repository.DayDataRepository
 import com.dyentrack.app.domain.repository.InfoExerciseUserRepository
-import com.dyentrack.app.domain.repository.LocalSeanceRepository
 import com.dyentrack.app.domain.repository.MasterDataRepository
 import dagger.Binds
 import dagger.Module
@@ -26,15 +25,12 @@ abstract class RepositoryModule {
         impl: InfoExerciseUserRepositoryImpl
     ): InfoExerciseUserRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindAPISeanceRepository(
-        impl: APISeanceRepositoryImpl
-    ): APISeanceRepository
 
     @Binds
     @Singleton
-    abstract fun bindLocalSeanceRepository(
-        impl: LocalSeanceRepositoryImpl
-    ): LocalSeanceRepository
+    abstract fun bindDayDataRepository(
+        impl: DayDataRepositoryImpl
+    ): DayDataRepository
+
+
 }

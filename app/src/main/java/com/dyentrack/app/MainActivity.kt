@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,9 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -33,12 +32,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dyentrack.app.domain.model.NavItem
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.presentation.screens.HomePage
+import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.MainPage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
-import com.dyentrack.app.presentation.viewModel.AppViewModel
+import com.dyentrack.app.presentation.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -54,9 +53,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val mainViewModel: AppViewModel by viewModels()
-            DyeNTrackTheme() {
-                MyApp(appViewModel = mainViewModel)
+            val appViewModel: AppViewModel = hiltViewModel()
+            DyeNTrackTheme {
+                MyApp()
             }
         }
     }
@@ -66,7 +65,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MyApp(appViewModel: AppViewModel) {
+fun MyApp() {
     val navController = rememberNavController()
 
     val navItemsList = listOf(
@@ -112,14 +111,14 @@ fun MyApp(appViewModel: AppViewModel) {
             .padding(innerPadding)
         ) {
             composable("home") { HomePage() }
-            composable("seance") { SeancePage(navController=navController, appViewModel = appViewModel) }
+            composable("seance") { SeancePage(navController=navController) }
             composable("analyse") { MainPage(navController=navController) }
             composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<Exercise>("exercise")
                 if (exercise != null) {
-                    ExercisePage(navController = navController, exercise = exercise , appViewModel = appViewModel)
+                    ExercisePage(navController = navController, exercise = exercise )
                 }
             }
 

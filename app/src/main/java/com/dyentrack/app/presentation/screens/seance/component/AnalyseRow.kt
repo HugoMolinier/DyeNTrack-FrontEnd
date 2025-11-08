@@ -1,3 +1,5 @@
+package com.dyentrack.app.presentation.screens.seance.component
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +32,7 @@ import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
 
 @Composable
