@@ -110,7 +110,7 @@ fun MyApp() {
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            composable("home") { HomePage() }
+            composable("home") { HomePage(navController=navController) }
             composable("seance") { SeancePage(navController=navController) }
             composable("analyse") { MainPage(navController=navController) }
             composable("exercise") { backStackEntry ->

@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation("androidx.core:core-splashscreen:1.0.0")
 
+    //graph
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

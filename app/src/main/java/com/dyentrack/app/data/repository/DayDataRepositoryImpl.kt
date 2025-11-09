@@ -17,14 +17,14 @@ class DayDataRepositoryImpl @Inject constructor(
     private val api: ApiInterface,
     private val seanceDao: SeanceDao
 ) : DayDataRepository {
-    private val _dayDataFlow = MutableStateFlow<List<DayDataRequest>>(emptyList())
-    override val dayDataFlow: StateFlow<List<DayDataRequest>> = _dayDataFlow
+    private val _dayDataFlow = MutableStateFlow<List<DayDataRequest>?>(null)
+    override val dayDataFlow: StateFlow<List<DayDataRequest>?> = _dayDataFlow
 
     override suspend fun fetchDayData() {
         val apiDayData = try {
             val apiResponse = api.getAllDayDataByDay()
             if (apiResponse.status == 200) apiResponse.data else emptyList()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
         //save Api into local
@@ -57,7 +57,7 @@ class DayDataRepositoryImpl @Inject constructor(
         }
         seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(isSaveApi))
 
-        val currentList = _dayDataFlow.value.toMutableList()
+        val currentList = _dayDataFlow.value?.toMutableList() ?: mutableListOf()
         val index = currentList.indexOfFirst { it.dayData == dayData.dayData }
         if (index != -1) {
             currentList[index] = dayData

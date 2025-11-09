@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetDayDataUseCase @Inject constructor(
     private val repository: DayDataRepository
 ) {
-    val dayDataFlow: StateFlow<List<DayDataRequest>> = repository.dayDataFlow
+    val dayDataFlow: StateFlow<List<DayDataRequest>?> = repository.dayDataFlow
 
     suspend operator fun invoke() {
         repository.fetchDayData()

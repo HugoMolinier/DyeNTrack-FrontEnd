@@ -5,11 +5,12 @@ import com.dyentrack.app.domain.model.SeanceTrack
 data class HomeUiState(
     val mapSeance:Map<String, SeanceTrack> = emptyMap(),
     val muscleRateOfEachDay:Map<String, Map<Long,MuscleRate>> = emptyMap(), //{day:{idMuscle:{}}
-    val expandedSeance: Int? = null
+    val expandedSeance: Int? = null,
+    val graphData: Map<Long, MuscleRate> = emptyMap()
 )
 
 data class MuscleRate(
 
-    val numberExercise: Int?=0,
-    val numberSet: Int?=0
+    val numberExercise: Int,
+    val numberSet: Int
 )

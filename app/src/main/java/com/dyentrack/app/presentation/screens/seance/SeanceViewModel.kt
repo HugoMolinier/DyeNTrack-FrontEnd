@@ -60,7 +60,7 @@ class SeanceViewModel @Inject constructor(
     val uiState: StateFlow<SeanceUiState> = _uiState
     val days: SnapshotStateList<DayInfo> = mutableStateListOf()
     var masterData: MasterDataStatic? = null
-    val dayDataFlow: StateFlow<List<DayDataRequest>> = getDayDataUseCase.dayDataFlow
+    val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     init {
@@ -68,6 +68,9 @@ class SeanceViewModel @Inject constructor(
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
             dayDataFlow.collect { dayDataList ->
+                if (dayDataList == null) {
+                    return@collect
+                }
                 val newMap = mutableStateMapOf<String, SeanceDuJour>()
                 dayDataList.forEach { dayData ->
                     newMap[dayData.dayData] = dayData.toSeanceDuJour()
@@ -443,7 +446,7 @@ class SeanceViewModel @Inject constructor(
         return SeanceDuJour(
             exercisesInSceance = exercises,
             setsMap = setsMap,
-            saveAPI = dayDataFlow.value.any { it.dayData == dayData } // ou false par défaut
+            saveAPI = dayDataFlow.value?.any { it.dayData == dayData } ?: false
         )
     }
 

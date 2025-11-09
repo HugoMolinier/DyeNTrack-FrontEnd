@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -54,7 +55,9 @@ fun CustomButton(
         enabled = enable,
         shape = RoundedCornerShape(5.dp),
         modifier = modifier
-            .semantics { contentDescription = accessibilityLabel }
+            .semantics { contentDescription = accessibilityLabel }.then(if (variant == ButtonVariant.OUTLINED)
+                Modifier.border(1.dp, color = contentColor,shape = RoundedCornerShape(5.dp))
+            else Modifier)
     ) {
         Text(text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),

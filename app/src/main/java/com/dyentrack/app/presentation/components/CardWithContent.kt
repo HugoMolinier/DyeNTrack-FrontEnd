@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.utils.bottomShadow
 
 enum class SubTextEmphasis { PRIMARY, SECONDARY }
 
@@ -60,12 +62,13 @@ fun CardWithContent(
     menuOnLongClick: Map<String, () -> Unit>? = null,
     childrenForExtend: @Composable (() -> Unit)? = null,
     subTextEmphasis: SubTextEmphasis = SubTextEmphasis.SECONDARY,
+    hasLineShadowBetweenMainAndChildren: Boolean=false,
 ) {
 
     var showMenu by remember() { mutableStateOf(false) }
     Box {
         Card(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
 
                 .animateContentSize(
@@ -80,7 +83,7 @@ fun CardWithContent(
             ) {
             Column() {
                 Row(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth().combinedClickable(
                             onClick = {
                                 onClick?.invoke()
@@ -90,65 +93,87 @@ fun CardWithContent(
                                 if (!menuOnLongClick.isNullOrEmpty()) showMenu = true
                             }
                         )
-                        .padding( start=8.dp, end = 20.dp, top = 6.dp, bottom = 6.dp)
-                        .height(58.dp), horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                      ,
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-
-                        Box(
-                            modifier = Modifier
-                                .height(58.dp)
-                                .width(58.dp)
-                                .background(
-                                    color =  if (leftIcon == null) TertiaOne else TertiaOne.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(5.dp)
-                                )
+                    Row( horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,modifier = modifier.fillMaxWidth().padding(
+                        start = 8.dp,
+                        end = 20.dp,
+                        top = 6.dp,
+                        bottom = 6.dp
+                    )
+                        .height(58.dp)) {
 
 
-                        ){
-                        if (leftIcon != null) {
-                            Image(
-                                painter = painterResource(id = leftIcon),
-                                contentDescription = "Image de l'exercise",
-                                modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Fit
-                            )
-                        } }
-                        Column(
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxHeight().padding(vertical =8.dp )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            Text(
-                                text = text,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                            Text(
-                                text = subText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (subTextEmphasis == SubTextEmphasis.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (badgeText != null) {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                            Box(
+                                modifier = Modifier
+                                    .height(58.dp)
+                                    .width(58.dp)
+                                    .background(
+                                        color = if (leftIcon == null) TertiaOne else TertiaOne.copy(
+                                            alpha = 0.5f
+                                        ),
+                                        shape = RoundedCornerShape(5.dp)
+                                    )
+
+
                             ) {
-                                Text(badgeText)
+                                if (leftIcon != null) {
+                                    Image(
+                                        painter = painterResource(id = leftIcon),
+                                        contentDescription = "Image de l'exercise",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                }
+                            }
+                            Column(
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxHeight().padding(vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = text,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                )
+                                Text(
+                                    text = subText,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (subTextEmphasis == SubTextEmphasis.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
-                        if (componentRight != null) {
-                            componentRight()
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (badgeText != null) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Text(badgeText)
+                                }
+                            }
+                            if (componentRight != null) {
+                                componentRight()
+                            }
                         }
+
+
                     }
-
-
+                }
+                if (hasLineShadowBetweenMainAndChildren && expanded) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .shadow(4.dp)
+                    )
                 }
                 if (canExtend && expanded) {
                     childrenForExtend?.invoke()

@@ -64,7 +64,7 @@ fun SeancePage(
                 "Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
-                    if (state.isLoadingRequest) {
+                    if (viewModel.dayDataFlow.collectAsState().value ==null) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -94,7 +94,7 @@ fun SeancePage(
                         var offsetY by remember { mutableFloatStateOf(0f) }
 
                         Box(
-                            modifier = Modifier
+                            modifier = Modifier.padding(10.dp, 4.dp)
                                 .offset { IntOffset(0, offsetY.roundToInt()) }
                                 .then(
                                     if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
@@ -169,7 +169,6 @@ fun SeancePage(
                                 "Ajouter un exercice ou une routine",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                             )
-                            //image
 
                         }
                     }
