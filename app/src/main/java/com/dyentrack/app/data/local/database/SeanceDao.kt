@@ -16,6 +16,8 @@ interface SeanceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSeance(seance: SeanceOfDayLocal)
 
+    @Query("UPDATE seanceOfDay SET saveAPI = :status WHERE day = :day")
+    suspend fun updateSaveApi(day: String, status: Boolean)
     @Update
     suspend fun updateSeance(seance: SeanceOfDayLocal)
 

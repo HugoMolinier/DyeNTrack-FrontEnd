@@ -29,6 +29,7 @@ import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.usecase.GetLast30DaysUseCase
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
+import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,7 +54,8 @@ class SeanceViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
-    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase
+    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
+    private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
@@ -326,24 +328,29 @@ class SeanceViewModel @Inject constructor(
     fun changeSaveStatus(status: Boolean = false) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
-        _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
+        val buildDayData = buildDayDataRequest(day,seance)
+        viewModelScope.launch {
+            updateDayDataToLocalUseCase(buildDayData)
+            _uiState.value.seancesParJour[day] = seance.copy(saveLocal = true)}
+
         if (!status) {
             autoSaveJob?.cancel()
             autoSaveJob = viewModelScope.launch {
                 delay(15_000L)
-                autoSaveSeanceIfNeeded()
+                autoSaveSeanceIfNeeded(buildDayData)
             }
         }
+        _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
     }
 
-    fun autoSaveSeanceIfNeeded() {
+    fun autoSaveSeanceIfNeeded(buildDayData:DayDataRequest) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
         if (seance.saveAPI) return
 
-        val request = buildDayDataRequest(day, seance)
 
-        val json = Json.Default.encodeToString(DayDataRequest.serializer(), request)
+
+        val json = Json.Default.encodeToString(DayDataRequest.serializer(), buildDayData)
 
         val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
             .setInputData(workDataOf("payload" to json))

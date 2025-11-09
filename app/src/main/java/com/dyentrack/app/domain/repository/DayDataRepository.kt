@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface DayDataRepository {
     val dayDataFlow: StateFlow<List<DayDataRequest>?>
+    suspend fun updateToLocal(dayData: DayDataRequest)
     suspend fun fetchDayData()
+    suspend fun updateToApi(dayData: DayDataRequest): Int
     suspend fun updateDayData(dayData: DayDataRequest):Int
 }

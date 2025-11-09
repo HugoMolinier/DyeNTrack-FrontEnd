@@ -21,31 +21,80 @@ class DayDataRepositoryImpl @Inject constructor(
     override val dayDataFlow: StateFlow<List<DayDataRequest>?> = _dayDataFlow
 
     override suspend fun fetchDayData() {
+        // 1. récupère le local
+        val localDayData = seanceDao.getAllSeances().map { it.toDayDataRequest() }
+        _dayDataFlow.value = localDayData
+
+        // 2. push local modifié vers l'API
+        localDayData.forEach { localDay ->
+            if (!localDay.toSeanceOfDayLocal(false).saveAPI) {
+                updateToApi(localDay)
+            }
+        }
+        // 3. récupère l'API
         val apiDayData = try {
             val apiResponse = api.getAllDayDataByDay()
             if (apiResponse.status == 200) apiResponse.data else emptyList()
         } catch (_: Exception) {
             emptyList()
         }
-        //save Api into local
-        apiDayData.forEach { apiDayData ->
-            seanceDao.saveOrUpdateSeance(
-                seanceDao,
-                apiDayData.toSeanceOfDayLocal(true)
-            )
+        // 4. merge local et API
+        val merged = mergeLocalAndApi(localDayData, apiDayData)
+        _dayDataFlow.value = merged
+
+        merged.forEach { dayData ->
+            val localSaveAPI = seanceDao.getSeanceByDay(dayData.dayData)?.saveAPI ?: false
+            val shouldSaveApi = localSaveAPI || apiDayData.any { it.dayData == dayData.dayData }
+            seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(shouldSaveApi))
         }
-
-        //!ApiData -> localData
-        val localDayData = if (apiDayData.isEmpty()) {
-            seanceDao.getAllSeances().map {
-                it.toDayDataRequest()
-            }
-        } else emptyList()
-
-        _dayDataFlow.value = apiDayData + localDayData
 
     }
 
+
+    private fun mergeLocalAndApi(
+        local: List<DayDataRequest>,
+        api: List<DayDataRequest>
+    ): List<DayDataRequest> {
+        val result = mutableListOf<DayDataRequest>()
+        val apiMap = api.associateBy { it.dayData }
+
+        local.forEach { localDay ->
+            val apiDay = apiMap[localDay.dayData]
+            result.add(
+                if (apiDay != null) {
+                    if (!localDay.toSeanceOfDayLocal(false).saveAPI) localDay else apiDay
+                } else localDay
+            )
+        }
+
+        // jours uniquement API
+        val localDays = local.map { it.dayData }.toSet()
+        api.filter { it.dayData !in localDays }.forEach { result.add(it) }
+
+        return result
+    }
+
+
+
+    override suspend fun updateToApi(dayData: DayDataRequest): Int {
+        return try {
+
+            val response = api.saveDayData(dayData)
+            if (response.status in listOf(200, 201)) {
+                seanceDao.updateSaveApi(dayData.dayData, true)
+                200
+            } else {
+                100
+            }
+        } catch (_: Exception) {
+            100
+        }
+    }
+
+
+    override suspend fun updateToLocal(dayData: DayDataRequest) {
+        seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(false))
+    }
     override suspend fun updateDayData(dayData: DayDataRequest): Int {
         var isSaveApi = false
         try {
@@ -70,7 +119,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
     }
 
-    private fun DayDataRequest.toSeanceOfDayLocal(isSaveApi: Boolean): SeanceOfDayLocal {
+    fun DayDataRequest.toSeanceOfDayLocal(isSaveApi: Boolean): SeanceOfDayLocal {
 
         return SeanceOfDayLocal(
             day = dayData,
@@ -80,7 +129,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
     }
 
-    private fun SeanceOfDayLocal.toDayDataRequest(): DayDataRequest {
+     fun SeanceOfDayLocal.toDayDataRequest(): DayDataRequest {
         return DayDataRequest(
             null,
             day,
