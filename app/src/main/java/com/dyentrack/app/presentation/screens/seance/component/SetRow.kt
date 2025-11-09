@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
+import com.dyentrack.app.presentation.screens.seance.SaveType
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
@@ -98,7 +99,7 @@ fun SetRow(
                 placeholder = if (setRightForUni != null) "L" else "Reps",
                 modifier = Modifier.weight(1f),
                 keyboardType = KeyboardType.Number,
-                onValueChange = { viewModel.changeSaveStatus(false) }
+                onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
             )
             LaunchedEffect(repsState.value.text) {
                 set.reps = repsState.value.text.toIntOrNull() ?: 0
@@ -110,7 +111,7 @@ fun SetRow(
                     enabled = !lockInput,
                     modifier = Modifier.weight(1f),
                     keyboardType = KeyboardType.Number,
-                    onValueChange = { viewModel.changeSaveStatus(false) }
+                    onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
                 )
                 LaunchedEffect(repsRightState.value.text) {
                     setRightForUni.reps = repsRightState.value.text.toIntOrNull() ?: 0
@@ -124,7 +125,7 @@ fun SetRow(
             enabled = !lockInput,
             modifier = Modifier.weight(1f),
             keyboardType = KeyboardType.Decimal,
-            onValueChange = { viewModel.changeSaveStatus(false) }
+            onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
 
         )
         LaunchedEffect(chargeState.value.text) {
@@ -141,7 +142,8 @@ fun SetRow(
             enabled = !lockInput,
             modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,
-            onValueChange = { viewModel.changeSaveStatus(false) }
+            onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
+            , onFocusLost =
         )
         LaunchedEffect(rirState.value.text) {
             val rirValue = rirState.value.text.toIntOrNull() ?: 0

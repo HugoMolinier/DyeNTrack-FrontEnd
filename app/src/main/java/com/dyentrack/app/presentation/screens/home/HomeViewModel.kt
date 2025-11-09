@@ -52,7 +52,6 @@ class HomeViewModel @Inject constructor(
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {
             val master = masterData ?: return
-        Log.d("HomeViewModel","muscleRateOfEachDay called")
 
         val lastScence = _uiState.value.mapSeance
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
@@ -64,7 +63,6 @@ class HomeViewModel @Inject constructor(
 
 
             seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
-                Log.d(dayKey,plannedExerciseVO.toString())
                 val exercise = master.officialExercise.find { it.idExercise == plannedExerciseVO.exerciseId }?: return@forEach
                 exercise.muscleInfos?.forEach { muscleInfo ->
                     if (principalOnly && !muscleInfo.principal)return@forEach

@@ -22,13 +22,17 @@ class DayDataRepositoryImpl @Inject constructor(
 
     override suspend fun fetchDayData() {
         // 1. récupère le local
-        val localDayData = seanceDao.getAllSeances().map { it.toDayDataRequest() }
+        val localDayDataBrut = seanceDao.getAllSeances()
+        val localDayData = localDayDataBrut.map { it.toDayDataRequest() }
         _dayDataFlow.value = localDayData
 
-        // 2. push local modifié vers l'API
-        localDayData.forEach { localDay ->
-            if (!localDay.toSeanceOfDayLocal(false).saveAPI) {
-                updateToApi(localDay)
+        // 2. push local modifié offline vers l'API
+        localDayDataBrut.forEach { localDay ->
+            if (!localDay.saveAPI) {
+                val dayDataRequest = localDayData.find { it.dayData == localDay.day }
+                dayDataRequest?.let {
+                    updateToApi(it)
+                }
             }
         }
         // 3. récupère l'API
@@ -43,9 +47,8 @@ class DayDataRepositoryImpl @Inject constructor(
         _dayDataFlow.value = merged
 
         merged.forEach { dayData ->
-            val localSaveAPI = seanceDao.getSeanceByDay(dayData.dayData)?.saveAPI ?: false
-            val shouldSaveApi = localSaveAPI || apiDayData.any { it.dayData == dayData.dayData }
-            seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(shouldSaveApi))
+            val isFromApi = apiDayData.any { it.dayData == dayData.dayData }
+            seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(isFromApi))
         }
 
     }
@@ -78,7 +81,6 @@ class DayDataRepositoryImpl @Inject constructor(
 
     override suspend fun updateToApi(dayData: DayDataRequest): Int {
         return try {
-
             val response = api.saveDayData(dayData)
             if (response.status in listOf(200, 201)) {
                 seanceDao.updateSaveApi(dayData.dayData, true)

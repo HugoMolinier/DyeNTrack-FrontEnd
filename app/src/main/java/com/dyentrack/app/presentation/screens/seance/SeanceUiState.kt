@@ -33,11 +33,15 @@ data class SeanceUiState(
 data class SeanceDuJour(
     //séparé pouur éviter les recomposition
     val exercisesInSceance: SnapshotStateList<ExerciseInSeance> = mutableStateListOf(),
-    val saveAPI: Boolean = false,
-    val saveLocal: Boolean = false,
+    val saveAPI: SaveType = SaveType.NOTSAVE,
     val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
     val note: String? = null,
 )
+enum class SaveType {
+    NOTSAVE,
+    LocalSAVE,
+    APISAVE
+}
 
 
 

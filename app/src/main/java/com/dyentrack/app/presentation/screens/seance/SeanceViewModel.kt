@@ -124,7 +124,7 @@ class SeanceViewModel @Inject constructor(
             exercisesInSceance = exercises
         )
 
-        _uiState.value.seancesParJour[day] = seance.copy(saveLocal = false, saveAPI = false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun updateLaterite(exerciseId: Long, lateriteId: Long) {
@@ -157,7 +157,7 @@ class SeanceViewModel @Inject constructor(
                 set.side = SetSide.BOTH
             }
         }
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun updateEquipment(exerciseId: Long, equipmentId: Long) {
@@ -169,7 +169,7 @@ class SeanceViewModel @Inject constructor(
             seance.exercisesInSceance[index] =
                 seance.exercisesInSceance[index].copy(equipment = equipmentId)
         }
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun changeDaySelected(dateFormat: String) {
@@ -236,7 +236,7 @@ class SeanceViewModel @Inject constructor(
                 isBottomSheetVisible = false
             )
         }
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun setExerciseToAdd(exercises: List<Long>) {
@@ -252,7 +252,7 @@ class SeanceViewModel @Inject constructor(
 
         seance.setsMap.remove(exerciseId)
 
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun addSetToExercise(exerciseId: Long, lateraliteName: String) {
@@ -286,7 +286,7 @@ class SeanceViewModel @Inject constructor(
         sets.add(set)
 
 
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun getLastExercicePerfBetweenDate(dateRecent: String, dateBefore: String) {
@@ -313,7 +313,7 @@ class SeanceViewModel @Inject constructor(
         if (fromIndex !in sets.indices || toIndex !in sets.indices) return
 
         sets[fromIndex] = sets.set(toIndex, sets[fromIndex])
-        changeSaveStatus(false)
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun expandExercise(exerciseId: Long?) {
@@ -325,32 +325,34 @@ class SeanceViewModel @Inject constructor(
     }
 
     private var autoSaveJob: Job? = null
-    fun changeSaveStatus(status: Boolean = false) {
+    fun changeSaveStatus(status: SaveType ) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
-        val buildDayData = buildDayDataRequest(day,seance)
-        viewModelScope.launch {
-            updateDayDataToLocalUseCase(buildDayData)
-            _uiState.value.seancesParJour[day] = seance.copy(saveLocal = true)}
 
-        if (!status) {
+        if (status == SaveType.NOTSAVE||status == SaveType.LocalSAVE) {
+            if (status !=SaveType.LocalSAVE) {
+                viewModelScope.launch {
+                    updateDayDataToLocalUseCase(buildDayDataRequest(day, seance))
+                    _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.LocalSAVE)
+                }
+            }
             autoSaveJob?.cancel()
             autoSaveJob = viewModelScope.launch {
-                delay(15_000L)
-                autoSaveSeanceIfNeeded(buildDayData)
+                delay(5_000L)
+                autoSaveSeanceIfNeeded()
             }
         }
         _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
     }
 
-    fun autoSaveSeanceIfNeeded(buildDayData:DayDataRequest) {
+    fun autoSaveSeanceIfNeeded() {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
-        if (seance.saveAPI) return
+        if (seance.saveAPI == SaveType.APISAVE) return
+        val currentDayData = buildDayDataRequest(day, seance)
 
 
-
-        val json = Json.Default.encodeToString(DayDataRequest.serializer(), buildDayData)
+        val json = Json.Default.encodeToString(DayDataRequest.serializer(), currentDayData)
 
         val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
             .setInputData(workDataOf("payload" to json))
@@ -368,7 +370,7 @@ class SeanceViewModel @Inject constructor(
         workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever { workInfo ->
             if (workInfo != null && workInfo.state.isFinished) {
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    changeSaveStatus(true)
+                    _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.APISAVE)
                 }
             }
         }
@@ -453,7 +455,7 @@ class SeanceViewModel @Inject constructor(
         return SeanceDuJour(
             exercisesInSceance = exercises,
             setsMap = setsMap,
-            saveAPI = dayDataFlow.value?.any { it.dayData == dayData } ?: false
+            saveAPI = if (dayDataFlow.value?.any { it.dayData == dayData } == true) SaveType.APISAVE else SaveType.NOTSAVE
         )
     }
 

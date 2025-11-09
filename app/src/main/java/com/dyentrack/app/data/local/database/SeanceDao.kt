@@ -18,6 +18,8 @@ interface SeanceDao {
 
     @Query("UPDATE seanceOfDay SET saveAPI = :status WHERE day = :day")
     suspend fun updateSaveApi(day: String, status: Boolean)
+
+
     @Update
     suspend fun updateSeance(seance: SeanceOfDayLocal)
 
