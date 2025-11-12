@@ -8,5 +8,4 @@ interface DayDataRepository {
     suspend fun updateToLocal(dayData: DayDataRequest)
     suspend fun fetchDayData()
     suspend fun updateToApi(dayData: DayDataRequest): Int
-    suspend fun updateDayData(dayData: DayDataRequest):Int
 }

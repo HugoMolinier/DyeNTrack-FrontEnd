@@ -5,6 +5,7 @@ import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ class DayDataRepositoryImpl @Inject constructor(
         } catch (_: Exception) {
             emptyList()
         }
+        Log.d("d,lakda","$apiDayData")
         // 4. merge local et API
         val merged = mergeLocalAndApi(localDayData, apiDayData)
         _dayDataFlow.value = merged
@@ -62,6 +64,7 @@ class DayDataRepositoryImpl @Inject constructor(
         val apiMap = api.associateBy { it.dayData }
 
         local.forEach { localDay ->
+            Log.d("localDay","$localDay")
             val apiDay = apiMap[localDay.dayData]
             result.add(
                 if (apiDay != null) {
@@ -86,9 +89,11 @@ class DayDataRepositoryImpl @Inject constructor(
                 seanceDao.updateSaveApi(dayData.dayData, true)
                 200
             } else {
+                Log.d("Api response Error","$response")
                 100
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.d("Api response Error","$e")
             100
         }
     }
@@ -97,35 +102,14 @@ class DayDataRepositoryImpl @Inject constructor(
     override suspend fun updateToLocal(dayData: DayDataRequest) {
         seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(false))
     }
-    override suspend fun updateDayData(dayData: DayDataRequest): Int {
-        var isSaveApi = false
-        try {
 
-            val response = api.saveDayData(dayData)
-            isSaveApi = response.status in listOf(200, 201)
-        } catch (e: Exception) {
-            Log.d("Fail API", "$e.message")
-        }
-        seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(isSaveApi))
-
-        val currentList = _dayDataFlow.value?.toMutableList() ?: mutableListOf()
-        val index = currentList.indexOfFirst { it.dayData == dayData.dayData }
-        if (index != -1) {
-            currentList[index] = dayData
-        } else {
-            currentList.add(dayData)
-        }
-        _dayDataFlow.value = currentList
-        return if (isSaveApi) 200 else 100
-
-
-    }
 
     fun DayDataRequest.toSeanceOfDayLocal(isSaveApi: Boolean): SeanceOfDayLocal {
 
         return SeanceOfDayLocal(
             day = dayData,
             saveAPI = isSaveApi,
+            nutritionTrack = nutritionTrack?: NutritionTrack(),
             plannedExercises = seanceTrack.plannedExercises
         )
 
@@ -140,7 +124,7 @@ class DayDataRepositoryImpl @Inject constructor(
                 presetSeanceId = null,
                 plannedExercises = plannedExercises
             ),
-            null,
+            nutritionTrack,
             null
         )
     }

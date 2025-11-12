@@ -1,5 +1,6 @@
-package com.dyentrack.app.presentation.screens.seance.component
+package com.dyentrack.app.presentation.screens.seance.component.seanceComp
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.screens.seance.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
@@ -123,16 +126,28 @@ fun ExerciseCard(
             )
         },
         menuOnLongClick = if (state.exerciseMode != ExerciseMode.CHANGE_ORDER) {
-            buildMap {
-                put("Voir Exercice") {
-                    navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
-                    navController.navigate("exercise")
-                }
+            buildList {
+                add(
+                    MenuItemData(
+                        "Voir Exercice",
+                        {
+                            navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
+                            navController.navigate("exercise")
+                        }
+                    )
+                )
                 if (state.exerciseMode != ExerciseMode.LOCK) {
-                    put("Supprimer") { viewModel.deleteExercice(exerciseId) }
+                    add(
+                        MenuItemData(
+                            "Supprimer",
+                            { viewModel.deleteExercice(exerciseId) }
+                            , MaterialTheme.typography.bodyMedium.copy(color = Color.Red.copy(alpha = 0.8f))
+                        )
+                    )
                 }
             }
         } else null,
+
         subTextEmphasis = SubTextEmphasis.SECONDARY,
         childrenForExtend = {
             Column(
@@ -249,7 +264,7 @@ fun ExerciseCard(
                             var offsetY by remember { mutableFloatStateOf(0f) }
                             var isDragging by remember { mutableStateOf(false) }
                             val animOffset =
-                                remember { androidx.compose.animation.core.Animatable(0f) }
+                                remember { Animatable(0f) }
 
                             LaunchedEffect(offsetY) {
                                 animOffset.animateTo(offsetY)
@@ -309,7 +324,10 @@ fun ExerciseCard(
                                     set,
                                     index,
                                     setRightForUni = set.linkedRightSet,
-                                    lockInput = isLock
+                                    lockInput = isLock,
+                                    onClickBadge = if (index == exerciseSets.lastIndex) {
+                                        { viewModel.deleteLastSet(exerciseId) }
+                                    } else null
                                 )
                             }
                         }

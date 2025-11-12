@@ -52,11 +52,12 @@ fun BottomSheetContent(
         sheetState = sheetState,
                 modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()        // hauteur auto selon le contenu
+            .wrapContentHeight()
 ,
         containerColor = colorScheme.background,
         shape = MaterialTheme.shapes.large
         ,
+
 
         dragHandle = {
             Box(
@@ -75,11 +76,7 @@ fun BottomSheetContent(
             }
         }
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.85f)
-        ) {
+        Column( modifier = modifier .fillMaxWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.85f) ) {
             if (title.isNotBlank() || closeButtonTitle) {
                 Row(
                     modifier = Modifier

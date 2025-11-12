@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -33,13 +34,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.screens.seance.component.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
-import com.dyentrack.app.presentation.screens.seance.component.ExerciseCard
+import com.dyentrack.app.presentation.screens.seance.component.seanceComp.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
+import com.dyentrack.app.presentation.screens.seance.component.NutritionSection
 import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
-import com.dyentrack.app.presentation.screens.seance.component.ShowInfoOfSeance
+import com.dyentrack.app.presentation.screens.seance.component.seanceComp.ShowInfoOfSeance
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import kotlin.math.roundToInt
 
@@ -48,9 +52,12 @@ import kotlin.math.roundToInt
 fun SeancePage(
     modifier: Modifier = Modifier,
     viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
-    navController: NavController
+    navController: NavController,
+    daySelected: String?=null
 ) {
-
+    LaunchedEffect(Unit) {
+        daySelected?.let { viewModel.setDaySelected(it) }
+    }
     val state by viewModel.uiState.collectAsState()
 
 
@@ -64,7 +71,7 @@ fun SeancePage(
                 "Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
-                    if (viewModel.dayDataFlow.collectAsState().value ==null) {
+                    if (viewModel.dayDataFlow.collectAsState().value == null) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -84,94 +91,125 @@ fun SeancePage(
 
             LazyColumn {
                 item { DateSelectorRange(uiState = state, viewModel = viewModel) }
-                item { SectionSelector() }
-
-                val exercises =
-                    state.seancesParJour[state.daySelected]?.exercisesInSceance ?: listOf()
-
-                if (exercises.isNotEmpty()) {
-                    itemsIndexed(exercises, key = { _, ex -> ex.exerciseId }) { _, exInSeance ->
-                        var offsetY by remember { mutableFloatStateOf(0f) }
-
-                        Box(
-                            modifier = Modifier.padding(10.dp, 4.dp)
-                                .offset { IntOffset(0, offsetY.roundToInt()) }
-                                .then(
-                                    if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
-                                        Modifier.pointerInput(exInSeance) {
-                                            detectDragGestures(
-                                                onDragStart = { },
-                                                onDrag = { change, dragAmount ->
-                                                    offsetY += dragAmount.y
-                                                    change.consume()
-                                                    val threshold = 70.dp.toPx()
-                                                    val lastIndex = exercises.lastIndex
+                item {
+                    SectionSelector(
+                        itemSection = listOf(
+                            MenuItemData(
+                                "Scéances",
+                                { viewModel.changeSection(SectionSelectType.SEANCE) }
+                            ),
+                            MenuItemData(
+                                "Data",
+                                { viewModel.changeSection(SectionSelectType.DATA) }
+                            )
+                        ),
+                        selectedIndex = if (state.sectionSelect == SectionSelectType.SEANCE) 0 else 1
 
 
-                                                    val currentIndex = exercises.indexOf(exInSeance)
+                    )
+                }
 
-                                                    if (offsetY > threshold && currentIndex < lastIndex) {
-                                                        viewModel.swapExercise(
-                                                            state.daySelected,
-                                                            currentIndex,
-                                                            currentIndex + 1
-                                                        )
-                                                        offsetY = 0f
-                                                    } else if (offsetY < -threshold && currentIndex > 0) {
-                                                        viewModel.swapExercise(
-                                                            state.daySelected,
-                                                            currentIndex,
-                                                            currentIndex - 1
-                                                        )
-                                                        offsetY = 0f
-                                                    }
-                                                },
-                                                onDragEnd = {
-                                                    offsetY = 0f
+                when (state.sectionSelect) {
+                    SectionSelectType.SEANCE -> {
+                        val exercises =
+                            state.seancesParJour[state.daySelected]?.exercisesInSceance ?: listOf()
 
-                                                },
-                                                onDragCancel = {
-                                                    offsetY = 0f
+                        if (exercises.isNotEmpty()) {
+                            itemsIndexed(
+                                exercises,
+                                key = { _, ex -> ex.exerciseId }) { _, exInSeance ->
+                                var offsetY by remember { mutableFloatStateOf(0f) }
 
+                                Box(
+                                    modifier = Modifier
+                                        .padding(10.dp, 4.dp)
+                                        .offset { IntOffset(0, offsetY.roundToInt()) }
+                                        .then(
+                                            if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                                Modifier.pointerInput(exInSeance) {
+                                                    detectDragGestures(
+                                                        onDragStart = { },
+                                                        onDrag = { change, dragAmount ->
+                                                            offsetY += dragAmount.y
+                                                            change.consume()
+                                                            val threshold = 70.dp.toPx()
+                                                            val lastIndex = exercises.lastIndex
+
+
+                                                            val currentIndex =
+                                                                exercises.indexOf(exInSeance)
+
+                                                            if (offsetY > threshold && currentIndex < lastIndex) {
+                                                                viewModel.swapExercise(
+                                                                    state.daySelected,
+                                                                    currentIndex,
+                                                                    currentIndex + 1
+                                                                )
+                                                                offsetY = 0f
+                                                            } else if (offsetY < -threshold && currentIndex > 0) {
+                                                                viewModel.swapExercise(
+                                                                    state.daySelected,
+                                                                    currentIndex,
+                                                                    currentIndex - 1
+                                                                )
+                                                                offsetY = 0f
+                                                            }
+                                                        },
+                                                        onDragEnd = {
+                                                            offsetY = 0f
+
+                                                        },
+                                                        onDragCancel = {
+                                                            offsetY = 0f
+
+                                                        }
+                                                    )
                                                 }
-                                            )
-                                        }
-                                    } else Modifier
-                                )
-                        ) {
-                            ExerciseCard(
-                                exInSeance,
-                                state,
-                                viewModel,
-                                navController,
-                                lateriteNameMap,
-                                equipmentNameMap
-                            )
+                                            } else Modifier
+                                        )
+                                ) {
+                                    ExerciseCard(
+                                        exInSeance,
+                                        state,
+                                        viewModel,
+                                        navController,
+                                        lateriteNameMap,
+                                        equipmentNameMap
+                                    )
+                                }
+                            }
+                            item { ShowInfoOfSeance(viewModel) }
+
+
+                        } else {
+                            item {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp, vertical = 20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        "Aucun exercice pour le moment",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        "Ajouter un exercice ou une routine",
+                                        style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                                    )
+
+                                }
+                            }
                         }
                     }
-                    item { ShowInfoOfSeance(viewModel ) }
 
-
-                } else {
-                    item {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "Aucun exercice pour le moment",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                "Ajouter un exercice ou une routine",
-                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
-                            )
-
+                    SectionSelectType.DATA ->
+                        item {
+                            NutritionSection(viewModel,    state.seancesParJour[state.daySelected]?.nutritionTrack ?: NutritionTrack())
                         }
-                    }
+
+                    else -> null
                 }
 
             }
@@ -179,7 +217,7 @@ fun SeancePage(
 
         }
 
-        if (state.exerciseMode != ExerciseMode.LOCK) {
+        if (state.exerciseMode != ExerciseMode.LOCK && state.sectionSelect == SectionSelectType.SEANCE) {
             FloatingActionButton(
 
                 onClick = {

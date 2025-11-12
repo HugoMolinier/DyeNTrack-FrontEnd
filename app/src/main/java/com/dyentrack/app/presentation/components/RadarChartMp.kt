@@ -1,13 +1,17 @@
 package com.dyentrack.app.presentation.components
 
 import android.content.Context
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.toColorInt
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.github.mikephil.charting.charts.RadarChart
+import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
@@ -23,13 +27,34 @@ fun RadarChartMP(
     AndroidView(
         factory = { context: Context ->
             RadarChart(context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                ).apply {
+                    weight = 1f
+                    gravity = Gravity.START or Gravity.TOP
+                }
                 description.isEnabled = false
+
+
                 legend.isEnabled = true
                 webLineWidth = 1f
-                webColor = "#CCCCCC".toColorInt()
+                webColor = secondaryTextColor.toArgb()
                 webLineWidthInner = 1f
-                webColorInner = "#AAAAAA".toColorInt()
-                webAlpha = 100
+                webColorInner = secondaryTextColor.copy(alpha = 0.4f).toArgb()
+                webAlpha = 25
+                setExtraOffsets(0f, 0f, 0f, 0f)
+
+                legend.form = Legend.LegendForm.CIRCLE
+                legend.yOffset =8f
+                legend.yEntrySpace = 10f
+                legend.textColor = secondaryTextColor.toArgb()
+                legend.textSize = 10f
+                legend.formSize = 12f
+                legend.formToTextSpace = 4f
+                legend.setDrawInside(true)
+                legend.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+
             }
         },
         modifier = modifier,
@@ -38,24 +63,33 @@ fun RadarChartMP(
             val entries1 = values1.map { RadarEntry(it) }
             val entries2 = values2.map { RadarEntry(it) }
 
-            val dataSet1 = RadarDataSet(entries1, "Exercices").apply {
+            val dataSet1 = RadarDataSet(entries1, "Nombre Exercices").apply {
                 color = colorScheme.secondary.toArgb()
-                fillColor = colorScheme.secondary.toArgb()
-                fillAlpha = 100
+                fillColor = secondaryTextColor.toArgb()
+                fillAlpha = 50
                 lineWidth = 2f
-                setDrawFilled(true)
+                setDrawFilled(false)
+                setDrawValues(false)
             }
 
-            val dataSet2 = RadarDataSet(entries2, "Séries").apply {
+            val dataSet2 = RadarDataSet(entries2, "Nombre Séries").apply {
                 color = colorScheme.primary.toArgb()
                 fillColor = colorScheme.primary.toArgb()
+
                 fillAlpha = 50
                 lineWidth = 2f
                 setDrawFilled(true)
+                setDrawValues(true)
+                valueTextColor = secondaryTextColor.toArgb()
+
+            }
+            dataSet2.valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
             }
 
             val radarData = RadarData(dataSet1, dataSet2)
-            radarData.setDrawValues(true)
             radarChart.apply {
                 isRotationEnabled = false
                 data = radarData
@@ -64,25 +98,17 @@ fun RadarChartMP(
             // Labels
             radarChart.xAxis.apply {
                 valueFormatter = com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels)
-                textSize = 12f
+                textSize = 10f
                 textColor = colorScheme.onSurface.toArgb()
             }
 
             radarChart.yAxis.apply {
                 axisMinimum = 0f
                 granularity = 5f // pour un pallier tous les 5
-                textSize = 12f
-                textColor = colorScheme.onSurface.toArgb()
+                textSize = 8f
+                textColor = colorScheme.onSurface.copy(alpha = 0.7f).toArgb()
             }
-            radarChart.legend.apply {
-                textColor = colorScheme.onSurface.toArgb()  // couleur du texte de la légende
-                textSize = 14f                               // taille du texte
-                form = com.github.mikephil.charting.components.Legend.LegendForm.CIRCLE // forme
-                formSize = 12f
-                formToTextSpace = 8f
-                yOffset = 0f
-                yEntrySpace = 4f
-            }
+
             radarChart.invalidate()
         }
     )

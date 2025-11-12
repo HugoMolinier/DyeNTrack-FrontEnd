@@ -2,6 +2,7 @@ package com.dyentrack.app.presentation.screens.seance.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.FavoriteIconButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
@@ -164,8 +166,9 @@ fun BottomSheetSelectionExercise(
                 //exercise
                 items(filteredExercises ?: listOf()) { exercise ->
                     val isSelected = exercise.idExercise in state.exerciseToAdd
+                    Box(Modifier.padding(12.dp, 4.dp)){
                     CardWithContent(
-                        modifier = Modifier.padding(12.dp, 4.dp),
+                        modifier = Modifier.padding(10.dp, 4.dp),
                         exercise.nameFR,
                         subText = viewModel.masterData?.musclesGroup
                             ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
@@ -186,19 +189,23 @@ fun BottomSheetSelectionExercise(
                                 }
                             )
                         },
-                        menuOnLongClick = mapOf(
-                            "Voir Exercice" to {
-                                navController.currentBackStackEntry?.savedStateHandle?.set(
-                                    "exercise",
-                                    exercise
+                        menuOnLongClick = listOf(
+                                MenuItemData(
+                                    "Voir Exercice",
+                                    {
+                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                            "exercise",
+                                            exercise
+                                        )
+                                        navController.navigate("exercise")
+                                    }
+
                                 )
-                                navController.navigate("exercise")
-                            }
-                        ),
+                            ),
                         subTextEmphasis = SubTextEmphasis.PRIMARY,
                         onClick = { viewModel.toggleExerciseSelection(exercise.idExercise) },
                         badgeText = if (isSelected) (state.exerciseToAdd.indexOf(exercise.idExercise) + 1).toString() else null
-                    )
+                    )}
                 }
             }
         },

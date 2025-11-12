@@ -7,7 +7,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -35,16 +35,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.utils.bottomShadow
 
 enum class SubTextEmphasis { PRIMARY, SECONDARY }
+data class MenuItemData(
+    val label: String,
+    val onClick: () -> Unit,
+    val style: TextStyle?=null
+)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -59,29 +65,35 @@ fun CardWithContent(
     canExtend: Boolean = false,
     expanded: Boolean = false,
     onExpandChange: ((Boolean) -> Unit)? = null,
-    menuOnLongClick: Map<String, () -> Unit>? = null,
+    menuOnLongClick: List<MenuItemData>? = null,
     childrenForExtend: @Composable (() -> Unit)? = null,
     subTextEmphasis: SubTextEmphasis = SubTextEmphasis.SECONDARY,
     hasLineShadowBetweenMainAndChildren: Boolean=false,
 ) {
 
-    var showMenu by remember() { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
     Box {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth()            .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    ambientColor = Color.Black.copy(alpha = 0.25f),
+                    spotColor = Color.Black.copy(alpha = 0.25f)
+                )
 
                 .animateContentSize(
                     animationSpec = spring(
                         stiffness = Spring.StiffnessLow
                     )
                 ),
-            colors = androidx.compose.material3.CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+
+            )
 
             ) {
-            Column() {
+            Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth().combinedClickable(
@@ -191,11 +203,11 @@ fun CardWithContent(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.surface)
         ) {
 
-            menuOnLongClick?.forEach { (key, action) ->
+            menuOnLongClick?.forEach { menuItemAction ->
                 DropdownMenuItem(
-                    text = { Text(key) },
+                    text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium ) },
                     onClick = {
-                        action()
+                        menuItemAction.onClick()
                         showMenu = false
                     })
             }

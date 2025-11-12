@@ -1,11 +1,9 @@
 package com.dyentrack.app.presentation.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
-import com.dyentrack.app.domain.model.ReturnIdAndName
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.forEach
 import kotlin.math.ceil
 
 @HiltViewModel
@@ -96,8 +93,8 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(muscleRateOfEachDay = muscleRate, graphData = futurGraphData) }
     }
 
-    fun expandSeance(Id: Int?) {
-        _uiState.update { it.copy(expandedSeance = Id) }
+    fun expandSeance(id: Int?) {
+        _uiState.update { it.copy(expandedSeance = id) }
     }
 
 

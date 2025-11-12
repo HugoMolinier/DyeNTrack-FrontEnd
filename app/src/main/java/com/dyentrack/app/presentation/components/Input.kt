@@ -33,7 +33,7 @@ import com.dyentrack.app.presentation.theme.PrimaryTextColor
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
-enum class InputVariant { FILLED, OUTLINED }
+enum class InputVariant { FILLED, OUTLINED ,EMPTY }
 
 @Composable
 fun InputCustom(
@@ -53,7 +53,7 @@ fun InputCustom(
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
+            .height(if (variant == InputVariant.EMPTY)32.dp else 44.dp)
             .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == InputVariant.OUTLINED) 12.dp else 5.dp))
 
             .then(
@@ -62,7 +62,7 @@ fun InputCustom(
                     color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
                 ) else Modifier
-            ).padding(horizontal = 16.dp, vertical = 10.dp),
+            ).padding(horizontal = 16.dp, vertical =if (singleLine)0.dp else 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -99,13 +99,14 @@ fun InputCustom(
             },
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = PrimaryTextColor
+                color = PrimaryTextColor,
+                        textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
 
             ),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = if(singleLine) Alignment.CenterStart else Alignment.TopStart
+                    contentAlignment =  if(singleLine)if (variant == InputVariant.EMPTY)Alignment.CenterEnd else  Alignment.CenterStart else Alignment.TopStart
                 ) {
                     if (text.value.text.isEmpty()) {
                         Text(
@@ -114,7 +115,7 @@ fun InputCustom(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = secondaryTextColor.copy(alpha = 0.5f),
 
-                                textAlign = TextAlign.Center
+                                textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
                             ),
                         )
                     }

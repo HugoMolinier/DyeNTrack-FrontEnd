@@ -1,7 +1,9 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -19,6 +21,7 @@ import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PlannedExerciseVO
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.model.SetData
@@ -45,7 +48,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.collections.get
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
@@ -75,6 +77,7 @@ class SeanceViewModel @Inject constructor(
                 }
                 val newMap = mutableStateMapOf<String, SeanceDuJour>()
                 dayDataList.forEach { dayData ->
+                    Log.d("icicic","$dayData")
                     newMap[dayData.dayData] = dayData.toSeanceDuJour()
                 }
                 _uiState.update { current ->
@@ -85,6 +88,9 @@ class SeanceViewModel @Inject constructor(
 
     }
 
+    fun setDaySelected(daySelected:String){
+        _uiState.update { current-> current.copy(daySelected=daySelected) }
+    }
     fun toggleMode(newMode: ExerciseMode) {
         _uiState.update { current ->
             if (current.exerciseMode == newMode) {
@@ -316,6 +322,17 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    fun deleteLastSet(exerciseId: Long){
+        val seance = _uiState.value.seancesParJour[_uiState.value.daySelected] ?: return
+        val sets = seance.setsMap[exerciseId] ?: return
+        sets.removeLast()
+        changeSaveStatus(SaveType.NOTSAVE)
+
+
+
+    }
+
     fun expandExercise(exerciseId: Long?) {
         _uiState.update { it.copy(expandedExerciseId = exerciseId, showAnalyseData = false) }
     }
@@ -324,11 +341,46 @@ class SeanceViewModel @Inject constructor(
         return _uiState.value.exerciseToAdd
     }
 
-    private var autoSaveJob: Job? = null
+    fun changeSection(sectionSelectType: SectionSelectType){
+        _uiState.update { it.copy( sectionSelect = sectionSelectType) }
+    }
+
+
+    // +++++++++++ Nutrition
+    fun updateNutrition(
+        champName: String,
+        value: Int
+    ) {
+        val day = _uiState.value.daySelected
+        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
+        val currentTrack = todaySeance.nutritionTrack ?: NutritionTrack()
+
+        // Génère dynamiquement le copy selon le champ
+        val newNutritionTrack = currentTrack.copy(
+            calories = if (champName == "calories") value else currentTrack.calories,
+            proteins = if (champName == "proteins") value else currentTrack.proteins,
+            lipids = if (champName == "lipids") value else currentTrack.lipids,
+            carbohydrates = if (champName == "carbohydrates") value else currentTrack.carbohydrates,
+            fiber = if (champName == "fiber") value else currentTrack.fiber,
+            cafeins = if (champName == "cafeins") value else currentTrack.cafeins
+        )
+
+        _uiState.value.seancesParJour[day] = todaySeance.copy(
+            nutritionTrack = newNutritionTrack
+        )
+
+        changeSaveStatus(SaveType.NOTSAVE)
+    }
+
+
+
+
+    private val autoSaveJobs = mutableMapOf<String, Job>()
+
     fun changeSaveStatus(status: SaveType ) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
-
+        _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
         if (status == SaveType.NOTSAVE||status == SaveType.LocalSAVE) {
             if (status !=SaveType.LocalSAVE) {
                 viewModelScope.launch {
@@ -336,19 +388,16 @@ class SeanceViewModel @Inject constructor(
                     _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.LocalSAVE)
                 }
             }
-            autoSaveJob?.cancel()
-            autoSaveJob = viewModelScope.launch {
+            autoSaveJobs[day]?.cancel()
+            val seanceForAutoSave = seance.copy() // capture immuable pour le Worker
+            autoSaveJobs[day] = viewModelScope.launch {
                 delay(5_000L)
-                autoSaveSeanceIfNeeded()
+                autoSaveSeanceIfNeeded(day, seanceForAutoSave)
             }
         }
-        _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
     }
 
-    fun autoSaveSeanceIfNeeded() {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
-        if (seance.saveAPI == SaveType.APISAVE) return
+    fun autoSaveSeanceIfNeeded(day: String, seance: SeanceDuJour) {
         val currentDayData = buildDayDataRequest(day, seance)
 
 
@@ -360,18 +409,18 @@ class SeanceViewModel @Inject constructor(
             .build()
 
         val workManager = WorkManager.Companion.getInstance(context)
-
+        val workName = "auto_save_seance_$day"
         workManager.enqueueUniqueWork(
-            "auto_save_seance_$day",
+            workName,
             ExistingWorkPolicy.REPLACE,
             workRequest
         )
 
         workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever { workInfo ->
-            if (workInfo != null && workInfo.state.isFinished) {
-                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+            if (workInfo != null &&   workInfo.state == WorkInfo.State.SUCCEEDED) {
+
                     _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.APISAVE)
-                }
+
             }
         }
 
@@ -401,7 +450,7 @@ class SeanceViewModel @Inject constructor(
             idDayData = null,
             dayData = day,
             seanceTrack = SeanceTrack(null, null, plannedExercises),
-            null, null
+            seance.nutritionTrack, null
         )
     }
 
@@ -452,8 +501,10 @@ class SeanceViewModel @Inject constructor(
             setsMap[plannedExercise.exerciseId] = sets
         }
 
+        Log.d("nutri","$nutritionTrack")
         return SeanceDuJour(
             exercisesInSceance = exercises,
+            nutritionTrack =nutritionTrack ,
             setsMap = setsMap,
             saveAPI = if (dayDataFlow.value?.any { it.dayData == dayData } == true) SaveType.APISAVE else SaveType.NOTSAVE
         )

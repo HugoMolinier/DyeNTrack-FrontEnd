@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import java.time.LocalDate
@@ -20,6 +21,8 @@ data class SeanceUiState(
     val isBottomSheetVisible: Boolean = false,
     val searchQuery: String = "",
 
+    val sectionSelect:SectionSelectType?=SectionSelectType.SEANCE,
+
 
     val exerciseMode: ExerciseMode = ExerciseMode.NORMAL,
     // résultats d’analyse
@@ -32,6 +35,9 @@ data class SeanceUiState(
 
 data class SeanceDuJour(
     //séparé pouur éviter les recomposition
+    val nutritionTrack: NutritionTrack?=null,
+
+
     val exercisesInSceance: SnapshotStateList<ExerciseInSeance> = mutableStateListOf(),
     val saveAPI: SaveType = SaveType.NOTSAVE,
     val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
@@ -42,6 +48,12 @@ enum class SaveType {
     LocalSAVE,
     APISAVE
 }
+
+enum class SectionSelectType {
+    SEANCE,
+    DATA
+}
+
 
 
 

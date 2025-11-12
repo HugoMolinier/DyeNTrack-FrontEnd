@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component
+package com.dyentrack.app.presentation.screens.seance.component.seanceComp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

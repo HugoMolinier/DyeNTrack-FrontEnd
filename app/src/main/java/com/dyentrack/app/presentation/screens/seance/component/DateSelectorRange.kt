@@ -23,15 +23,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.presentation.screens.seance.SaveType
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
-import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -73,7 +73,13 @@ fun DateSelectorRange(
                 uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() == true
             val isToday = today == day.dateFormat
             val isAfterToday = LocalDate.parse(day.dateFormat).isAfter(todayDate)
-
+            val saveStatus = uiState.seancesParJour[day.dateFormat]?.saveAPI
+            val dotColor = when (saveStatus) {
+                SaveType.APISAVE -> Color(0xFF4CAF50)   // vert
+                SaveType.LocalSAVE -> Color(0xFFFFC107) // jaune
+                SaveType.NOTSAVE -> Color(0xFFF44336)   // rouge
+                else -> null
+            }
             val (borderColor, backgroundColor, textColor) = remember(
                 isSelected,
                 hasSeance,
@@ -115,12 +121,19 @@ fun DateSelectorRange(
                 Box(
                     modifier = Modifier
                         .size(30.dp)
-                        .clip(CircleShape)
                         .border(1.dp, borderColor, CircleShape)
                         .background(backgroundColor, CircleShape)
                         .clickable { viewModel.changeDaySelected(day.dateFormat) },
                     contentAlignment = Alignment.Center
                 ) {
+                    if (dotColor != null ) {
+                        Box(
+                            modifier = Modifier
+                                .size(4.dp)
+                                .align(Alignment.TopEnd)
+                                .background(dotColor, CircleShape)
+                        )
+                    }
                     Text(
                         day.dayNumber.toString(),
                         style = MaterialTheme.typography.bodySmall.copy(color = textColor)

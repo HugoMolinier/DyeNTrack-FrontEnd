@@ -25,19 +25,20 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.dyentrack.app.domain.model.NavItem
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.presentation.screens.home.HomePage
+import com.dyentrack.app.presentation.AppViewModel
 import com.dyentrack.app.presentation.screens.MainPage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
+import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
-import com.dyentrack.app.presentation.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -83,10 +84,12 @@ fun MyApp() {
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
-                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                        selected = currentDestination?.hierarchy?.any {
+                            it.route?.startsWith(item.route) == true
+                        } == true,
                         onClick = {
                             navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(item.route) { inclusive = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -111,7 +114,19 @@ fun MyApp() {
             .padding(innerPadding)
         ) {
             composable("home") { HomePage(navController=navController) }
-            composable("seance") { SeancePage(navController=navController) }
+            composable(
+                route = "seance?dayKey={dayKey}",
+                arguments = listOf(
+                    navArgument("dayKey") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
+                val dayKey = backStackEntry.arguments?.getString("dayKey") // null si non fourni
+                SeancePage(navController = navController, daySelected = dayKey)
+            }
             composable("analyse") { MainPage(navController=navController) }
             composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry
