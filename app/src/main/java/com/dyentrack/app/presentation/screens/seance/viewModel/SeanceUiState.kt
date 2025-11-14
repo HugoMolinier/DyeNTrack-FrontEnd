@@ -1,10 +1,11 @@
-package com.dyentrack.app.presentation.screens.seance
+package com.dyentrack.app.presentation.screens.seance.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import java.time.LocalDate
@@ -35,24 +36,15 @@ data class SeanceUiState(
 
 data class SeanceDuJour(
     //séparé pouur éviter les recomposition
-    val nutritionTrack: NutritionTrack?=null,
-
+    val nutritionTrack: NutritionTrack =NutritionTrack(),
+    val physioTrack: PhysioTrack= PhysioTrack(),
 
     val exercisesInSceance: SnapshotStateList<ExerciseInSeance> = mutableStateListOf(),
     val saveAPI: SaveType = SaveType.NOTSAVE,
     val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
     val note: String? = null,
 )
-enum class SaveType {
-    NOTSAVE,
-    LocalSAVE,
-    APISAVE
-}
 
-enum class SectionSelectType {
-    SEANCE,
-    DATA
-}
 
 
 

@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Fullscreen
@@ -31,6 +34,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,7 +45,9 @@ import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.ButtonVariant
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
+import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.RadarChartMP
+import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -49,8 +57,28 @@ fun HomePage(
     homeViewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
     navController: NavController
 ) {
+
     val state by homeViewModel.uiState.collectAsState()
     val pseudo = "Pearlt"
+    val objectifStep = 15000
+    val objectifCal = 3000
+    val objectifsommeil = 8.0
+
+    var pourcentage = 0f
+    if (state.todaySeance?.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
+        pourcentage += 0.25f
+    }
+    if (state.todaySeance?.nutritionTrack?.calories !=0 && state.todaySeance?.nutritionTrack?.calories !=null ) {
+        pourcentage += 0.25f
+    }
+    if (state.todaySeance?.physioTrack?.step !=0 &&state.todaySeance?.physioTrack?.step !=null) {
+        pourcentage += 0.25f
+    }
+    if (state.todaySeance?.physioTrack?.hourOfSleep !=0.0&&state.todaySeance?.physioTrack?.hourOfSleep !=null) {
+        pourcentage += 0.25f
+    }
+
+
     val muscleName: Map<Long, String> = homeViewModel.masterData?.muscles
         ?.associate { muscle -> muscle.id to muscle.nameFR }
         ?: emptyMap()
@@ -81,7 +109,7 @@ fun HomePage(
                 }
             }
             item {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 6.dp)) {
                     Text(
                         "Bonjour,",
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
@@ -90,6 +118,141 @@ fun HomePage(
                         "$pseudo !",
                         style = MaterialTheme.typography.titleMedium
                     )
+                }
+            }
+            item { Column(Modifier.fillMaxWidth().padding(start = 14.dp,end= 14.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
+                    Text(
+                        "Données du jour ",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600)
+                    )
+                    Text(
+                            "${(pourcentage*100).toInt()} %",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
+                    )
+                }
+                ProgressLine(pourcentage, height = 4.dp)
+
+
+            } }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val listState = rememberLazyListState()
+                    LazyRow(
+                        state = listState,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .size(92.dp).clip(MaterialTheme.shapes.medium)
+                                        .background(color = MaterialTheme.colorScheme.primary)
+                                        .clickable(onClick = { navController.navigate("seance") }),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            tint = MaterialTheme.colorScheme.background,
+                                            contentDescription = "ajouter une séance"
+                                        )
+                                        Text(
+                                            "Ajouter une séance",
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = MaterialTheme.colorScheme.background,
+                                                fontWeight = FontWeight.W600
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        item {
+                            val steps = state.todaySeance?.physioTrack?.step ?: 0
+                            ObjectifBox(
+                                value = steps.toString(),
+                                objectif = objectifStep.toString(),
+                                unit = "pas"
+                            ) {
+                                val progress =
+                                    (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
+                                ProgressLine(
+                                    progress,
+                                    height = 4.dp,
+                                    progressColor = Color(0xFF3B5398),
+                                    modifier = Modifier.padding(top = 12.dp)
+                                )
+                            }
+                        }
+                        item {
+                            val calories = state.todaySeance?.nutritionTrack?.calories ?: 0
+                            ObjectifBox(
+                                value = calories.toString(),
+                                objectif = objectifCal.toString(),
+                                unit = "Cal"
+                            ) {
+                                val progress =
+                                    (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f)
+                                ProgressLine(
+                                    progress,
+                                    height = 4.dp,
+                                    progressColor = Color(0xFFFF5915),
+                                    modifier = Modifier.padding(top = 12.dp)
+                                )
+                            }
+                        }
+                        item {
+                            val sleep = state.todaySeance?.physioTrack?.hourOfSleep ?: 0
+                            ObjectifBox(
+                                value = sleep.toString(),
+                                objectif = objectifsommeil.toString(),
+                                unit = "h"
+                            ) {
+                                val progress =
+                                    (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f)
+                                ProgressLine(
+                                    progress,
+                                    height = 4.dp,
+                                    progressColor = Color(0xFF6BECFF),
+                                    modifier = Modifier.padding(top = 12.dp)
+                                )
+                            }
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val itemCount = if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true) 4 else 3
+
+
+                        for (i in 0 until itemCount) {
+                            val alpha = when {
+                                i < listState.firstVisibleItemIndex -> 0.3f
+                                i == listState.firstVisibleItemIndex -> {
+                                    val scrollFraction = listState.firstVisibleItemScrollOffset / 200f
+                                    1f - scrollFraction.coerceIn(0f, 0.7f)
+                                }
+                                else -> 1f
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    }
+
                 }
             }
             item {
@@ -143,7 +306,7 @@ fun HomePage(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 12.dp, bottom = 2.dp)
+                                            .padding(top = 12.dp, bottom = 8.dp)
                                     ) {
                                         Text(
                                             "Muscles",

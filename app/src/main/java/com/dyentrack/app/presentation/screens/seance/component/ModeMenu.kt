@@ -21,7 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-import com.dyentrack.app.presentation.screens.seance.ExerciseMode
+import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 
 @Composable
 fun ModeMenu(

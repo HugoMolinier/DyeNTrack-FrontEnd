@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component.nutrtionComp
+package com.dyentrack.app.presentation.screens.seance.dataSection.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -25,16 +25,17 @@ fun NutrientRow(
     isEditable: Boolean = true,
     onValueChange: (String) -> Unit = {},
     onFocusLost: ((String) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    modifierInput:Modifier = Modifier
 ) {
-    Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(label,style=MaterialTheme.typography.bodySmall)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             InputCustom(
-                modifier = modifier.width(80.dp - (unit.length * 10).dp),
+                modifier = modifierInput.width(80.dp - (unit.length * 10).dp),
                 text = valueState,
                 enabled = isEditable,
                 placeholder = "0",

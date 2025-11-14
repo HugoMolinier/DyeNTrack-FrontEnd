@@ -6,6 +6,7 @@ import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,6 +102,8 @@ class DayDataRepositoryImpl @Inject constructor(
 
     override suspend fun updateToLocal(dayData: DayDataRequest) {
         seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(false))
+        val updatedLocal = seanceDao.getAllSeances().map { it.toDayDataRequest() }
+        _dayDataFlow.value = updatedLocal.map { it.copy() }
     }
 
 
@@ -109,7 +112,8 @@ class DayDataRepositoryImpl @Inject constructor(
         return SeanceOfDayLocal(
             day = dayData,
             saveAPI = isSaveApi,
-            nutritionTrack = nutritionTrack?: NutritionTrack(),
+            nutritionTrack = nutritionTrack,
+            physioTrack = physioTrack,
             plannedExercises = seanceTrack.plannedExercises
         )
 
@@ -124,8 +128,8 @@ class DayDataRepositoryImpl @Inject constructor(
                 presetSeanceId = null,
                 plannedExercises = plannedExercises
             ),
-            nutritionTrack,
-            null
+            nutritionTrack?: NutritionTrack(),
+            physioTrack?: PhysioTrack()
         )
     }
 }

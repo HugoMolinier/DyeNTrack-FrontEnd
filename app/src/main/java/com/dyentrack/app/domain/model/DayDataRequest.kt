@@ -7,8 +7,8 @@ data class DayDataRequest(
     val idDayData:Long?,
     val dayData: String,
     val seanceTrack: SeanceTrack,
-    val nutritionTrack: NutritionTrack?,
-    val physioTrack: PhysioTrack?
+    val nutritionTrack: NutritionTrack,
+    val physioTrack: PhysioTrack
 )
 
 @Serializable
@@ -19,13 +19,16 @@ data class NutritionTrack(
     val carbohydrates: Int?=0,
     val fiber: Int?=0,
     val cafeins: Int?=0
-)
+) {
+    val isNotNull: Boolean
+        get() = listOf(calories, proteins, lipids, carbohydrates, fiber, cafeins).any { it != null && it != 0 }
+}
 
 @Serializable
 data class PhysioTrack(
-    val weight: Double?=70.0,
+    val weight: Double?=0.0,
     val step: Int?=0,
-    val hourOfSleep: Double?=8.0,
+    val hourOfSleep: Double?=7.0,
     val mood: String?=""
 )
 
@@ -47,7 +50,7 @@ data class StartHour(
 
 @Serializable
 data class PlannedExerciseVO(
-    val id : Long?,
+    val id: Long?,
     val exerciseOrder: Int,
     val exerciseId: Long,
     val lateraliteId: Long,

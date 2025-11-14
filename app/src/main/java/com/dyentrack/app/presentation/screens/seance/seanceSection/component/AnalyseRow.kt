@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component.seanceComp
+package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,11 +28,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.SetType
-import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 
 
 @Composable

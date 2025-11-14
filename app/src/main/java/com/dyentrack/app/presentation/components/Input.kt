@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -90,12 +91,20 @@ fun InputCustom(
                     KeyboardType.Decimal -> newValue.text.filter { it.isDigit() || (it == '.' && newValue.text.count { c -> c == '.' } <= 1) }
                     else -> newValue.text
                 }
-                val newCursor = minOf(filteredText.length, newValue.selection.end)
-                text.value = TextFieldValue(
-                    text = filteredText,
-                    selection = androidx.compose.ui.text.TextRange(newCursor)
-                )
-                onValueChange?.invoke(filteredText)
+                if (filteredText != text.value.text) {
+                    // Calcul de la nouvelle position du curseur
+                    val newCursor = minOf(newValue.selection.end, filteredText.length)
+                    text.value = TextFieldValue(
+                        text = filteredText,
+                        selection = TextFieldValue(filteredText, TextRange(newCursor)).selection
+                    )
+                    onValueChange?.invoke(filteredText)
+                } else {
+                    // Si le texte ne change pas mais que l'utilisateur clique, on garde la sélection
+                    if (text.value.selection != newValue.selection) {
+                        text.value = text.value.copy(selection = newValue.selection)
+                    }
+                }
             },
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(

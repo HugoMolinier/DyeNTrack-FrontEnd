@@ -34,16 +34,19 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.screens.seance.component.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
-import com.dyentrack.app.presentation.screens.seance.component.seanceComp.ExerciseCard
+import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
-import com.dyentrack.app.presentation.screens.seance.component.NutritionSection
+import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
 import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
-import com.dyentrack.app.presentation.screens.seance.component.seanceComp.ShowInfoOfSeance
+import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
+import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.viewModel.SectionSelectType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import kotlin.math.roundToInt
 
@@ -82,7 +85,7 @@ fun SeancePage(
                         ModeMenu(
                             currentMode = state.exerciseMode,
                             onToggleMode = { mode ->
-                                viewModel.toggleMode(mode) // la fonction dans le ViewModel gère NORMAL / LOCK / CHANGE_ORDER
+                                viewModel.toggleMode(mode)
                             }
                         )
                     }
@@ -206,7 +209,7 @@ fun SeancePage(
 
                     SectionSelectType.DATA ->
                         item {
-                            NutritionSection(viewModel,    state.seancesParJour[state.daySelected]?.nutritionTrack ?: NutritionTrack())
+                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour())
                         }
 
                     else -> null

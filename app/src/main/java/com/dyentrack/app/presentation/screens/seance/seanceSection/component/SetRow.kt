@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component.seanceComp
+package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,9 +28,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.screens.seance.SaveType
+import com.dyentrack.app.presentation.screens.seance.viewModel.SaveType
 import com.dyentrack.app.presentation.theme.addColor
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -73,7 +73,7 @@ fun SetRow(
     }
     var confirmDelete by remember { mutableStateOf(false) }
     if (confirmDelete) {
-        LaunchedEffect(confirmDelete) {
+        LaunchedEffect(true) {
             delay(3000)
             confirmDelete = false
         }

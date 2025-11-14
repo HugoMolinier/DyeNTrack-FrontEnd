@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component.seanceComp
+package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -47,9 +47,9 @@ import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SubTextEmphasis
-import com.dyentrack.app.presentation.screens.seance.ExerciseMode
-import com.dyentrack.app.presentation.screens.seance.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages

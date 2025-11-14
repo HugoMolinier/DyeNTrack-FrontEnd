@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component.seanceComp
+package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 
 @Composable
 fun ShowInfoOfSeance(viewModel: SeanceViewModel) {

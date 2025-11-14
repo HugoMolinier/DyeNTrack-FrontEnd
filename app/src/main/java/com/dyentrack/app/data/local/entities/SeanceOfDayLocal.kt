@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.dyentrack.app.data.local.database.Converters
 import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.PlannedExerciseVO
 
 
@@ -17,7 +18,8 @@ data class SeanceOfDayLocal(
     val day: String,
     val plannedExercises: List<PlannedExerciseVO> = emptyList(),
     //val note: String? = null,
-    val nutritionTrack: NutritionTrack = NutritionTrack(),
+    val nutritionTrack: NutritionTrack?,
+    val physioTrack: PhysioTrack?,
     val saveAPI: Boolean = false
 )
 

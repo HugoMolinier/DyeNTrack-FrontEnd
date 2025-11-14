@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 
-@Database(entities = [SeanceOfDayLocal::class], version = 4)
+@Database(entities = [SeanceOfDayLocal::class], version = 7)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun seanceDao(): SeanceDao

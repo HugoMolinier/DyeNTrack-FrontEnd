@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -34,14 +36,23 @@ class HomeViewModel @Inject constructor(
                     _uiState.update { it.copy(mapSeance = emptyMap()) }
                     return@collect
                 }
-                val newMap = list.takeLast(15)
+                val formatter = DateTimeFormatter.ISO_DATE
+                val today = LocalDate.now()
+
+                var todaySeanceTemp: DayDataRequest? = null
+                val newMap = list
+                    .sortedBy { LocalDate.parse(it.dayData, formatter )} .takeLast(15)
                     .mapNotNull { dayData ->
+                        val day = LocalDate.parse(dayData.dayData, formatter)
+                        if (day == today) {
+                            todaySeanceTemp = dayData
+                        }
                         if (dayData.seanceTrack.plannedExercises.isNotEmpty()) {
                             dayData.dayData to dayData.seanceTrack
                         } else null
                     }
                     .toMap()
-                _uiState.update { current -> current.copy(mapSeance = newMap) }
+                _uiState.update { current -> current.copy(mapSeance = newMap, todaySeance = todaySeanceTemp) }
                 muscleRateOfEachDay(true)
             }
         }

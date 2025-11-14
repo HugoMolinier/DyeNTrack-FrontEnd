@@ -24,7 +24,7 @@ class AppViewModel @Inject constructor(
                 getInfoExerciseUser()
 
             } catch (e: Exception) {
-                println("❌ Erreur : ${e.message}")
+                println("❌ Erreur : $e")
             }
         }
     }
