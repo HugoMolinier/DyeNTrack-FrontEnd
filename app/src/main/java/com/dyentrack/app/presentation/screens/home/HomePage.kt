@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.dyentrack.app.R
 import androidx.navigation.NavController
 import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.ButtonVariant
@@ -51,6 +53,7 @@ import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
+@SuppressLint("FrequentlyChangingValue")
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
@@ -84,17 +87,16 @@ fun HomePage(
         ?: emptyMap()
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp)) {
+            .fillMaxWidth()) {
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp, horizontal = 4.dp),
+                        .padding(vertical = 24.dp, horizontal = 14.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconButton(
-                        { null }, modifier = Modifier
+                        { navController.navigate("parametre") }, modifier = Modifier
                             .size(42.dp)
                             .background(
                                 TertiaOne, CircleShape
@@ -109,7 +111,7 @@ fun HomePage(
                 }
             }
             item {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 6.dp)) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                     Text(
                         "Bonjour,",
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
@@ -120,7 +122,7 @@ fun HomePage(
                     )
                 }
             }
-            item { Column(Modifier.fillMaxWidth().padding(start = 14.dp,end= 14.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
+            item { Column(Modifier.fillMaxWidth().padding(start = 24.dp,end= 24.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
                     Text(
                         "Données du jour ",
@@ -140,7 +142,7 @@ fun HomePage(
                     val listState = rememberLazyListState()
                     LazyRow(
                         state = listState,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true) {
@@ -178,7 +180,9 @@ fun HomePage(
                             ObjectifBox(
                                 value = steps.toString(),
                                 objectif = objectifStep.toString(),
-                                unit = "pas"
+                                unit = "pas",
+                                drawableTop =  R.drawable.icon_step
+
                             ) {
                                 val progress =
                                     (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
@@ -195,7 +199,8 @@ fun HomePage(
                             ObjectifBox(
                                 value = calories.toString(),
                                 objectif = objectifCal.toString(),
-                                unit = "Cal"
+                                unit = "Cal",
+                                drawableTop =  R.drawable.icon_cal
                             ) {
                                 val progress =
                                     (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f)
@@ -212,7 +217,8 @@ fun HomePage(
                             ObjectifBox(
                                 value = sleep.toString(),
                                 objectif = objectifsommeil.toString(),
-                                unit = "h"
+                                unit = "h",
+                                drawableTop =  R.drawable.icon_sleep
                             ) {
                                 val progress =
                                     (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f)
@@ -257,7 +263,7 @@ fun HomePage(
             }
             item {
                 Column(
-                    modifier = Modifier.padding(top = 32.dp),
+                    modifier = Modifier.padding(top = 32.dp, start = 10.dp, end = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
@@ -392,7 +398,7 @@ fun HomePage(
                     "Voir les séances",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp),
+                        .padding(top = 12.dp, start = 10.dp, end = 10.dp),
                     variant = ButtonVariant.OUTLINED,
                     emphasis = ButtonEmphasis.SECONDARY,
                     onClick = { navController.navigate("seance") }
@@ -400,7 +406,7 @@ fun HomePage(
             }
             item {
 
-                Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 4.dp, end = 4.dp)) {
+                Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -422,7 +428,7 @@ fun HomePage(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(380.dp)
+                        .height(380.dp).padding(horizontal = 10.dp)
 
 
                         .wrapContentHeight()

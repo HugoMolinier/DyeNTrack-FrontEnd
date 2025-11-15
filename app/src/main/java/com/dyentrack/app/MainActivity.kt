@@ -37,6 +37,7 @@ import com.dyentrack.app.presentation.AppViewModel
 import com.dyentrack.app.presentation.screens.MainPage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
+import com.dyentrack.app.presentation.screens.parameters.ParameterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -128,6 +129,8 @@ fun MyApp() {
                 SeancePage(navController = navController, daySelected = dayKey)
             }
             composable("analyse") { MainPage(navController=navController) }
+            composable("parametre") { ParameterPage(navController=navController) }
+
             composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry
                     ?.savedStateHandle

@@ -209,7 +209,7 @@ fun SeancePage(
 
                     SectionSelectType.DATA ->
                         item {
-                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour())
+                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour(),state.exerciseMode == ExerciseMode.LOCK,state.daySelected)
                         }
 
                     else -> null

@@ -20,12 +20,15 @@ import kotlin.math.ceil
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
+
 ) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
     var masterData: MasterDataStatic? = null
+
+
 
     init {
         viewModelScope.launch {

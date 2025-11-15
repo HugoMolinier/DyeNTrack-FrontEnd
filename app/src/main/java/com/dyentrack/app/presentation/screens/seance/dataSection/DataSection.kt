@@ -11,14 +11,14 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 
 @Composable
-fun DataSection(    viewModel: SeanceViewModel = viewModel(),seanceDuJour: SeanceDuJour,lockInput:Boolean =false){
+fun DataSection(    viewModel: SeanceViewModel = viewModel(),seanceDuJour: SeanceDuJour,lockInput:Boolean =false,day:String){
 
 
 
     Column(modifier = Modifier.padding(10.dp, 4.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-      NutritionBox(viewModel,seanceDuJour.nutritionTrack,lockInput)
+      NutritionBox(viewModel,seanceDuJour.nutritionTrack,lockInput,day)
 
-        PhysioBox(viewModel,seanceDuJour.physioTrack,lockInput)
+        PhysioBox(viewModel,seanceDuJour.physioTrack,lockInput,day)
 
 
     }

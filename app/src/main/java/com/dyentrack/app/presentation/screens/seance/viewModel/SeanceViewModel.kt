@@ -49,7 +49,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.collections.get
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
@@ -59,7 +58,7 @@ class SeanceViewModel @Inject constructor(
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
-    private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase
+    private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
@@ -117,7 +116,6 @@ class SeanceViewModel @Inject constructor(
             updateInfoExerciseUserUseCase(info)
         }
     }
-
 
     fun swapExercise(day: String, fromIndex: Int, toIndex: Int) {
         val seance = _uiState.value.seancesParJour[day] ?: return

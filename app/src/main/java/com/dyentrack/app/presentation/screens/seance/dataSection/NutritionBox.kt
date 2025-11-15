@@ -37,38 +37,38 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.NutritionField
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
-fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: NutritionTrack,lockInput:Boolean =false){
-    val carbs = remember {
+fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: NutritionTrack,lockInput:Boolean =false,day:String){
+    val carbs = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.carbohydrates ?: 0) == 0) "" else nutritionTrack.carbohydrates.toString())
         )
     }
 
-    val prots = remember {
+    val prots = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.proteins ?: 0) == 0) "" else nutritionTrack.proteins.toString())
         )
     }
 
-    val fats = remember {
+    val fats = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.lipids ?: 0) == 0) "" else nutritionTrack.lipids.toString())
         )
     }
 
-    val fiber = remember{
+    val fiber = remember(day){
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.fiber ?: 0) == 0) "" else nutritionTrack.fiber.toString())
         )
     }
 
-    val cafeine = remember{
+    val cafeine = remember(day){
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.cafeins ?: 0) == 0) "" else nutritionTrack.cafeins.toString())
         )
     }
 
-    val calories = remember{
+    val calories = remember(day){
         mutableStateOf(
             TextFieldValue(text = if ((nutritionTrack.calories ?: 0) == 0) "" else nutritionTrack.calories.toString())
         )

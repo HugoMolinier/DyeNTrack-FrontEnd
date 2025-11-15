@@ -28,7 +28,7 @@ data class NutritionTrack(
 data class PhysioTrack(
     val weight: Double?=0.0,
     val step: Int?=0,
-    val hourOfSleep: Double?=7.0,
+    val hourOfSleep: Double?=.0,
     val mood: String?=""
 )
 

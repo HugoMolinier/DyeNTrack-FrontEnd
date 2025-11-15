@@ -1,6 +1,9 @@
 package com.dyentrack.app.presentation.screens.seance.dataSection
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,19 +35,20 @@ import com.dyentrack.app.presentation.screens.seance.dataSection.component.Nutri
 import com.dyentrack.app.presentation.screens.seance.viewModel.PhysioField
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack,lockInput:Boolean =false){
-    val steps = remember {
+fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack,lockInput:Boolean =false,day:String){
+    val steps = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((physioTrack.step ?: 0) == 0) "" else physioTrack.step.toString())
         )
     }
-    val sleep = remember {
+    val sleep = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((physioTrack.hourOfSleep ?: 0) == 0) "" else physioTrack.hourOfSleep.toString())
         )
     }
-    val weight = remember {
+    val weight = remember(day) {
         mutableStateOf(
             TextFieldValue(text = if ((physioTrack.weight ?: 0) == 0) "" else physioTrack.weight.toString())
         )
@@ -69,7 +73,7 @@ fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically,modifier=Modifier.padding(bottom = 20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically,modifier=Modifier.padding(bottom = 20.dp)){
                         Icon(
                             Icons.Default.Sync,
                             "sync with MyFitnessPal",
@@ -147,7 +151,7 @@ fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack
                 ) {
                     NutrientRow("Sommeil", sleep, modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp), modifierInput = Modifier.width(120.dp), unit = "h", isEditable = !lockInput,
                         onValueChange = { newValue ->
-                            newValue.toIntOrNull()?.let { value ->
+                            newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.HOUR_OF_SLEEP, value)
                             }
                         })
@@ -171,7 +175,7 @@ fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack
                 ) {
                     NutrientRow("Poids (Optionnel)", weight, modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp), modifierInput = Modifier.width(120.dp), unit = "kg", isEditable = !lockInput,
                         onValueChange = { newValue ->
-                            newValue.toIntOrNull()?.let { value ->
+                            newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.WEIGHT, value)
                             }
                         })
