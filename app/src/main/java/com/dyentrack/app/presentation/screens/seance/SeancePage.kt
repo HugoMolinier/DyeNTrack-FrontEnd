@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,7 +42,8 @@ import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
-import com.dyentrack.app.presentation.screens.seance.component.SectionSelector
+import com.dyentrack.app.presentation.components.SectionSelector
+import com.dyentrack.app.presentation.components.VariantSelection
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
@@ -95,21 +97,24 @@ fun SeancePage(
             LazyColumn {
                 item { DateSelectorRange(uiState = state, viewModel = viewModel) }
                 item {
-                    SectionSelector(
-                        itemSection = listOf(
-                            MenuItemData(
-                                "Scéances",
-                                { viewModel.changeSection(SectionSelectType.SEANCE) }
+                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 20.dp)) {
+                        SectionSelector(
+                            variant = VariantSelection.OUTLINE,
+                            itemSection = listOf(
+                                MenuItemData(
+                                    "Scéances",
+                                    { viewModel.changeSection(SectionSelectType.SEANCE) }
+                                ),
+                                MenuItemData(
+                                    "Data",
+                                    { viewModel.changeSection(SectionSelectType.DATA) }
+                                )
                             ),
-                            MenuItemData(
-                                "Data",
-                                { viewModel.changeSection(SectionSelectType.DATA) }
-                            )
-                        ),
-                        selectedIndex = if (state.sectionSelect == SectionSelectType.SEANCE) 0 else 1
+                            selectedIndex = if (state.sectionSelect == SectionSelectType.SEANCE) 0 else 1
 
 
-                    )
+                        )
+                    }
                 }
 
                 when (state.sectionSelect) {

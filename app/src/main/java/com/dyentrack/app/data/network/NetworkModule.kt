@@ -18,7 +18,7 @@ object NetworkModule {
 
     private const val BASE_URL: String = "http://4.233.56.101:8080/api/"
     private const val TestToken : String ="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6IjEiLCJpYXQiOjE3NjE1OTEyMzcsImV4cCI6MTc2MjE5NjAzN30.Ipr7gQcA_iAh-y0is8jW8Fyov9lKRNtYS_PJAvqo1qE"
-    private const val AccountPersPerfToken: String = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjIsInN1YiI6IjIiLCJpYXQiOjE3NjI5NTcxMTMsImV4cCI6MTc2MzU2MTkxM30.eH-O1cREXY26p_wphcy4k3kuW3hUKj055O85toU2dlY"
+    private const val AccountPersPerfToken: String = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjIsInN1YiI6IjIiLCJpYXQiOjE3NjM2Njg4NzUsImV4cCI6MTc2NDI3MzY3NX0.NM8OKZiqcmKMFRQj2S2TP6cLJdW-LtD57JBM79T-Qes"
     private const val Apikey : String ="gK7WOGlkQQxEiDQeYxweqbKluRfulBxkXHzqUP8k3U0="
 
     @Provides

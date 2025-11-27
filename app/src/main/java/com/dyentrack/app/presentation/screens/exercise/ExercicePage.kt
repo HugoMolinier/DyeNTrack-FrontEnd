@@ -32,14 +32,18 @@ import com.dyentrack.app.presentation.components.FavoriteIconButton
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
+import com.dyentrack.app.presentation.components.MenuItemData
+import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
-import com.dyentrack.app.presentation.screens.exercise.component.SectionSelector
+import com.dyentrack.app.presentation.components.VariantSelection
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
-fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
-                  exerciseViewModel : ExerciseViewModel= hiltViewModel<ExerciseViewModel>(),) {
+fun ExercisePage(
+    modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
+    exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
+) {
 
 
     val idUser = 1.toLong()
@@ -50,24 +54,34 @@ fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, e
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
-    Box(modifier = Modifier.fillMaxSize()
-        .pointerInput(Unit) {
-            detectTapGestures(onTap = {
-                focusManager.clearFocus()
-                keyboardController?.hide()
-            })
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                })
 
-    }) {
+            }) {
         Column {
             TopNavigationBar(
                 "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() })
 
-            LazyColumn(modifier= modifier.fillMaxWidth().padding(horizontal = 20.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
                 item {
                     Column {
                         Row(
-                            modifier = modifier.fillMaxWidth()
+                            modifier = modifier
+                                .fillMaxWidth()
                                 .padding(top = 32.dp, end = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -75,34 +89,56 @@ fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, e
 
 
                             FavoriteIconButton(
-                                isFavorite = infoMapState[exercise.idExercise]?.favorite?:false,
+                                isFavorite = infoMapState[exercise.idExercise]?.favorite ?: false,
                                 onClick = {
-                                    val currentFavorite = infoMapState[exercise.idExercise]?.favorite ?: false
-                                    exerciseViewModel.updateInfoExerciseUser(exercise.idExercise,!currentFavorite,null)
+                                    val currentFavorite =
+                                        infoMapState[exercise.idExercise]?.favorite ?: false
+                                    exerciseViewModel.updateInfoExerciseUser(
+                                        exercise.idExercise,
+                                        !currentFavorite,
+                                        null
+                                    )
                                 }
                             )
                         }
                         Text(
-                         text = "Crée par " + when (exercise.idCreator) {
-                             null -> "DyeNTrack"
-                             idUser -> "Vous"
-                             else -> "un utilisateur"
-                         },
-                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-
+                            text = "Crée par " + when (exercise.idCreator) {
+                                null -> "DyeNTrack"
+                                idUser -> "Vous"
+                                else -> "un utilisateur"
+                            },
+                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                        )
 
 
                     }
                 }
 
 
-                item {SectionSelector()}
+                item {
+                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 20.dp)) {
+                    SectionSelector(
+                        variant = VariantSelection.FULL,
+                        itemSection = listOf(
+                            MenuItemData(
+                                "Explication",
+                                { null }
+                            ),
+                            MenuItemData(
+                                "Statistique",
+                                { null }
+                            )
+                        )
 
-                if (exercise.description?.isNotBlank() == true){
-                    item {Text(exercise.description, style = MaterialTheme.typography.bodyMedium)}
+
+                    )
+                    }
+                }
+                if (exercise.description?.isNotBlank() == true) {
+                    item { Text(exercise.description, style = MaterialTheme.typography.bodyMedium) }
                 }
 
-                if (exercise.linkVideo?.isNotBlank() == true){
+                if (exercise.linkVideo?.isNotBlank() == true) {
                     item { YouTubePlayerViewComposable(exercise.linkVideo) }
 
                 }
@@ -112,51 +148,72 @@ fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, e
                         ?.filter { it.id in exercise.muscleInfos.map { it -> it.idMuscle } }
                         ?.map { it.nameFR } ?: emptySet()
 
-                    item {Column(modifier = modifier.fillMaxWidth()) {
-                        Text("Détails",modifier= Modifier.padding(vertical = 12.dp), style = MaterialTheme.typography.bodyLarge)
-                        InfoRow(
-                            label = "Aussi Appellé",
-                            value = "future nom anglais",
-                        )
-                        InfoRow(
-                            label = "Muscle utilisé",
-                            value = muscleUse.joinToString(", "),
-                            border = true
-                        )
-                        InfoRow(
-                            label = "Muscle Principal",
-                            value =  exercise.muscleInfos
-                                .firstOrNull { it.principal }
-                                ?.idMuscle
-                                ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
-                                ?: "Aucun",
-                        )
-                        InfoRow(
-                            label = "Equipement possible",
-                            value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
-                                ?: "Aucun",
-                        border = true
+                    item {
+                        Column(modifier = modifier.fillMaxWidth()) {
+                            Text(
+                                "Détails",
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            InfoRow(
+                                label = "Aussi Appellé",
+                                value = "future nom anglais",
+                            )
+                            InfoRow(
+                                label = "Muscle utilisé",
+                                value = muscleUse.joinToString(", "),
+                                border = true
+                            )
+                            InfoRow(
+                                label = "Muscle Principal",
+                                value = exercise.muscleInfos
+                                    .firstOrNull { it.principal }
+                                    ?.idMuscle
+                                    ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
+                                    ?: "Aucun",
+                            )
+                            InfoRow(
+                                label = "Equipement possible",
+                                value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
+                                    ?: "Aucun",
+                                border = true
                             )
 
-                        InfoRow(
-                            label = "Exécution possible",
-                            value = exerciseViewModel.masterData?.lateralites?.joinToString(", ") { it.nameFR }
-                                ?: "Aucune",
-                        )
+                            InfoRow(
+                                label = "Exécution possible",
+                                value = exerciseViewModel.masterData?.lateralites?.joinToString(", ") { it.nameFR }
+                                    ?: "Aucune",
+                            )
+
+
+                        }
 
 
                     }
+                    item {
+                        val noteState = remember {
+                            mutableStateOf(
+                                TextFieldValue(
+                                    infoMapState[exercise.idExercise]?.note ?: ""
+                                )
+                            )
+                        }
 
 
-                    }
-                    item{
-                        val noteState = remember { mutableStateOf(TextFieldValue(infoMapState[exercise.idExercise]?.note ?: "")) }
-
-
-                        InputCustom(modifier = Modifier.padding(top=12.dp).height(70.dp), noteState, placeholder = "Ajouter une note", variant = InputVariant.OUTLINED,
+                        InputCustom(
+                            modifier = Modifier
+                                .padding(top = 12.dp)
+                                .height(70.dp),
+                            noteState,
+                            placeholder = "Ajouter une note",
+                            variant = InputVariant.OUTLINED,
                             singleLine = false,
                             onFocusLost = { finalText ->
-                                exerciseViewModel.updateInfoExerciseUser(exercise.idExercise, null,finalText)
+                                exerciseViewModel.updateInfoExerciseUser(
+                                    exercise.idExercise,
+                                    null,
+                                    finalText
+                                )
                             }
                         )
 
@@ -164,7 +221,6 @@ fun ExercisePage (modifier: Modifier = Modifier, navController: NavController, e
                     }
 
                 }
-
 
 
             }

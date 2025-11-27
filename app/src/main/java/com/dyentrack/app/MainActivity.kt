@@ -34,7 +34,7 @@ import androidx.navigation.navArgument
 import com.dyentrack.app.domain.model.NavItem
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.presentation.AppViewModel
-import com.dyentrack.app.presentation.screens.MainPage
+import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
@@ -128,7 +128,7 @@ fun MyApp() {
                 val dayKey = backStackEntry.arguments?.getString("dayKey") // null si non fourni
                 SeancePage(navController = navController, daySelected = dayKey)
             }
-            composable("analyse") { MainPage(navController=navController) }
+            composable("analyse") { AnalysePage(navController=navController) }
             composable("parametre") { ParameterPage(navController=navController) }
 
             composable("exercise") { backStackEntry ->

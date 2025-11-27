@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +41,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dyentrack.app.R
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.ButtonVariant
 import com.dyentrack.app.presentation.components.CardWithContent
@@ -81,7 +85,6 @@ fun HomePage(
         pourcentage += 0.25f
     }
 
-
     val muscleName: Map<Long, String> = homeViewModel.masterData?.muscles
         ?.associate { muscle -> muscle.id to muscle.nameFR }
         ?: emptyMap()
@@ -92,65 +95,64 @@ fun HomePage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp, horizontal = 14.dp),
-                    horizontalArrangement = Arrangement.End
+                        .padding(top = 60.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(
-                        { navController.navigate("parametre") }, modifier = Modifier
-                            .size(42.dp)
-                            .background(
-                                TertiaOne, CircleShape
-                            )
-                    ) {
-                        Icon(
-                            Icons.Default.Settings,
-                            "Go settings",
-                            modifier = Modifier.size(18.dp)
+                    Column {
+                        Text(
+                            "Bonjour,",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            "$pseudo !",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier= Modifier.padding(top = 4.dp)
                         )
                     }
-                }
-            }
-            item {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(
-                        "Bonjour,",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
-                    )
-                    Text(
-                        "$pseudo !",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    IconButton(
+                        { navController.navigate("parametre") }, modifier = Modifier
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Go settings",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
             item { Column(Modifier.fillMaxWidth().padding(start = 24.dp,end= 24.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
                     Text(
                         "Données du jour ",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600)
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600 )
                     )
                     Text(
                             "${(pourcentage*100).toInt()} %",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600),
                     )
                 }
-                ProgressLine(pourcentage, height = 4.dp)
+                ProgressLine(pourcentage, height = 8.dp)
 
 
             } }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     val listState = rememberLazyListState()
+
                     LazyRow(
                         state = listState,
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true) {
+                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true||state.todaySeance?.seanceTrack?.plannedExercises == null) {
                             item {
                                 Box(
                                     modifier = Modifier
-                                        .size(92.dp).clip(MaterialTheme.shapes.medium)
-                                        .background(color = MaterialTheme.colorScheme.primary)
+                                        .size(88.dp).clip(MaterialTheme.shapes.medium)
+                                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
                                         .clickable(onClick = { navController.navigate("seance") }),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -235,7 +237,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        val itemCount = if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true) 4 else 3
+                        val itemCount = if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true|| state.todaySeance?.seanceTrack?.plannedExercises ==null) 4 else 3
 
 
                         for (i in 0 until itemCount) {
@@ -421,7 +423,7 @@ fun HomePage(
                             ) }
                     }
                     Text(
-                        "Cycle de " + state.mapSeance.count() + " jours",
+                        ""+ state.mapSeance.count() + " / 14 jours",
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
                 }
@@ -440,7 +442,8 @@ fun HomePage(
                     Column (modifier= Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 8.dp)){
                         Text("Répartition", style = MaterialTheme.typography.bodyLarge)
                     }
-                    RadarChartSample(state, homeViewModel)
+
+                    RadarChartSample(state.graphData, homeViewModel.masterData)
                 }
 
             }
@@ -449,16 +452,16 @@ fun HomePage(
 }
 
 @Composable
-fun RadarChartSample(state: HomeUiState, homeViewModel: HomeViewModel) {
+fun RadarChartSample(graphData:Map<Long, MuscleRate>, masterData: MasterDataStatic?) {
 
-    val radarData = remember(state.graphData, homeViewModel.masterData) {
+    val radarData = remember(graphData) {
         val radarLabels = mutableListOf<String>()
         val values2 = mutableListOf<Float>()
         val values3 = mutableListOf<Float>()
 
-        state.graphData.forEach { (muscleGroupId, stats) ->
+        graphData.forEach { (muscleGroupId, stats) ->
             val groupName =
-                homeViewModel.masterData?.musclesGroup?.find { it.id == muscleGroupId }?.nameFR
+                masterData?.musclesGroup?.find { it.id == muscleGroupId }?.nameFR
                     ?: "N/A"
             radarLabels.add(groupName)
             values2.add(stats.numberExercise.toFloat())

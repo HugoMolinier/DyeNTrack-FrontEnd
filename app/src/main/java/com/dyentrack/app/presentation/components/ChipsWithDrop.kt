@@ -9,6 +9,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextStyle
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.TertiaThree
 
@@ -25,16 +27,17 @@ fun ChipDropDown(
     listOfSelectableItem: List<String>,
     canChange: Boolean = true,
     emphasys : ChipsEmphasys ?= ChipsEmphasys.PRIMARY,
-    defaultSelected: String,
-    onSelected: (String) -> Unit = {},
+    defaultSelected: String?=null,
+    textStyle : TextStyle = MaterialTheme.typography.bodySmall,
+    onSelected: (String) -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
-
+    var selectedItem by remember { mutableStateOf(defaultSelected ?: listOfSelectableItem.first()) }
     Box {
         FilterChip(
-            selected = defaultSelected.isNotEmpty(),
+            selected = selectedItem.isNotEmpty(),
             onClick = { if (canChange) expanded = true },
-            label = { Text(defaultSelected) },
+            label = { Text(selectedItem, style = textStyle) },
             trailingIcon = {
                 if (canChange) Icon(
                     if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,

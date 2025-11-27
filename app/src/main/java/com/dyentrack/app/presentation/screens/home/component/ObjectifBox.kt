@@ -54,7 +54,7 @@ fun ObjectifBox(
                 Image(
                     painter = painterResource(id = resId),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp)
                         .align(Alignment.TopStart)
                         .offset(x = (-4).dp, y = (-4).dp)
                 )

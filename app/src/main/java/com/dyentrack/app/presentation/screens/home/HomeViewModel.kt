@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,19 +43,18 @@ class HomeViewModel @Inject constructor(
                 val formatter = DateTimeFormatter.ISO_DATE
                 val today = LocalDate.now()
 
+                val last15Days = (0L..14L).map { today.minusDays(it) }.reversed()
                 var todaySeanceTemp: DayDataRequest? = null
                 val newMap = list
-                    .sortedBy { LocalDate.parse(it.dayData, formatter )} .takeLast(15)
                     .mapNotNull { dayData ->
                         val day = LocalDate.parse(dayData.dayData, formatter)
-                        if (day == today) {
-                            todaySeanceTemp = dayData
-                        }
-                        if (dayData.seanceTrack.plannedExercises.isNotEmpty()) {
+                        if (day == today) todaySeanceTemp = dayData
+                        if (day in last15Days && dayData.seanceTrack.plannedExercises.isNotEmpty()) {
                             dayData.dayData to dayData.seanceTrack
                         } else null
                     }
                     .toMap()
+
                 _uiState.update { current -> current.copy(mapSeance = newMap, todaySeance = todaySeanceTemp) }
                 muscleRateOfEachDay(true)
             }
