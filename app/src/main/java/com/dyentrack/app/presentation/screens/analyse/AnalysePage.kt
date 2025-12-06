@@ -4,9 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,15 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
-import com.dyentrack.app.presentation.screens.home.HomeViewModel
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import kotlin.collections.forEach
+import com.dyentrack.app.presentation.utils.toCleanString
 import kotlin.math.roundToInt
 
 
@@ -65,7 +62,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 )
             ) ) }
             item {
-                Column(modifier= Modifier.padding(top=24.dp, start = 12.dp, end = 12.dp, bottom = 12.dp),) {
+                Column(modifier= Modifier.padding(top=24.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)) {
                     Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(top=8.dp,bottom = 8.dp))
                     Text("Filtre par groupe musculaire", style =MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
                     FilterMuscleGroupRow(analyseViewModel.masterData)
@@ -90,8 +87,8 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                             innerMap.values.forEach { mr ->
                                 sommeSet += mr.numberSet
                                 sommeEx += mr.numberExercise
-                                sommeSetFail += mr.numberSetFail ?: 0
-                                sommePond+=mr.sommePond?:0.0
+                                sommeSetFail += mr.rateSetSomme?.numberSetFail ?: 0
+                                sommePond+=mr.rateSetSomme?.sommePond?:0.0
                             }
                         }
                         Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
@@ -122,7 +119,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                     Icon(Icons.Default.Info,"voir info", tint = secondaryTextColor,modifier=Modifier.size(20.dp))
                                 }
 
-                                    Text(  sommePond.toString()+"kg", style = MaterialTheme.typography.bodyLarge)
+                                    Text(  sommePond.toCleanString()+"kg", style = MaterialTheme.typography.bodyLarge)
 
                             }
 
@@ -146,9 +143,35 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                         )
                 ) {
                     Column (modifier= Modifier.padding( top = 20.dp, bottom = 8.dp)){
-                        Text("Répartition", style = MaterialTheme.typography.bodyLarge)
+                        Text("Répartition", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 12.dp))
                     }
                     RadarChartSample(state.graphData, analyseViewModel.masterData)
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp).padding(horizontal = 10.dp, vertical = 20.dp)
+
+
+                        .wrapContentHeight()
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                ) {
+                    CombinedChartMP(
+                        labels = state.dayRatio.keys.toList(),
+                        barValues = state.dayRatio.values.map { it.rateSetSomme?.sommePond?.toFloat() ?: 0f },
+                        lineValues = state.dayRatio.values.map {
+                            val totalSet = it.numberSet
+                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
+                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
                 }
             }
         }

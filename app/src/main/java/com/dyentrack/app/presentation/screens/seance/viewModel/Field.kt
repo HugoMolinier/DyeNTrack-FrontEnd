@@ -1,5 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance.viewModel
 
+import com.dyentrack.app.domain.model.exercise.Exercise
+
 enum class SaveType {
     NOTSAVE,
     LocalSAVE,
@@ -26,3 +28,10 @@ enum class NutritionField {
     FIBER,
     CAFEINS
 }
+
+data class ExerciseSummary(
+    val exercises: List<Exercise>,
+    val mainFocus: Set<String>,
+    val totalSets: Int,
+    val sommePond: Int
+)

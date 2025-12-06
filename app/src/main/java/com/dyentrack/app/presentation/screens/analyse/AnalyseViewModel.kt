@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,7 +71,14 @@ class AnalyseViewModel @Inject constructor(
         val lastScence = _uiState.value.mapSeance
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
         val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
+        val dayRatioMap: MutableMap<String, MuscleRate> = mutableMapOf()
         lastScence.forEach { (dayKey, seanceTrack) ->
+            // CHAQUE jOUR
+            var daySommePond = 0.0
+            var dayFailSetCount = 0
+            var dayTotalSet = 0
+            var dayTotalExercise = 0
+
 
             val dayMap = muscleRate.getOrPut(dayKey) { mutableMapOf() }
 
@@ -110,10 +118,25 @@ class AnalyseViewModel @Inject constructor(
                     val updatedValue = prevVal?.copy(
                         numberExercise = prevVal.numberExercise + 1,
                         numberSet = prevVal.numberSet + numberSet,
-                        numberSetFail= prevVal.numberSetFail?.plus(numberSetFail),
-                        sommePond= prevVal.sommePond?.plus(sommePond)
-                    ) ?: MuscleRate(numberExercise = 1, numberSet= numberSet, numberSetFail= numberSetFail, sommePond =sommePond  )
+                        rateSetSomme = prevVal.rateSetSomme?.copy(
+                            numberSetFail = prevVal.rateSetSomme.numberSetFail?.plus(numberSetFail),
+                            sommePond = prevVal.rateSetSomme.sommePond?.plus(sommePond)
+                        )
+                    ) ?: MuscleRate(
+                        numberExercise = 1,
+                        numberSet = numberSet,
+                        rateSetSomme = RateSetSomme(
+                            numberSetFail = numberSetFail,
+                            sommePond = sommePond
+                        )
+                    )
                     dayMap[muscle.id] = updatedValue
+
+                    dayTotalExercise += 1
+                    dayTotalSet += numberSet
+                    dayFailSetCount += numberSetFail
+                    daySommePond += sommePond
+
 
                     //pour groupe musculmaire sur 15j:
                     val prevValgroup = futurGraphData[muscle.idMuscularGroup]
@@ -127,10 +150,26 @@ class AnalyseViewModel @Inject constructor(
 
 
                 }
+                dayRatioMap[dayKey] = MuscleRate(
+                    numberExercise = dayTotalExercise,
+                    numberSet = dayTotalSet,
+                    rateSetSomme = RateSetSomme(
+                        numberSetFail = dayFailSetCount,
+                        sommePond = daySommePond
+                    )
+                )
             }
+
         }
 
-        _uiState.update { it.copy(muscleRateOfEachDay = muscleRate, graphData = futurGraphData) }
-    }
+
+        _uiState.update {
+            it.copy(
+                muscleRateOfEachDay = muscleRate,
+                graphData = futurGraphData,
+                dayRatio = dayRatioMap
+            )
+        }    }
+
 
 }

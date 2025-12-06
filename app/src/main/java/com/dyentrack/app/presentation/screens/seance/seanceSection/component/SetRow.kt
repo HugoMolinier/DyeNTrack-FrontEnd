@@ -131,6 +131,7 @@ fun SetRow(
                 placeholder = if (setRightForUni != null) "L" else "Reps",
                 modifier = Modifier.weight(1f),
                 keyboardType = KeyboardType.Number,
+                maxCaracter = 2,
                 onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
             )
             LaunchedEffect(repsState.value.text) {
@@ -142,6 +143,7 @@ fun SetRow(
                     placeholder = "R",
                     enabled = !lockInput,
                     modifier = Modifier.weight(1f),
+                    maxCaracter = 2,
                     keyboardType = KeyboardType.Number,
                     onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
                 )
@@ -156,6 +158,7 @@ fun SetRow(
             placeholder = "Charge",
             enabled = !lockInput,
             modifier = Modifier.weight(1f),
+            maxCaracter = 6,
             keyboardType = KeyboardType.Decimal,
             onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
 
@@ -174,6 +177,7 @@ fun SetRow(
             enabled = !lockInput,
             modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,
+            maxCaracter = 2,
             onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
         )
         LaunchedEffect(rirState.value.text) {

@@ -32,7 +32,10 @@ fun ChipDropDown(
     onSelected: (String) -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf(defaultSelected ?: listOfSelectableItem.first()) }
+    var selectedItem by remember(defaultSelected) {
+        mutableStateOf(defaultSelected ?: listOfSelectableItem.first())
+    }
+
     Box {
         FilterChip(
             selected = selectedItem.isNotEmpty(),

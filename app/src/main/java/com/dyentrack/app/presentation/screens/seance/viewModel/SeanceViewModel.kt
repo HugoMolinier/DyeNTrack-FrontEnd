@@ -6,7 +6,9 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,7 +32,7 @@ import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.SetVO
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
-import com.dyentrack.app.domain.usecase.GetLast30DaysUseCase
+import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
@@ -52,7 +54,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
-    getLast30DaysUseCase: GetLast30DaysUseCase,
+    getDaysRangeUseCase: GetDaysRangeUseCase,
     @ApplicationContext private val context: Context,
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
@@ -63,22 +65,29 @@ class SeanceViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SeanceUiState())
     val uiState: StateFlow<SeanceUiState> = _uiState
-    val days: SnapshotStateList<DayInfo> = mutableStateListOf()
+    val days: SnapshotStateSet<DayInfo> = mutableStateSetOf()
     var masterData: MasterDataStatic? = null
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     init {
-        days.addAll(getLast30DaysUseCase())
+        days.addAll(getDaysRangeUseCase.getLast30Days())
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
             dayDataFlow.collect { dayDataList ->
                 if (dayDataList == null) {
                     return@collect
                 }
+                val minDayDataDate = dayDataList.minOfOrNull { LocalDate.parse(it.dayData) }
+                if (minDayDataDate != null) {
+                    val additionalDays = getDaysRangeUseCase.extendDaysIfNeeded(days, minDayDataDate)
+                    if (additionalDays.isNotEmpty()) {
+                        days.addAll( additionalDays)
+                    }
+                    Log.d("days:",days.toString())
+                }
                 val newMap = mutableStateMapOf<String, SeanceDuJour>()
                 dayDataList.forEach { dayData ->
-                    Log.d("icicic","$dayData")
                     newMap[dayData.dayData] = dayData.toSeanceDuJour()
                 }
                 _uiState.update { current ->

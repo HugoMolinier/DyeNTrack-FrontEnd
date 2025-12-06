@@ -47,7 +47,8 @@ fun InputCustom(
     leadingIcon:   ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     variant : InputVariant ?= InputVariant.FILLED,
-    singleLine:Boolean = true
+    singleLine:Boolean = true,
+    maxCaracter: Int? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -86,11 +87,29 @@ fun InputCustom(
             },
 
             onValueChange = { newValue ->
-                val filteredText = when (keyboardType) {
+                var filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
-                    KeyboardType.Decimal -> newValue.text.filter { it.isDigit() || (it == '.' && newValue.text.count { c -> c == '.' } <= 1) }
+                    KeyboardType.Decimal -> newValue.text
+                        .filter { it.isDigit() || it == '.' } // on garde les chiffres et le point
+                        .let { text ->
+                            val parts = text.split('.')
+                            if (parts.size > 1) {
+                                parts[0] + "." + parts[1].take(1) // garde max 1 chiffre après le point
+                            } else {
+                                text
+                            }
+                        }
                     else -> newValue.text
                 }
+
+                if (maxCaracter != null && filteredText.length > maxCaracter) {
+                    filteredText = if (keyboardType == KeyboardType.Decimal && !filteredText.contains('.')) {
+                        filteredText.takeLast(maxCaracter - 1) // -1 pour le futur point + chiffre
+                    } else {
+                        filteredText.takeLast(maxCaracter)
+                    }
+                }
+
                 if (filteredText != text.value.text) {
                     // Calcul de la nouvelle position du curseur
                     val newCursor = minOf(newValue.selection.end, filteredText.length)

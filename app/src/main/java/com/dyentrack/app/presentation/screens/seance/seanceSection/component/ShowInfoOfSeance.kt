@@ -13,10 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
+import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseSummary
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.utils.toCleanString
 
 @Composable
 fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
@@ -34,12 +37,13 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
     }
 
 
-    val (exercises, mainFocusOfSeance, totalSets) = remember(state) {
+    val exerciseSummary = remember(state) {
         val exercisesList = viewModel.masterData?.officialExercise
             ?.filter { exercise ->
                 state.seancesParJour[state.daySelected]?.exercisesInSceance
                     ?.any { it.exerciseId == exercise.idExercise } ?: false
             } ?: listOf()
+
 
         val mainFocusSet: Set<String> = run {
             val mainFocusIds = exercisesList.mapNotNull { it.mainFocusGroup }.toSet()
@@ -49,10 +53,18 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
                 ?.toSet()
                 ?: emptySet()
         }
-        val total = state.seancesParJour[state.daySelected]?.setsMap?.values
-            ?.sumOf { it.size } ?: 0
+        val setsMap = state.seancesParJour[state.daySelected]?.setsMap ?: emptyMap()
+        val (totalSets, sommePond) = setsMap.values.flatten().fold(0 to 0.0) { (count, sum), setData ->
+            val newSum = if (setData.linkedRightSet == null) {
+                sum + (setData.reps ?: 0) * (setData.charge ?: 0.0)
+            } else {
+                // moyenne des reps multipliée par la charge
+                sum + (((setData.reps ?: 0) + (setData.linkedRightSet?.reps ?: 0)) * (setData.charge ?: 0.0) / 2)
+            }
+            (count + 1) to newSum
+        }
 
-        Triple(exercisesList, mainFocusSet, total)
+        ExerciseSummary(exercisesList, mainFocusSet, totalSets,sommePond.fastRoundToInt())
     }
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
@@ -62,9 +74,10 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
             style = MaterialTheme.typography.bodyLarge
         )
 
-        InfoRow(label = "Muscle utilisé", value = mainFocusOfSeance.joinToString(", "))
-        InfoRow(label = "Nombre de série", value = totalSets.toString(), border = true)
-        InfoRow(label = "Nombre d'exercices", value = exercises.count().toString())
+        InfoRow(label = "Muscle utilisé", value = exerciseSummary.mainFocus.joinToString(", "))
+        InfoRow(label = "Nombre de série", value = exerciseSummary.totalSets.toString(), border = true)
+        InfoRow(label = "Nombre d'exercices", value = exerciseSummary.exercises.count().toString(), border = true)
+        InfoRow(label = "Somme Pondéré", value = exerciseSummary.sommePond.toString()+"kg")
 
         InputCustom(
             modifier = Modifier

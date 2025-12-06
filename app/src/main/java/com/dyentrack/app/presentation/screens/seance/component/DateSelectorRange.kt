@@ -67,7 +67,7 @@ fun DateSelectorRange(
             .height(68.dp)
     ) {
         items(days.size) { index ->
-            val day = days[index]
+            val day = days.toList()[index]
             val isSelected = uiState.daySelected == day.dateFormat
             val hasSeance =
                 uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() == true
