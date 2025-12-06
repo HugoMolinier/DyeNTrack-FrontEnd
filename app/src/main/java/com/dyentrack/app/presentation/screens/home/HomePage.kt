@@ -430,7 +430,7 @@ fun HomePage(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(380.dp).padding(horizontal = 10.dp)
+                        .height(340.dp).padding(horizontal = 10.dp)
 
 
                         .wrapContentHeight()
@@ -439,9 +439,6 @@ fun HomePage(
                             shape = MaterialTheme.shapes.medium
                         )
                 ) {
-                    Column (modifier= Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 8.dp)){
-                        Text("Répartition", style = MaterialTheme.typography.bodyLarge)
-                    }
 
                     RadarChartSample(state.graphData, homeViewModel.masterData)
                 }

@@ -4,13 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
@@ -27,13 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.presentation.components.MenuItemData
+import com.dyentrack.app.presentation.components.ProgressLine
+import com.dyentrack.app.presentation.components.RadarChartMP
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.utils.toCleanString
 import kotlin.math.roundToInt
 
 
@@ -62,7 +66,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 )
             ) ) }
             item {
-                Column(modifier= Modifier.padding(top=24.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+                Column(modifier= Modifier.padding(top=24.dp, bottom = 12.dp)) {
                     Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(top=8.dp,bottom = 8.dp))
                     Text("Filtre par groupe musculaire", style =MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
                     FilterMuscleGroupRow(analyseViewModel.masterData)
@@ -119,7 +123,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                     Icon(Icons.Default.Info,"voir info", tint = secondaryTextColor,modifier=Modifier.size(20.dp))
                                 }
 
-                                    Text(  sommePond.toCleanString()+"kg", style = MaterialTheme.typography.bodyLarge)
+                                    Text(  sommePond.toInt().toString()+"kg", style = MaterialTheme.typography.bodyLarge)
 
                             }
 
@@ -133,26 +137,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(400.dp).padding(horizontal = 10.dp)
-
-
-                        .wrapContentHeight()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.medium
-                        )
-                ) {
-                    Column (modifier= Modifier.padding( top = 20.dp, bottom = 8.dp)){
-                        Text("Répartition", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 12.dp))
-                    }
-                    RadarChartSample(state.graphData, analyseViewModel.masterData)
-                }
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp).padding(horizontal = 10.dp, vertical = 20.dp)
+                        .height(280.dp).padding( vertical = 20.dp)
 
 
                         .wrapContentHeight()
@@ -172,6 +157,78 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
+                }
+            }
+            item {Text("Répartition", style = MaterialTheme.typography.bodyLarge,modifier=Modifier.padding(top = 20.dp, bottom = 8.dp))}
+            item {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(top=8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+
+
+                    item {  Box(
+                        modifier = Modifier
+                            .width(300.dp)
+                            .height(328.dp)
+
+
+                            .wrapContentHeight()
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                    ) {
+                        RadarChartSample(state.graphData, analyseViewModel.masterData)
+                    }
+                    }
+                    item {  Box(
+                        modifier = Modifier
+                            .width(300.dp)
+                            .height(328.dp)
+
+
+                            .wrapContentHeight()
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                    ) {
+                        val labels = state.muscleSetPercentage
+                            .mapNotNull { (muscleId, _, _) ->
+                                analyseViewModel.masterData?.muscles?.find { it.id == muscleId }?.nameFR
+                            }
+                        val values = state.muscleSetPercentage
+                            .map { it.third.numberSet.toFloat() }
+                        val values2 = state.muscleSetPercentage
+                            .map { it.third.numberExercise.toFloat() }
+                        RadarChartMP(modifier,labels,values2,values)
+                    }
+                    }
+                }
+            }
+
+            item {
+                Text("Vu détaillé de la repartition :", style = MaterialTheme.typography.bodyMedium,modifier = Modifier.padding(top=12.dp))
+                FlowRow(maxItemsInEachRow = 2, modifier= Modifier.padding(vertical = 20.dp),verticalArrangement = Arrangement.spacedBy(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    state.muscleSetPercentage.forEach { (key, value) ->
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.fillMaxWidth(0.48f)) {
+                            Row (modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR?.let {
+                                    Text(
+                                        it,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                                Text(
+                                    String.format("%.2f%%", value * 100),
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+                            }
+                            ProgressLine(value,height=4.dp)
+                        }
+                        analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR
+                    }
                 }
             }
         }

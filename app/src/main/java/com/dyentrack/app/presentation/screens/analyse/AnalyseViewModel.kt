@@ -61,8 +61,39 @@ class AnalyseViewModel @Inject constructor(
 
                 _uiState.update { current -> current.copy(mapSeance = newMap) }
                 muscleRateOfEachDay(true)
+                val musclePercentages = computeSetPercentagePerMuscle()
+
+                _uiState.update {
+                    it.copy(muscleSetPercentage = musclePercentages)
+                }
+            }
+
+        }
+    }
+    fun computeSetPercentagePerMuscle(): List<Triple<Long, Float, MuscleRate>> {
+        val allDays = _uiState.value.muscleRateOfEachDay
+
+        val totalSetPerMuscle = mutableMapOf<Long, Int>()
+        val totalExercisePerMuscle = mutableMapOf<Long, Int>()
+        var globalTotalSet = 0
+
+        allDays.values.forEach { dayMap ->
+            dayMap.forEach { (muscleId, muscleRate) ->
+                totalSetPerMuscle[muscleId] = totalSetPerMuscle.getOrDefault(muscleId, 0) + muscleRate.numberSet
+                totalExercisePerMuscle[muscleId] = totalExercisePerMuscle.getOrDefault(muscleId, 0) + muscleRate.numberExercise
+                globalTotalSet += muscleRate.numberSet
             }
         }
+
+        if (globalTotalSet == 0) return emptyList()
+
+        return totalSetPerMuscle.map { (muscleId, muscleSet) ->
+            val muscleRate = MuscleRate(
+                numberExercise = totalExercisePerMuscle[muscleId] ?: 0,
+                numberSet = muscleSet
+            )
+            Triple(muscleId, muscleSet.toFloat() / globalTotalSet.toFloat(), muscleRate)
+        }.sortedByDescending { it.second }
     }
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {

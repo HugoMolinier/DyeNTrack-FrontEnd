@@ -10,6 +10,8 @@ data class AnalyseUiState(
     val dayRatio:Map<String,MuscleRate> = emptyMap(),
     val graphData: Map<Long, MuscleRate> = emptyMap(),
 
+    val muscleSetPercentage: List<Triple<Long, Float, MuscleRate>> = emptyList()
+
 
 )
 
