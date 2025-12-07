@@ -1,5 +1,10 @@
 package com.dyentrack.app.presentation.screens.analyse
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,14 +21,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,6 +49,7 @@ import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.toAbbreviatedDate
 import kotlin.math.roundToInt
 
 
@@ -45,19 +57,22 @@ import kotlin.math.roundToInt
 fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),) {
     val state by analyseViewModel.uiState.collectAsState()
+    var inputIndex by remember { mutableIntStateOf(0) }
+    var extendFilter by remember { mutableStateOf(false) }
+
     Column(modifier=modifier.fillMaxWidth()) {
         TopNavigationBar(
             "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onClickLeft = { navController.popBackStack() })
-        LazyColumn(modifier = Modifier            .fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 20.dp)) {
-            item { SectionSelector(modifier=Modifier ,itemSection = listOf(
+        LazyColumn(modifier = Modifier            .fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 12.dp)) {
+            item { SectionSelector(modifier=Modifier , selectedIndex = inputIndex,itemSection = listOf(
                 MenuItemData(
                     "2 Weeks",
-                    { null }
+                    { analyseViewModel.applyDateRange(14L);inputIndex=0 }
                 ),
                 MenuItemData(
                     "Month",
-                    { null }
+                    { analyseViewModel.applyDateRange(30L);inputIndex=1 }
                 )
                 ,
                 MenuItemData(
@@ -66,10 +81,40 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 )
             ) ) }
             item {
-                Column(modifier= Modifier.padding(top=24.dp, bottom = 12.dp)) {
-                    Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(top=8.dp,bottom = 8.dp))
-                    Text("Filtre par groupe musculaire", style =MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                    FilterMuscleGroupRow(analyseViewModel.masterData)
+                Row(modifier= Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.Center) {
+
+                    Text(
+                        state.dateRange.oldDate.toAbbreviatedDate() +
+                                if (state.dateRange.oldDate.year != state.dateRange.recentDate.year) {
+                                    " ${state.dateRange.oldDate.year} - "
+                                } else {
+                                    " - "
+                                } +
+                                state.dateRange.recentDate.toAbbreviatedDate() +
+                                " ${state.dateRange.recentDate.year}",
+                        style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                    ) }
+            }
+            item {
+                Column(modifier= Modifier.padding(top=20.dp)) {
+                    Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge)
+                        IconButton(onClick = {extendFilter=!extendFilter},modifier= Modifier.size(20.dp)) {Icon(Icons.Default.FilterAlt,"Afficher les filtres",     tint = if (extendFilter) MaterialTheme.colorScheme.onSurface else secondaryTextColor) }
+                    }
+                        AnimatedVisibility(
+                            visible = extendFilter,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Column {
+                                Text(
+                                    "Filtre par groupe musculaire",
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+
+                                FilterMuscleGroupRow(analyseViewModel.masterData)
+                            }
+                                        }
                     Column {
                         //debut composant
                         Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
@@ -137,7 +182,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(280.dp).padding( vertical = 20.dp)
+                        .height(280.dp).padding( vertical = 8.dp)
 
 
                         .wrapContentHeight()
@@ -209,7 +254,6 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
             }
 
             item {
-                Text("Vu détaillé de la repartition :", style = MaterialTheme.typography.bodyMedium,modifier = Modifier.padding(top=12.dp))
                 FlowRow(maxItemsInEachRow = 2, modifier= Modifier.padding(vertical = 20.dp),verticalArrangement = Arrangement.spacedBy(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     state.muscleSetPercentage.forEach { (key, value) ->
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.fillMaxWidth(0.48f)) {

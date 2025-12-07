@@ -6,6 +6,7 @@ import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.RateSetSomme
+import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +35,7 @@ class AnalyseViewModel @Inject constructor(
     val uiState: StateFlow<AnalyseUiState> = _uiState
     var masterData: MasterDataStatic? = null
 
+    private val allSeanceByDay = mutableMapOf<String, SeanceTrack>()
 
 
     init {
@@ -45,31 +47,44 @@ class AnalyseViewModel @Inject constructor(
                     _uiState.update { it.copy(mapSeance = emptyMap()) }
                     return@collect
                 }
-                val formatter = DateTimeFormatter.ISO_DATE
-                val today = LocalDate.now()
-                val last15Days = (0L..13L).map { today.minusDays(it) }.reversed()
-                var todaySeanceTemp: DayDataRequest? = null
-                val newMap = list
-                    .mapNotNull { dayData ->
-                        val day = LocalDate.parse(dayData.dayData, formatter)
-                        if (day == today) todaySeanceTemp = dayData
-                        if (day in last15Days && dayData.seanceTrack.plannedExercises.isNotEmpty()) {
-                            dayData.dayData to dayData.seanceTrack
-                        } else null
-                    }
-                    .toMap()
 
-                _uiState.update { current -> current.copy(mapSeance = newMap) }
-                muscleRateOfEachDay(true)
-                val musclePercentages = computeSetPercentagePerMuscle()
-
-                _uiState.update {
-                    it.copy(muscleSetPercentage = musclePercentages)
+                allSeanceByDay.clear()
+                list.forEach { dayData ->
+                    allSeanceByDay[dayData.dayData]=dayData.seanceTrack
                 }
+
+                applyDateRange(_uiState.value.dateRange.rangeInDays)
             }
 
         }
     }
+
+    // ✅ FONCTION UNIQUE POUR CHANGER LA RANGE
+    fun applyDateRange(rangeInDays: Long) {
+        val formatter = DateTimeFormatter.ISO_DATE
+        val today = LocalDate.now()
+        val lastDays = (0L..rangeInDays).map { today.minusDays(it) }
+
+        val filteredMap = allSeanceByDay.filter { (dateStr, seance) ->
+            val day = LocalDate.parse(dateStr, formatter)
+            day in lastDays && seance.plannedExercises.isNotEmpty()
+        }
+
+        _uiState.update {
+            it.copy(
+                mapSeance = filteredMap,
+                dateRange = it.dateRange.copy(rangeInDays = rangeInDays)
+            )
+        }
+
+        muscleRateOfEachDay(true)
+
+        val musclePercentages = computeSetPercentagePerMuscle()
+        _uiState.update {
+            it.copy(muscleSetPercentage = musclePercentages)
+        }
+    }
+
     fun computeSetPercentagePerMuscle(): List<Triple<Long, Float, MuscleRate>> {
         val allDays = _uiState.value.muscleRateOfEachDay
 
