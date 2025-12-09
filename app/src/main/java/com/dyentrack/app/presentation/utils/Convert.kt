@@ -1,5 +1,7 @@
 package com.dyentrack.app.presentation.utils
 
+import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.SetVO
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -24,4 +26,18 @@ fun LocalDate.toIsoDate(): String {
 
 fun LocalDate.toAbbreviatedDate(): String {
     return this.format(ABBREVIATED_FORMATTER)
+}
+
+
+
+
+fun SetVO.toSetData(linkedRightSet: SetData? = null): SetData {
+    return SetData(
+        type = this.typeOfSet,
+        charge = this.charge,
+        rir = this.rir,
+        reps = this.repsNumber,
+        side = this.side,
+        linkedRightSet = linkedRightSet
+    )
 }

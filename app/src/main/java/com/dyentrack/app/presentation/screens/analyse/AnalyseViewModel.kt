@@ -59,11 +59,11 @@ class AnalyseViewModel @Inject constructor(
         }
     }
 
-    // ✅ FONCTION UNIQUE POUR CHANGER LA RANGE
+
     fun applyDateRange(rangeInDays: Long) {
         val formatter = DateTimeFormatter.ISO_DATE
         val today = LocalDate.now()
-        val lastDays = (0L..rangeInDays).map { today.minusDays(it) }
+        val lastDays = (0L..rangeInDays).map { today.minusDays(it-1L) }
 
         val filteredMap = allSeanceByDay.filter { (dateStr, seance) ->
             val day = LocalDate.parse(dateStr, formatter)

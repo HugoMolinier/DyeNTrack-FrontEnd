@@ -64,7 +64,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
         TopNavigationBar(
             "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onClickLeft = { navController.popBackStack() })
-        LazyColumn(modifier = Modifier            .fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 12.dp)) {
+        LazyColumn(modifier = Modifier            .fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 20.dp)) {
             item { SectionSelector(modifier=Modifier , selectedIndex = inputIndex,itemSection = listOf(
                 MenuItemData(
                     "2 Weeks",
@@ -81,7 +81,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 )
             ) ) }
             item {
-                Row(modifier= Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.Center) {
+                Row(modifier= Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.Center) {
 
                     Text(
                         state.dateRange.oldDate.toAbbreviatedDate() +
@@ -96,7 +96,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                     ) }
             }
             item {
-                Column(modifier= Modifier.padding(top=20.dp)) {
+                Column(modifier= Modifier.padding(top=36.dp)) {
                     Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge)
                         IconButton(onClick = {extendFilter=!extendFilter},modifier= Modifier.size(20.dp)) {Icon(Icons.Default.FilterAlt,"Afficher les filtres",     tint = if (extendFilter) MaterialTheme.colorScheme.onSurface else secondaryTextColor) }
