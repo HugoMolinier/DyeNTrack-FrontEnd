@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,25 +34,36 @@ import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
 import com.dyentrack.app.presentation.screens.seance.viewModel.PhysioField
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack,lockInput:Boolean =false,day:String){
-    val steps = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((physioTrack.step ?: 0) == 0) "" else physioTrack.step.toString())
-        )
-    }
-    val sleep = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((physioTrack.hourOfSleep ?: 0) == 0) "" else physioTrack.hourOfSleep.toString())
-        )
-    }
-    val weight = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((physioTrack.weight ?: 0) == 0) "" else physioTrack.weight.toString())
-        )
+fun PhysioBox(
+    viewModel: SeanceViewModel = viewModel(),
+    state: SeanceUiState,
+    lockInput: Boolean = false,
+    day: String
+) {
+    val currentSeance = state.seancesParJour[day] ?: SeanceDuJour()
+    val physioTrack = currentSeance.physioTrack
+
+    // --- UI State pour TextFieldValue ---
+    val steps = remember { mutableStateOf(TextFieldValue("")) }
+    val sleep = remember { mutableStateOf(TextFieldValue("")) }
+    val weight = remember { mutableStateOf(TextFieldValue("")) }
+
+    // --- Met à jour uniquement si la valeur a changé ---
+    LaunchedEffect(physioTrack) {
+        val newSteps = if ((physioTrack.step ?: 0) == 0) "" else physioTrack.step.toString()
+        if (steps.value.text != newSteps) steps.value = TextFieldValue(newSteps)
+
+        val newSleep = if ((physioTrack.hourOfSleep ?: 0) == 0) "" else physioTrack.hourOfSleep.toString()
+        if (sleep.value.text != newSleep) sleep.value = TextFieldValue(newSleep)
+
+        val newWeight = if ((physioTrack.weight ?: 0) == 0) "" else physioTrack.weight.toString()
+        if (weight.value.text != newWeight) weight.value = TextFieldValue(newWeight)
     }
 
     Box(
@@ -62,60 +74,29 @@ fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack
                 shape = RoundedCornerShape(8.dp),
             ),
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-        ) {
+        Column(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically,modifier=Modifier.padding(bottom = 20.dp)){
-                        Icon(
-                            Icons.Default.Sync,
-                            "sync with MyFitnessPal",
-                            tint = secondaryTextColor,
-                            modifier = Modifier.size(28.dp).padding(4.dp)
-                        )
-                        Text(
-                            " import from healthApp",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                            )
-                        )
-                    }
-                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .drawBehind {
-                            val yTop = 0f + 1 / 2
-                            val yBottom = size.height - 1 / 2
-                            val color = secondaryTextColor.copy(alpha = 0.3f)
-
-                            // Ligne du haut
+                            val yBottom = size.height - 0.5f
                             drawLine(
-                                color = color,
-                                start = Offset(0f, yTop),
-                                end = Offset(size.width, yTop),
-                                strokeWidth = 1f
-
-                            )
-
-                            // Ligne du bas
-                            drawLine(
-                                color = color,
+                                color = secondaryTextColor.copy(alpha = 0.3f),
                                 start = Offset(0f, yBottom),
                                 end = Offset(size.width, yBottom),
                                 strokeWidth = 1f
                             )
                         }
                 ) {
-                    NutrientRow("Nombre de pas", steps, modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp), modifierInput = Modifier.width(120.dp), unit = "steps", isEditable = !lockInput,
-
+                    NutrientRow(
+                        label = "Nombre de pas",
+                        valueState = steps,
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                        modifierInput = Modifier.width(120.dp),
+                        unit = "steps",
+                        isEditable = !lockInput,
                         onValueChange = { newValue ->
                             newValue.toIntOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.STEP, value)
@@ -123,69 +104,85 @@ fun PhysioBox( viewModel: SeanceViewModel = viewModel(),physioTrack: PhysioTrack
                         }
                     )
                 }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .drawBehind {
-                            val yTop = 0f + 1 / 2
-                            val yBottom = size.height - 1 / 2
+                            val yTop = 0.5f
+                            val yBottom = size.height - 0.5f
                             val color = secondaryTextColor.copy(alpha = 0.3f)
-
-                            // Ligne du haut
-                            drawLine(
-                                color = color,
-                                start = Offset(0f, yTop),
-                                end = Offset(size.width, yTop),
-                                strokeWidth = 1f
-
-                            )
-
-                            // Ligne du bas
-                            drawLine(
-                                color = color,
-                                start = Offset(0f, yBottom),
-                                end = Offset(size.width, yBottom),
-                                strokeWidth = 1f
-                            )
+                            drawLine(color, Offset(0f, yTop), Offset(size.width, yTop), 1f)
+                            drawLine(color, Offset(0f, yBottom), Offset(size.width, yBottom), 1f)
                         }
                 ) {
-                    NutrientRow("Sommeil", sleep, modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp), modifierInput = Modifier.width(120.dp), unit = "h", isEditable = !lockInput,
+                    NutrientRow(
+                        label = "Sommeil",
+                        valueState = sleep,
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                        modifierInput = Modifier.width(120.dp),
+                        unit = "h",
+                        isEditable = !lockInput,
                         onValueChange = { newValue ->
                             newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.HOUR_OF_SLEEP, value)
                             }
-                        })
+                        }
+                    )
                 }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .drawBehind {
-                            val yTop = 0f + 1 / 2
-                            val color = secondaryTextColor.copy(alpha = 0.3f)
-
-                            // Ligne du haut
+                            val yTop = 0.5f
                             drawLine(
-                                color = color,
+                                color = secondaryTextColor.copy(alpha = 0.3f),
                                 start = Offset(0f, yTop),
                                 end = Offset(size.width, yTop),
                                 strokeWidth = 1f
-
                             )
                         }
                 ) {
-                    NutrientRow("Poids (Optionnel)", weight, modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp), modifierInput = Modifier.width(120.dp), unit = "kg", isEditable = !lockInput,
+                    NutrientRow(
+                        label = "Poids (Optionnel)",
+                        valueState = weight,
+                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                        modifierInput = Modifier.width(120.dp),
+                        unit = "kg",
+                        isEditable = !lockInput,
                         onValueChange = { newValue ->
                             newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.WEIGHT, value)
                             }
-                        })
+                        }
+                    )
                 }
-                Row (Modifier.fillMaxWidth().padding(end = 16.dp, top = 4.dp, bottom = 16.dp), horizontalArrangement = Arrangement.End){
-                    Text("Last : ",style=MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor, fontSize = 10.sp))
-                    Text("73.1 kg (2025-12-12)",style=MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor, fontSize = 10.sp))
 
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp, top = 4.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        "Last : ",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = secondaryTextColor,
+                            fontSize = 10.sp
+                        )
+                    )
+                    Text(
+                        "73.1 kg (2025-12-12)",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = secondaryTextColor,
+                            fontSize = 10.sp
+                        )
+                    )
                 }
+
             }
         }
     }
+
 }

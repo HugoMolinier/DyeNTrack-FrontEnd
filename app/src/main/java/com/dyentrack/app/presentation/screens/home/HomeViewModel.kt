@@ -1,12 +1,18 @@
 package com.dyentrack.app.presentation.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.HealthConnectStatus
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
+import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
+import com.dyentrack.app.domain.usecase.health.GetDataHealthUseCase
+import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
+import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +27,9 @@ import kotlin.math.ceil
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
-
+    private val healthConnectUseCase: CheckHealthConnectUseCase,
+    private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase,
+    private val syncHealthDataUseCas: SyncHealthDataUseCase
 ) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
@@ -34,6 +42,7 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
+
 
             dayDataFlow.collect { list ->
                 if (list == null) {
@@ -49,7 +58,7 @@ class HomeViewModel @Inject constructor(
                     .mapNotNull { dayData ->
                         val day = LocalDate.parse(dayData.dayData, formatter)
                         if (day == today) todaySeanceTemp = dayData
-                        if (day in last15Days && dayData.seanceTrack.plannedExercises.isNotEmpty()) {
+                        if (day in last15Days && dayData.seanceTrack?.plannedExercises?.isNotEmpty()==true) {
                             dayData.dayData to dayData.seanceTrack
                         } else null
                     }
@@ -58,8 +67,26 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { current -> current.copy(mapSeance = newMap, todaySeance = todaySeanceTemp) }
                 muscleRateOfEachDay(true)
             }
+
+        }
+        viewModelScope.launch {
+            val status = healthConnectUseCase()
+            when (status) {
+                is HealthConnectStatus.Available -> {
+                    val client = status.client
+                    val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
+                    if (permissionsGranted) {
+                       syncHealthDataUseCas.invoke(client)
+                    } else {
+                        Log.d("HealthSync", "Permissions non accordées")
+                    }
+                }
+                else -> Log.d("HealthSync", "Health Connect non disponible")
+            }
         }
     }
+
+
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {
             val master = masterData ?: return

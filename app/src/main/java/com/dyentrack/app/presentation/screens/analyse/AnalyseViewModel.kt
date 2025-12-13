@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.forEach
 import kotlin.collections.get
 import kotlin.collections.sortedBy
 import kotlin.math.ceil
@@ -50,7 +51,7 @@ class AnalyseViewModel @Inject constructor(
 
                 allSeanceByDay.clear()
                 list.forEach { dayData ->
-                    allSeanceByDay[dayData.dayData]=dayData.seanceTrack
+                    if (dayData.seanceTrack?.plannedExercises?.isNotEmpty() == true) { allSeanceByDay[dayData.dayData]=dayData!!.seanceTrack}
                 }
 
                 applyDateRange(_uiState.value.dateRange.rangeInDays)
@@ -63,7 +64,7 @@ class AnalyseViewModel @Inject constructor(
     fun applyDateRange(rangeInDays: Long) {
         val formatter = DateTimeFormatter.ISO_DATE
         val today = LocalDate.now()
-        val lastDays = (0L..rangeInDays).map { today.minusDays(it-1L) }
+        val lastDays = (0L until rangeInDays).map { today.minusDays(it) }
 
         val filteredMap = allSeanceByDay.filter { (dateStr, seance) ->
             val day = LocalDate.parse(dateStr, formatter)

@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,58 +35,61 @@ import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
 import com.dyentrack.app.presentation.screens.seance.viewModel.NutritionField
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
-fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: NutritionTrack,lockInput:Boolean =false,day:String){
-    val carbs = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.carbohydrates ?: 0) == 0) "" else nutritionTrack.carbohydrates.toString())
-        )
+fun NutritionBox(
+    viewModel: SeanceViewModel = viewModel(),
+    state: SeanceUiState,
+    lockInput: Boolean = false,
+    day: String
+) {
+    val currentSeance = state.seancesParJour[day] ?: SeanceDuJour()
+    val nutritionTrack = currentSeance.nutritionTrack
+
+    // --- UI State pour TextFieldValue, stable pour le curseur ---
+    val carbs = remember { mutableStateOf(TextFieldValue("")) }
+    val prots = remember { mutableStateOf(TextFieldValue("")) }
+    val fats = remember { mutableStateOf(TextFieldValue("")) }
+    val fiber = remember { mutableStateOf(TextFieldValue("")) }
+    val cafeine = remember { mutableStateOf(TextFieldValue("")) }
+    val calories = remember { mutableStateOf(TextFieldValue("")) }
+
+    // --- Met à jour les TextFieldValues uniquement si la valeur change réellement ---
+    LaunchedEffect(nutritionTrack) {
+        val newCarbs = if ((nutritionTrack.carbohydrates ?: 0) == 0) "" else nutritionTrack.carbohydrates.toString()
+        if (carbs.value.text != newCarbs) carbs.value = TextFieldValue(newCarbs)
+
+        val newProts = if ((nutritionTrack.proteins ?: 0) == 0) "" else nutritionTrack.proteins.toString()
+        if (prots.value.text != newProts) prots.value = TextFieldValue(newProts)
+
+        val newFats = if ((nutritionTrack.lipids ?: 0) == 0) "" else nutritionTrack.lipids.toString()
+        if (fats.value.text != newFats) fats.value = TextFieldValue(newFats)
+
+        val newFiber = if ((nutritionTrack.fiber ?: 0) == 0) "" else nutritionTrack.fiber.toString()
+        if (fiber.value.text != newFiber) fiber.value = TextFieldValue(newFiber)
+
+        val newCafeine = if ((nutritionTrack.cafeins ?: 0) == 0) "" else nutritionTrack.cafeins.toString()
+        if (cafeine.value.text != newCafeine) cafeine.value = TextFieldValue(newCafeine)
+
+        val newCalories = if ((nutritionTrack.calories ?: 0) == 0) "" else nutritionTrack.calories.toString()
+        if (calories.value.text != newCalories) calories.value = TextFieldValue(newCalories)
     }
 
-    val prots = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.proteins ?: 0) == 0) "" else nutritionTrack.proteins.toString())
-        )
-    }
-
-    val fats = remember(day) {
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.lipids ?: 0) == 0) "" else nutritionTrack.lipids.toString())
-        )
-    }
-
-    val fiber = remember(day){
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.fiber ?: 0) == 0) "" else nutritionTrack.fiber.toString())
-        )
-    }
-
-    val cafeine = remember(day){
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.cafeins ?: 0) == 0) "" else nutritionTrack.cafeins.toString())
-        )
-    }
-
-    val calories = remember(day){
-        mutableStateOf(
-            TextFieldValue(text = if ((nutritionTrack.calories ?: 0) == 0) "" else nutritionTrack.calories.toString())
-        )
-    }
     Box(
         Modifier
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(8.dp),
-            ),
+                shape = RoundedCornerShape(8.dp)
+            )
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-        ) {
+        Column(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
+
+                // --- Ligne supérieure avec calories ---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,32 +107,35 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                     verticalAlignment = Alignment.Top
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Sync,"sync with MyFitnessPal", tint = secondaryTextColor, modifier = Modifier.size(28.dp).padding(4.dp))
-                        Text(" import from MyFitnessPal",style=MaterialTheme.typography.bodySmall.copy(color=MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)))
+                        Text(
+                            "",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                            )
+                        )
                     }
                     Column(
                         Modifier.padding(end = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         horizontalAlignment = Alignment.End
-
                     ) {
                         NutrientRow(
                             label = "",
                             valueState = calories,
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             unit = "kcal",
-                            modifierInput = Modifier.width(   100.dp),
+                            modifierInput = Modifier.width(100.dp),
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CALORIES, value)
                                 }
                             }
                         )
+
                         Row(
                             Modifier.padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(
-                                8.dp
-                            ), verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             val protsValue = prots.value.text.toFloatOrNull() ?: 0f
                             val carbsValue = carbs.value.text.toFloatOrNull() ?: 0f
@@ -136,9 +143,7 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                             Text(
                                 text = "Calculé : ${(protsValue * 4 + carbsValue * 4 + fatsValue * 9).toInt()} kcal",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    color = secondaryTextColor.copy(
-                                        alpha = 0.5f
-                                    )
+                                    color = secondaryTextColor.copy(alpha = 0.5f)
                                 )
                             )
                             Icon(
@@ -151,25 +156,24 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                     }
                 }
 
-                Row(Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp)
-                    .height(IntrinsicSize.Max)) {
+                // --- Colonnes nutriments ---
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp)
+                        .height(IntrinsicSize.Max)
+                ) {
+                    // Colonne de gauche
                     Column(
                         Modifier
-                            .padding(
-                                top = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
-                            )
+                            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-
                         NutrientRow(
                             label = "Protéines",
                             valueState = prots,
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.PROTEINS, value)
@@ -179,18 +183,17 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                         NutrientRow(
                             label = "Glucides",
                             valueState = carbs,
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CARBOHYDRATES, value)
                                 }
                             }
                         )
-
                         NutrientRow(
                             label = "Lipides",
                             valueState = fats,
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.LIPIDS, value)
@@ -198,26 +201,25 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                             }
                         )
                     }
+
                     Spacer(
                         modifier = Modifier
                             .fillMaxHeight()
                             .width(1.dp)
                             .background(secondaryTextColor.copy(alpha = 0.2f))
                     )
+
+                    // Colonne de droite
                     Column(
                         Modifier
-                            .padding(
-                                top = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
-                            )
+                            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         NutrientRow(
                             label = "Fibres",
                             valueState = fiber,
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.FIBER, value)
@@ -228,20 +230,16 @@ fun NutritionBox( viewModel: SeanceViewModel = viewModel(),nutritionTrack: Nutri
                             label = "Caféine",
                             valueState = cafeine,
                             unit = "mg",
-                            isEditable=!lockInput,
+                            isEditable = !lockInput,
                             onValueChange = { newValue ->
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CAFEINS, value)
                                 }
                             }
                         )
-
-
                     }
                 }
             }
-
-
         }
     }
 }

@@ -5,8 +5,9 @@ import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetSide
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class GetLastExercisePerfBetweenDateUseCase {
+class GetLastExercisePerfBetweenDateUseCase @Inject constructor(){
 
     operator fun invoke(
         dayDataFlow: List<DayDataRequest>?,

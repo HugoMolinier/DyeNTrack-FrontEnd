@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 enum class ExerciseMode { NORMAL, LOCK, CHANGE_ORDER }
 data class SeanceUiState(
     val seancesParJour: SnapshotStateMap<String, SeanceDuJour> = mutableStateMapOf(),
-
+    val healthConnectPermissionsNeeded: Set<String>? = null,
     val exerciseToAdd: List<Long> = emptyList(),
     val daySelected: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
 

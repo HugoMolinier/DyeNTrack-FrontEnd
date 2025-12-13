@@ -21,6 +21,7 @@ import androidx.work.workDataOf
 import com.dyentrack.app.data.worker.SaveSeanceWorker
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.DayInfo
+import com.dyentrack.app.domain.model.HealthConnectStatus
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.NutritionTrack
@@ -33,9 +34,13 @@ import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.SetVO
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
+import com.dyentrack.app.domain.usecase.GetLastExercisePerfBetweenDateUseCase
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
+import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
+import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
+import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,19 +53,22 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
     getDaysRangeUseCase: GetDaysRangeUseCase,
+    private val getLastExercisePerfBetweenDateUseCase: GetLastExercisePerfBetweenDateUseCase,
     @ApplicationContext private val context: Context,
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
+    private val healthConnectUseCase: CheckHealthConnectUseCase,
+    private val syncHealthDataUseCase: SyncHealthDataUseCase,
+    private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
@@ -97,6 +105,39 @@ class SeanceViewModel @Inject constructor(
         }
 
     }
+    fun syncHealthData() {
+        viewModelScope.launch {
+            // Récupérer le status Health Connect
+            when (val status = healthConnectUseCase()) {
+                is HealthConnectStatus.Available -> {
+                    val client = status.client
+                    Log.d("HealthConnect", "Health Connect disponible")
+
+                    val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
+
+                    if (!permissionsGranted) {
+                        val requiredPermissions = requestHealthConnectPermissionsUseCase.getRequiredPermissions()
+                        Log.d("HealthConnect", "Permissions manquantes : $requiredPermissions")
+                        _uiState.update { it.copy(healthConnectPermissionsNeeded=requiredPermissions) }
+                    } else {
+                        syncHealthDataUseCase(client)
+                    }
+                }
+                is HealthConnectStatus.NotAvailable -> {
+                    // Health Connect n'est pas disponible
+                    Log.d("HealthConnect", "Health Connect SDK not available")
+                }
+                is HealthConnectStatus.NeedsUpdate -> {
+                    // Provider doit être mis à jour
+                    Log.d("HealthConnect", "Health Connect provider needs update: ${status.packageName}")
+                }
+                else -> Log.d("a","j")
+            }
+        }
+    }
+
+
+
 
     fun setDaySelected(daySelected:String){
         _uiState.update { current-> current.copy(daySelected=daySelected) }
@@ -306,20 +347,18 @@ class SeanceViewModel @Inject constructor(
     }
 
     fun getLastExercicePerfBetweenDate(dateRecent: String, dateBefore: String) {
-        val result = mutableMapOf<String, MutableList<SetData>>()
-        generateSequence(LocalDate.parse(dateRecent)) { it.minusDays(1) }
-            .takeWhile { !it.isBefore(LocalDate.parse(dateBefore)) }
-            .forEach { day ->
-                val dataOfTheDay =
-                    uiState.value.seancesParJour[day.format(DateTimeFormatter.ISO_DATE)]
-                if (dataOfTheDay?.setsMap[uiState.value.expandedExerciseId]?.isNotEmpty() == true) {
-                    result.getOrPut(day.toString()) { mutableListOf() }
-                        .addAll(dataOfTheDay.setsMap[uiState.value.expandedExerciseId]!!.toList())
+        val dayDataList = dayDataFlow.value // List<DayDataRequest>?
+        val exerciseId = uiState.value.expandedExerciseId ?: return
 
-                }
-            }
-        Log.e("Log Info", "info: $result")
-        _uiState.value = _uiState.value.copy(analyseData = result)
+        val result = getLastExercisePerfBetweenDateUseCase(
+             dayDataList,
+             exerciseId,
+             dateRecent,
+             dateBefore
+        )
+        _uiState.update { current ->
+            current.copy(analyseData = result)
+        }
     }
 
     fun swapSet(exerciseId: Long, fromIndex: Int, toIndex: Int) {
@@ -488,16 +527,16 @@ class SeanceViewModel @Inject constructor(
     }
 
     private fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
-        val exercises = seanceTrack.plannedExercises.map { plannedExercise ->
+        val exercises = seanceTrack?.plannedExercises?.map { plannedExercise ->
             ExerciseInSeance(
                 exerciseId = plannedExercise.exerciseId,
                 laterite = plannedExercise.lateraliteId,
                 equipment = plannedExercise.equipmentId
             )
-        }.toMutableStateList()
+        }?.toMutableStateList()?:mutableStateListOf()
 
         val setsMap = mutableStateMapOf<Long, SnapshotStateList<SetData>>()
-        seanceTrack.plannedExercises.forEach { plannedExercise ->
+        seanceTrack?.plannedExercises?.forEach { plannedExercise ->
             val sets = plannedExercise.sets?.mapNotNull { setVO ->
                 when (setVO.side) {
                     SetSide.BOTH -> SetData(

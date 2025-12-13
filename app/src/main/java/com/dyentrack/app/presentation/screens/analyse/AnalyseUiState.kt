@@ -24,5 +24,5 @@ data class DateRangeSelected(
     val recentDate: LocalDate = LocalDate.now()
 ) {
     val oldDate: LocalDate
-        get() = recentDate.minusDays(rangeInDays)
+        get() = recentDate.minusDays(rangeInDays - 1L)
 }

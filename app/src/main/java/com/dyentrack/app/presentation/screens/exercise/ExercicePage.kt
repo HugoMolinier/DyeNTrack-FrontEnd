@@ -37,6 +37,7 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.VariantSelection
+import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -47,7 +48,7 @@ fun ExercisePage(
 
 
     val idUser = 1.toLong()
-
+    val state by exerciseViewModel.uiState.collectAsState()
     val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
 
     val focusManager = LocalFocusManager.current
@@ -78,151 +79,163 @@ fun ExercisePage(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 item {
-                    Column {
-                        Row(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(top = 32.dp, end = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(exercise.nameFR)
+                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 12.dp)) {
+                        SectionSelector(
+                            variant = VariantSelection.FULL,
+                            selectedIndex = if(state.sectionChose==SectionChose.EXPLAIN)0 else 1 ,
+                            itemSection = listOf(
+                                MenuItemData(
+                                    "Explication",
+                                    { exerciseViewModel.changeSection(SectionChose.EXPLAIN) }
+                                ),
+                                MenuItemData(
+                                    "Statistique",
+                                    {  exerciseViewModel.changeSection(SectionChose.ANALYSE) }
+                                )
+                            )
 
 
-                            FavoriteIconButton(
-                                isFavorite = infoMapState[exercise.idExercise]?.favorite ?: false,
-                                onClick = {
-                                    val currentFavorite =
-                                        infoMapState[exercise.idExercise]?.favorite ?: false
+                        )
+                    }
+                }
+                if(state.sectionChose==SectionChose.EXPLAIN) {
+                    item {
+                        Column {
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 0.dp, end = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(exercise.nameFR)
+
+
+                                FavoriteIconButton(
+                                    isFavorite = infoMapState[exercise.idExercise]?.favorite
+                                        ?: false,
+                                    onClick = {
+                                        val currentFavorite =
+                                            infoMapState[exercise.idExercise]?.favorite ?: false
+                                        exerciseViewModel.updateInfoExerciseUser(
+                                            exercise.idExercise,
+                                            !currentFavorite,
+                                            null
+                                        )
+                                    }
+                                )
+                            }
+                            Text(
+                                text = "Crée par " + when (exercise.idCreator) {
+                                    null -> "DyeNTrack"
+                                    idUser -> "Vous"
+                                    else -> "un utilisateur"
+                                },
+                                style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                            )
+
+
+                        }
+                    }
+
+
+                    if (exercise.description?.isNotBlank() == true) {
+                        item {
+                            Text(
+                                exercise.description,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
+                    if (exercise.linkVideo?.isNotBlank() == true) {
+                        item { YouTubePlayerViewComposable(exercise.linkVideo) }
+
+                    }
+
+                    if (exercise.muscleInfos?.isNotEmpty() == true) {
+                        val muscleUse = exerciseViewModel.masterData?.muscles
+                            ?.filter { it.id in exercise.muscleInfos.map { it -> it.idMuscle } }
+                            ?.map { it.nameFR } ?: emptySet()
+
+                        item {
+                            Column(modifier = modifier.fillMaxWidth()) {
+                                Text(
+                                    "Détails",
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                InfoRow(
+                                    label = "Aussi Appellé",
+                                    value = "future nom anglais",
+                                )
+                                InfoRow(
+                                    label = "Muscle utilisé",
+                                    value = muscleUse.joinToString(", "),
+                                    border = true
+                                )
+                                InfoRow(
+                                    label = "Muscle Principal",
+                                    value = exercise.muscleInfos
+                                        .firstOrNull { it.principal }
+                                        ?.idMuscle
+                                        ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
+                                        ?: "Aucun",
+                                )
+                                InfoRow(
+                                    label = "Equipement possible",
+                                    value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
+                                        ?: "Aucun",
+                                    border = true
+                                )
+
+                                InfoRow(
+                                    label = "Exécution possible",
+                                    value = exerciseViewModel.masterData?.lateralites?.joinToString(
+                                        ", "
+                                    ) { it.nameFR }
+                                        ?: "Aucune",
+                                )
+
+
+                            }
+
+
+                        }
+                        item {
+                            val noteState = remember {
+                                mutableStateOf(
+                                    TextFieldValue(
+                                        infoMapState[exercise.idExercise]?.note ?: ""
+                                    )
+                                )
+                            }
+
+
+                            InputCustom(
+                                modifier = Modifier
+                                    .padding(top = 12.dp)
+                                    .height(70.dp),
+                                noteState,
+                                placeholder = "Ajouter une note",
+                                variant = InputVariant.OUTLINED,
+                                singleLine = false,
+                                onFocusLost = { finalText ->
                                     exerciseViewModel.updateInfoExerciseUser(
                                         exercise.idExercise,
-                                        !currentFavorite,
-                                        null
+                                        null,
+                                        finalText
                                     )
                                 }
                             )
-                        }
-                        Text(
-                            text = "Crée par " + when (exercise.idCreator) {
-                                null -> "DyeNTrack"
-                                idUser -> "Vous"
-                                else -> "un utilisateur"
-                            },
-                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
-                        )
-
-
-                    }
-                }
-
-
-                item {
-                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 20.dp)) {
-                    SectionSelector(
-                        variant = VariantSelection.FULL,
-                        itemSection = listOf(
-                            MenuItemData(
-                                "Explication",
-                                { null }
-                            ),
-                            MenuItemData(
-                                "Statistique",
-                                { null }
-                            )
-                        )
-
-
-                    )
-                    }
-                }
-                if (exercise.description?.isNotBlank() == true) {
-                    item { Text(exercise.description, style = MaterialTheme.typography.bodyMedium) }
-                }
-
-                if (exercise.linkVideo?.isNotBlank() == true) {
-                    item { YouTubePlayerViewComposable(exercise.linkVideo) }
-
-                }
-
-                if (exercise.muscleInfos?.isNotEmpty() == true) {
-                    val muscleUse = exerciseViewModel.masterData?.muscles
-                        ?.filter { it.id in exercise.muscleInfos.map { it -> it.idMuscle } }
-                        ?.map { it.nameFR } ?: emptySet()
-
-                    item {
-                        Column(modifier = modifier.fillMaxWidth()) {
-                            Text(
-                                "Détails",
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            InfoRow(
-                                label = "Aussi Appellé",
-                                value = "future nom anglais",
-                            )
-                            InfoRow(
-                                label = "Muscle utilisé",
-                                value = muscleUse.joinToString(", "),
-                                border = true
-                            )
-                            InfoRow(
-                                label = "Muscle Principal",
-                                value = exercise.muscleInfos
-                                    .firstOrNull { it.principal }
-                                    ?.idMuscle
-                                    ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
-                                    ?: "Aucun",
-                            )
-                            InfoRow(
-                                label = "Equipement possible",
-                                value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
-                                    ?: "Aucun",
-                                border = true
-                            )
-
-                            InfoRow(
-                                label = "Exécution possible",
-                                value = exerciseViewModel.masterData?.lateralites?.joinToString(", ") { it.nameFR }
-                                    ?: "Aucune",
-                            )
 
 
                         }
 
-
                     }
-                    item {
-                        val noteState = remember {
-                            mutableStateOf(
-                                TextFieldValue(
-                                    infoMapState[exercise.idExercise]?.note ?: ""
-                                )
-                            )
-                        }
-
-
-                        InputCustom(
-                            modifier = Modifier
-                                .padding(top = 12.dp)
-                                .height(70.dp),
-                            noteState,
-                            placeholder = "Ajouter une note",
-                            variant = InputVariant.OUTLINED,
-                            singleLine = false,
-                            onFocusLost = { finalText ->
-                                exerciseViewModel.updateInfoExerciseUser(
-                                    exercise.idExercise,
-                                    null,
-                                    finalText
-                                )
-                            }
-                        )
-
-
-                    }
-
                 }
-
-
+                else{
+                   // CombinedChartMP(Modifier,state.)
+                }
             }
         }
     }

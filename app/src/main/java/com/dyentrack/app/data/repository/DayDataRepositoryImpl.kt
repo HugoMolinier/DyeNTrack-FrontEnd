@@ -101,23 +101,32 @@ class DayDataRepositoryImpl @Inject constructor(
 
 
     override suspend fun updateToLocal(dayData: DayDataRequest) {
-        seanceDao.saveOrUpdateSeance(seanceDao, dayData.toSeanceOfDayLocal(false))
+        val existing = seanceDao.getSeanceByDay(dayData.dayData)
+        val seanceLocal = dayData.toSeanceOfDayLocal(false, existing)
+        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal)
+
         val updatedLocal = seanceDao.getAllSeances().map { it.toDayDataRequest() }
         _dayDataFlow.value = updatedLocal.map { it.copy() }
     }
 
 
-    fun DayDataRequest.toSeanceOfDayLocal(isSaveApi: Boolean): SeanceOfDayLocal {
-
+    fun DayDataRequest.toSeanceOfDayLocal(
+        isSaveApi: Boolean,
+        existing: SeanceOfDayLocal? = null
+    ): SeanceOfDayLocal {
         return SeanceOfDayLocal(
             day = dayData,
             saveAPI = isSaveApi,
-            nutritionTrack = nutritionTrack,
-            physioTrack = physioTrack,
-            plannedExercises = seanceTrack.plannedExercises
+            nutritionTrack = nutritionTrack ?: existing?.nutritionTrack,
+            physioTrack = physioTrack ?: existing?.physioTrack,
+            plannedExercises = if (seanceTrack?.plannedExercises.isNullOrEmpty()) {
+                existing?.plannedExercises ?: emptyList()
+            } else {
+                seanceTrack.plannedExercises
+            }
         )
-
     }
+
 
      fun SeanceOfDayLocal.toDayDataRequest(): DayDataRequest {
         return DayDataRequest(

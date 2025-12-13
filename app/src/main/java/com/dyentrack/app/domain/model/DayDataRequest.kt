@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 data class DayDataRequest(
     val idDayData:Long?,
     val dayData: String,
-    val seanceTrack: SeanceTrack,
-    val nutritionTrack: NutritionTrack,
-    val physioTrack: PhysioTrack
+    val seanceTrack: SeanceTrack?=null,
+    val nutritionTrack: NutritionTrack?=null,
+    val physioTrack: PhysioTrack?=null
 )
 
 @Serializable

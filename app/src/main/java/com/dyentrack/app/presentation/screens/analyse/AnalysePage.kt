@@ -140,10 +140,16 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                 sommePond+=mr.rateSetSomme?.sommePond?:0.0
                             }
                         }
+                        val moyenneSetParEx = if (sommeEx > 0) {
+                            ((sommeSet.toDouble() / sommeEx) * 100).roundToInt() / 100.0
+                        } else 0.0
+                        val proportionSetFail = if (sommeSet > 0) {
+                            sommeSetFail.toDouble() / sommeSet * 100
+                        } else 0.0
                         Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
                             Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text("Moyenne Set/ Exercices", style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                                Text(  (((sommeSet.toDouble() / sommeEx) * 100).roundToInt() / 100.0).toString(), style = MaterialTheme.typography.bodyLarge)
+                                Text(  moyenneSetParEx.toString(), style = MaterialTheme.typography.bodyLarge)
 
                             }
 
@@ -152,7 +158,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                         Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
                             Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text("Proportion Set échec", style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                                Text(  String.format("%.2f%%", (sommeSetFail.toDouble() / sommeSet * 100)), style = MaterialTheme.typography.bodyLarge)
+                                Text(  String.format("%.2f%%", proportionSetFail), style = MaterialTheme.typography.bodyLarge)
 
                             }
 

@@ -178,7 +178,9 @@ fun HomePage(
                             }
                         }
                         item {
-                            val steps = state.todaySeance?.physioTrack?.step ?: 0
+                            val steps = remember(state.todaySeance) { state.todaySeance?.physioTrack?.step ?: 0 }
+                            val progressSteps = remember(steps, objectifStep) { (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f) }
+
                             ObjectifBox(
                                 value = steps.toString(),
                                 objectif = objectifStep.toString(),
@@ -186,10 +188,8 @@ fun HomePage(
                                 drawableTop =  R.drawable.icon_step
 
                             ) {
-                                val progress =
-                                    (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
                                 ProgressLine(
-                                    progress,
+                                    progressSteps,
                                     height = 4.dp,
                                     progressColor = Color(0xFF3B5398),
                                     modifier = Modifier.padding(top = 12.dp)
@@ -197,17 +197,16 @@ fun HomePage(
                             }
                         }
                         item {
-                            val calories = state.todaySeance?.nutritionTrack?.calories ?: 0
+                            val calories = remember(state.todaySeance) { state.todaySeance?.nutritionTrack?.calories ?: 0 }
+                            val progressCalories = remember(calories, objectifCal) { (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f) }
                             ObjectifBox(
                                 value = calories.toString(),
                                 objectif = objectifCal.toString(),
                                 unit = "Cal",
                                 drawableTop =  R.drawable.icon_cal
                             ) {
-                                val progress =
-                                    (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f)
                                 ProgressLine(
-                                    progress,
+                                    progressCalories,
                                     height = 4.dp,
                                     progressColor = Color(0xFFFF5915),
                                     modifier = Modifier.padding(top = 12.dp)
@@ -215,17 +214,16 @@ fun HomePage(
                             }
                         }
                         item {
-                            val sleep = state.todaySeance?.physioTrack?.hourOfSleep ?: 0
+                            val sleep = remember(state.todaySeance) { state.todaySeance?.physioTrack?.hourOfSleep ?: 0 }
+                            val progressSleep = remember(sleep, objectifsommeil) { (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f) }
                             ObjectifBox(
                                 value = sleep.toString(),
                                 objectif = objectifsommeil.toString(),
                                 unit = "h",
                                 drawableTop =  R.drawable.icon_sleep
                             ) {
-                                val progress =
-                                    (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f)
                                 ProgressLine(
-                                    progress,
+                                    progressSleep,
                                     height = 4.dp,
                                     progressColor = Color(0xFF6BECFF),
                                     modifier = Modifier.padding(top = 12.dp)

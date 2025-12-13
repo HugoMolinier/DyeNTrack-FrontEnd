@@ -31,6 +31,24 @@ interface SeanceDao {
         }
     }
 
+    suspend fun saveOrUpdateSeanceWithoutReplaceNull(seanceDao: SeanceDao, seance: SeanceOfDayLocal) {
+        val existing = seanceDao.getSeanceByDay(seance.day)
+
+        val mergedSeance = existing?.copy(
+            nutritionTrack = seance.nutritionTrack ?: existing.nutritionTrack,
+            physioTrack = seance.physioTrack ?: existing.physioTrack,
+            plannedExercises = seance.plannedExercises.ifEmpty { existing.plannedExercises },
+            saveAPI = seance.saveAPI
+        ) ?: seance
+
+        if (existing == null) {
+            seanceDao.insertSeance(mergedSeance)
+        } else {
+            seanceDao.updateSeance(mergedSeance)
+        }
+    }
+
+
     @Delete
     suspend fun deleteSeance(seance: SeanceOfDayLocal)
 }

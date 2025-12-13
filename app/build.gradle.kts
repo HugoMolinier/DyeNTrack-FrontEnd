@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation("androidx.core:core-splashscreen:1.0.0")
 
+    //santé
+    implementation("androidx.health.connect:connect-client:1.1.0")
     //graph
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     // Compose
@@ -67,6 +69,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.runtime)
 
     // Navigation
     val nav_version = "2.9.5"

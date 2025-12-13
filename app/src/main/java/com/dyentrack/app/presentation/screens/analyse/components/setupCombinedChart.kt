@@ -23,8 +23,14 @@ import com.github.mikephil.charting.data.LineDataSet
 fun CombinedChartMP(
     modifier: Modifier = Modifier,
     labels: List<String>,
-    barValues: List<Float>,  // somme pondérée
-    lineValues: List<Float>
+    barValues: List<Float>,
+    lineValues: List<Float>,
+
+    // NEW PARAMETERS
+    barLegendLabel: String = "Somme pondérée",
+    barLegendColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+    lineLegendLabel: String = "Ratio fail/set",
+    lineLegendColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -46,49 +52,50 @@ fun CombinedChartMP(
         modifier = modifier,
         update = { chart ->
 
-            // Bar Entries (somme pondérée) → axe gauche
+            // Bar entries
             val barEntries = barValues.mapIndexed { index, value ->
                 BarEntry(index.toFloat(), value)
             }
 
-            // Line Entries (ratio fail/set) → axe droite invisible
+            // Line entries
             val lineEntries = lineValues.mapIndexed { index, value ->
                 Entry(index.toFloat(), value)
             }
 
-            val barDataSet = BarDataSet(barEntries, "Somme pondérée").apply {
-                color = colorScheme.primary.copy(alpha = 0.7f).toArgb()
+            val barDataSet = BarDataSet(barEntries, barLegendLabel).apply {
+                color = barLegendColor.toArgb()
                 axisDependency = YAxis.AxisDependency.LEFT
                 setDrawValues(true)
                 valueTextColor = colorScheme.onSurface.toArgb()
             }
 
-            val lineDataSet = LineDataSet(lineEntries, "Ratio fail/set").apply {
-                color = colorScheme.secondary.copy(alpha = 0.4f).toArgb()
+            val lineDataSet = LineDataSet(lineEntries, lineLegendLabel).apply {
+                color = lineLegendColor.toArgb()
                 lineWidth = 2f
                 setDrawCircles(true)
                 setDrawValues(true)
                 valueTextColor = colorScheme.onSurface.toArgb()
                 axisDependency = YAxis.AxisDependency.RIGHT
+
                 valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
-                        return "${(value * 100).toInt()}%"  // valeur sur le point
+                        return "${(value * 100).toInt()}%"
                     }
                 }
             }
 
-            val barData = BarData(barDataSet)
-            val lineData = LineData(lineDataSet)
-
-            val combinedData = CombinedData()
-            combinedData.setData(barData)
-            combinedData.setData(lineData)
+            val combinedData = CombinedData().apply {
+                setData(BarData(barDataSet))
+                setData(LineData(lineDataSet))
+            }
 
             chart.data = combinedData
+
+            // Format X labels
             val labelsWithoutYear = labels.map { label ->
-                label.split("-").drop(1).joinToString("/") // garde seulement jour et mois
+                label.split("-").drop(1).joinToString("/")
             }
-            // X Axis
+
             chart.xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 granularity = 1f
@@ -97,18 +104,18 @@ fun CombinedChartMP(
                 textSize = 10f
             }
 
-            // Axe gauche → barre somme pondérée
+            // Axe gauche
             chart.axisLeft.apply {
                 axisMinimum = 0f
                 textColor = secondaryTextColor.toArgb()
             }
 
-            // Axe droite → ratio invisible
+            // Axe droite
             chart.axisRight.apply {
                 axisMinimum = 0f
+                axisMaximum = 1f
                 setDrawGridLines(false)
                 textColor = secondaryTextColor.toArgb()
-                axisMaximum = 1f
             }
 
             chart.invalidate()
