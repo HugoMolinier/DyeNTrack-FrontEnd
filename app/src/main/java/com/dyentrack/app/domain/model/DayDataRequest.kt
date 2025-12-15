@@ -8,7 +8,8 @@ data class DayDataRequest(
     val dayData: String,
     val seanceTrack: SeanceTrack?=null,
     val nutritionTrack: NutritionTrack?=null,
-    val physioTrack: PhysioTrack?=null
+    val physioTrack: PhysioTrack?=null,
+    val lastUpdate: String?=null
 )
 
 @Serializable

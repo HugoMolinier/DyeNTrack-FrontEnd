@@ -9,6 +9,7 @@ import com.dyentrack.app.data.local.database.Converters
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.PlannedExerciseVO
+import java.time.Instant
 
 
 @Entity(tableName = "seanceOfDay")
@@ -20,7 +21,7 @@ data class SeanceOfDayLocal(
     //val note: String? = null,
     val nutritionTrack: NutritionTrack?,
     val physioTrack: PhysioTrack?,
-    val saveAPI: Boolean = false
+    val lastUpdate: String = Instant.now().toString()
 )
 
 

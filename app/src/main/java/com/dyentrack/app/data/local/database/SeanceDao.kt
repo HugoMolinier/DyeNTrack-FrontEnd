@@ -2,6 +2,8 @@ package com.dyentrack.app.data.local.database
 
 import androidx.room.*
 import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
+import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 @Dao
 @TypeConverters(Converters::class)
@@ -13,21 +15,23 @@ interface SeanceDao {
     @Query("SELECT * FROM seanceOfDay WHERE day = :day")
     suspend fun getSeanceByDay(day: String): SeanceOfDayLocal?
 
+    @Query("SELECT * FROM seanceOfDay")
+    fun observeAllSeances(): Flow<List<SeanceOfDayLocal>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSeance(seance: SeanceOfDayLocal)
 
-    @Query("UPDATE seanceOfDay SET saveAPI = :status WHERE day = :day")
-    suspend fun updateSaveApi(day: String, status: Boolean)
 
 
     @Update
     suspend fun updateSeance(seance: SeanceOfDayLocal)
 
     suspend fun saveOrUpdateSeance(seanceDao: SeanceDao, seance: SeanceOfDayLocal) {
+        val updatedSeance = seance.copy(lastUpdate = Instant.now().toString())
         if (seanceDao.getSeanceByDay(seance.day) == null) {
-            seanceDao.insertSeance(seance)
+            seanceDao.insertSeance(updatedSeance)
         } else {
-            seanceDao.updateSeance(seance)
+            seanceDao.updateSeance(updatedSeance)
         }
     }
 
@@ -38,8 +42,8 @@ interface SeanceDao {
             nutritionTrack = seance.nutritionTrack ?: existing.nutritionTrack,
             physioTrack = seance.physioTrack ?: existing.physioTrack,
             plannedExercises = seance.plannedExercises.ifEmpty { existing.plannedExercises },
-            saveAPI = seance.saveAPI
-        ) ?: seance
+            lastUpdate = Instant.now().toString()
+        ) ?: seance.copy(lastUpdate = Instant.now().toString())
 
         if (existing == null) {
             seanceDao.insertSeance(mergedSeance)
@@ -49,6 +53,4 @@ interface SeanceDao {
     }
 
 
-    @Delete
-    suspend fun deleteSeance(seance: SeanceOfDayLocal)
 }

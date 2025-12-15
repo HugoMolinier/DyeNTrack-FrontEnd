@@ -48,6 +48,7 @@ fun InputCustom(
     keyboardType: KeyboardType = KeyboardType.Text,
     variant : InputVariant ?= InputVariant.FILLED,
     singleLine:Boolean = true,
+    replaceZeroToNull:Boolean=false,
     maxCaracter: Int? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -80,6 +81,7 @@ fun InputCustom(
             enabled= enabled,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             modifier=Modifier.weight(1f).onFocusChanged { focusState ->
+                // FOCUS OUT
                 if (isFocused && !focusState.isFocused) {
                     onFocusLost?.invoke(text.value.text)
                 }
@@ -87,6 +89,7 @@ fun InputCustom(
             },
 
             onValueChange = { newValue ->
+                
                 var filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
                     KeyboardType.Decimal -> newValue.text

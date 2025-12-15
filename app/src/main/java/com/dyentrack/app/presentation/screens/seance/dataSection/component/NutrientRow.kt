@@ -39,6 +39,7 @@ fun NutrientRow(
                 text = valueState,
                 enabled = isEditable,
                 placeholder = "0",
+                replaceZeroToNull = true,
                 onValueChange = onValueChange,
                 onFocusLost = onFocusLost,
                 keyboardType = KeyboardType.Decimal,

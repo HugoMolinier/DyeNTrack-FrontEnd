@@ -132,6 +132,7 @@ fun SetRow(
                 modifier = Modifier.weight(1f),
                 keyboardType = KeyboardType.Number,
                 maxCaracter = 2,
+                replaceZeroToNull = true,
                 onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
             )
             LaunchedEffect(repsState.value.text) {
@@ -144,6 +145,7 @@ fun SetRow(
                     enabled = !lockInput,
                     modifier = Modifier.weight(1f),
                     maxCaracter = 2,
+                    replaceZeroToNull = true,
                     keyboardType = KeyboardType.Number,
                     onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
                 )
@@ -157,6 +159,7 @@ fun SetRow(
             text = chargeState,
             placeholder = "Charge",
             enabled = !lockInput,
+            replaceZeroToNull = true,
             modifier = Modifier.weight(1f),
             maxCaracter = 6,
             keyboardType = KeyboardType.Decimal,
