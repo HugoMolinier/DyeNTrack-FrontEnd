@@ -34,17 +34,19 @@ class SyncHealthDataUseCase @Inject constructor(
             val steps = getDataHealthUseCase.aggregateSteps(client, start, end).toInt()
             val nutrition = getDataHealthUseCase.nutritionData(client, start, end)
 
-            // Création ou mise à jour du DayDataRequest local
-            val dayData = DayDataRequest(
-                idDayData = null,
-                dayData = today.toString(),
-                physioTrack = PhysioTrack(step = steps),
-                seanceTrack = null,
-                nutritionTrack = nutrition
-            )
+            if(steps !=0 ||nutrition.isNotNull) {
+                // Création ou mise à jour du DayDataRequest local
+                val dayData = DayDataRequest(
+                    idDayData = null,
+                    dayData = today.toString(),
+                    physioTrack = PhysioTrack(step = steps),
+                    seanceTrack = null,
+                    nutritionTrack = nutrition
+                )
 
-            updateDayDataToLocalUseCase(dayData)
-            updateDayDataToApiUseCase(dayData)
+                updateDayDataToLocalUseCase(dayData)
+                updateDayDataToApiUseCase(dayData)
+            }
 
             Log.d("kfsk",steps.toString()+"  "+nutrition.calories.toString())
             SyncedHealthData(

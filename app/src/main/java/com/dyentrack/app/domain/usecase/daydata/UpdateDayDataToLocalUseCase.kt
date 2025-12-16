@@ -6,6 +6,6 @@ import javax.inject.Inject
 
 class UpdateDayDataToLocalUseCase @Inject constructor(private val repository: DayDataRepository) {
     suspend operator fun invoke(dayData: DayDataRequest) {
-        repository.updateToLocal(dayData)
+        repository.updateToLocal(dayData,null)
     }
 }

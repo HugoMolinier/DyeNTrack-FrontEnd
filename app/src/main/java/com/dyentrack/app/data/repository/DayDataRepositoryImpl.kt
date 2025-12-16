@@ -40,9 +40,7 @@ class DayDataRepositoryImpl @Inject constructor(
         }
         _dayDataFlow.value = apiDayData
         // 4. merge local et API
-
         val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
-        Log.d("Merge jhkad","${merged}")
         _dayDataFlow.value = merged
 
 
@@ -59,35 +57,26 @@ class DayDataRepositoryImpl @Inject constructor(
         local.forEach { localDay ->
             val apiDay = apiMap[localDay.dayData]
             if (apiDay != null) {
-                if(localDay.dayData=="2025-12-16") {
-                    Log.d("API Day", "${apiDay}")
-                    Log.d("Local Day", "${localDay}")
-                }
-
                 val localTime = Instant.parse(localDay.lastUpdate)
                 val apiTime =  Instant.parse(apiDay.lastUpdate)
-                if (apiTime.isAfter(localTime)) { // API plus récente → prendre API et mettre à jour local
+                if (!apiTime.isBefore(localTime)) { // API plus récente ou equal → prendre API et mettre à jour local
                     result.add(apiDay)
-                    updateToLocal(apiDay)
+                    updateToLocal(apiDay,apiDay.lastUpdate)
                 } else {// sinon garder local et mettre a jour api
                     result.add(localDay)
-                    if(localTime.isAfter(apiTime.plusSeconds(30))) {
-                        //updateToApi(localDay)
-                    }
+                    updateToApi(localDay)
                 }
             }else {// API n'a pas ce jour → on envoie le local
                 result.add(localDay)
-                //updateToApi(localDay)
+                updateToApi(localDay)
             }
         }
         //ajouter au local les jour api pas dans le local
         val localDays = local.map { it.dayData }.toSet()
         api.filter { it.dayData !in localDays }.forEach { apiOnlyDay ->
             result.add(apiOnlyDay)
-            updateToLocal(apiOnlyDay)
+            updateToLocal(apiOnlyDay,apiOnlyDay.lastUpdate)
         }
-
-
         return result
     }
 
@@ -109,10 +98,10 @@ class DayDataRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun updateToLocal(dayData: DayDataRequest) {
+    override suspend fun updateToLocal(dayData: DayDataRequest, dateSave: String? ) {
         val existing = seanceDao.getSeanceByDay(dayData.dayData)
         val seanceLocal = dayData.toSeanceOfDayLocal( existing)
-        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal)
+        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal,dateSave)
 
         val updatedLocal = seanceDao.getAllSeances().map { it.toDayDataRequest() }
         _dayDataFlow.value = updatedLocal.map { it.copy() }
