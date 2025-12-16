@@ -25,13 +25,12 @@ class DayDataRepositoryImpl @Inject constructor(
 
     override suspend fun fetchDayData() {
         // 1. récupère le local
-        /*
+
         val localDayDataBrut = seanceDao.getAllSeances()
         val localDayData = localDayDataBrut.map { it.toDayDataRequest() }
         //1.5 update le flow car api peut delay
         _dayDataFlow.value = localDayData
 
-        Log.d("LocalData","${localDayData}")*/
         // 2. récupère l'API
         val apiDayData = try {
             val apiResponse = api.getAllDayDataByDay()
@@ -40,12 +39,11 @@ class DayDataRepositoryImpl @Inject constructor(
             emptyList()
         }
         _dayDataFlow.value = apiDayData
-        Log.d("API Day","${apiDayData}")
         // 4. merge local et API
-        /*
+
         val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
         Log.d("Merge jhkad","${merged}")
-        _dayDataFlow.value = merged*/
+        _dayDataFlow.value = merged
 
 
     }
@@ -61,8 +59,13 @@ class DayDataRepositoryImpl @Inject constructor(
         local.forEach { localDay ->
             val apiDay = apiMap[localDay.dayData]
             if (apiDay != null) {
-                val localTime = localDay.lastUpdate?.let { Instant.parse(it) } ?: Instant.EPOCH
-                val apiTime = apiDay.lastUpdate?.let { Instant.parse(it) } ?: Instant.EPOCH
+                if(localDay.dayData=="2025-12-16") {
+                    Log.d("API Day", "${apiDay}")
+                    Log.d("Local Day", "${localDay}")
+                }
+
+                val localTime = Instant.parse(localDay.lastUpdate)
+                val apiTime =  Instant.parse(apiDay.lastUpdate)
                 if (apiTime.isAfter(localTime)) { // API plus récente → prendre API et mettre à jour local
                     result.add(apiDay)
                     updateToLocal(apiDay)
@@ -92,6 +95,7 @@ class DayDataRepositoryImpl @Inject constructor(
     override suspend fun updateToApi(dayData: DayDataRequest): Int {
         return try {
             val response = api.saveDayData(dayData)
+            Log.d("ResponseApi","${response}")
             if (response.status in listOf(200, 201)) {
                 200
             } else {
@@ -122,26 +126,27 @@ class DayDataRepositoryImpl @Inject constructor(
             day = dayData,
             nutritionTrack = nutritionTrack ?: existing?.nutritionTrack,
             physioTrack = physioTrack ?: existing?.physioTrack,
-            plannedExercises = (
-                    (seanceTrack?.plannedExercises ?: emptyList()) +
-                            (existing?.plannedExercises ?: emptyList())
-                    ).distinctBy { it.id },
-            lastUpdate = Instant.now().toString()
+            plannedExercises = if (seanceTrack?.plannedExercises.isNullOrEmpty()) {
+                existing?.plannedExercises ?: emptyList()
+            } else {
+                seanceTrack.plannedExercises
+            },
         )
     }
-
 
      fun SeanceOfDayLocal.toDayDataRequest(): DayDataRequest {
         return DayDataRequest(
             null,
             day,
+
             seanceTrack = SeanceTrack(
                 startHour = null,
                 presetSeanceId = null,
                 plannedExercises = plannedExercises
             ),
             nutritionTrack?: NutritionTrack(),
-            physioTrack?: PhysioTrack()
+            physioTrack?: PhysioTrack(),
+            lastUpdate=lastUpdate
         )
     }
 }

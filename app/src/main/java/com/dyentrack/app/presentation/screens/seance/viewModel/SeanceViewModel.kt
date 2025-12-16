@@ -371,7 +371,6 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     fun deleteLastSet(exerciseId: Long){
         val seance = _uiState.value.seancesParJour[_uiState.value.daySelected] ?: return
         val sets = seance.setsMap[exerciseId] ?: return
