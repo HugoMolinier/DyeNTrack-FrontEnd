@@ -1,9 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance.viewModel
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -371,11 +369,10 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     fun deleteLastSet(exerciseId: Long){
         val seance = _uiState.value.seancesParJour[_uiState.value.daySelected] ?: return
         val sets = seance.setsMap[exerciseId] ?: return
-        sets.removeLast()
+        sets.removeAt(sets.size - 1)
         changeSaveStatus(SaveType.NOTSAVE)
 
 
