@@ -25,12 +25,13 @@ class DayDataRepositoryImpl @Inject constructor(
 
     override suspend fun fetchDayData() {
         // 1. récupère le local
+        /*
         val localDayDataBrut = seanceDao.getAllSeances()
         val localDayData = localDayDataBrut.map { it.toDayDataRequest() }
         //1.5 update le flow car api peut delay
         _dayDataFlow.value = localDayData
 
-        Log.d("LocalData","${localDayData}")
+        Log.d("LocalData","${localDayData}")*/
         // 2. récupère l'API
         val apiDayData = try {
             val apiResponse = api.getAllDayDataByDay()
@@ -38,11 +39,13 @@ class DayDataRepositoryImpl @Inject constructor(
         } catch (_: Exception) {
             emptyList()
         }
+        _dayDataFlow.value = apiDayData
         Log.d("API Day","${apiDayData}")
         // 4. merge local et API
+        /*
         val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
         Log.d("Merge jhkad","${merged}")
-        _dayDataFlow.value = merged
+        _dayDataFlow.value = merged*/
 
 
     }
@@ -60,7 +63,7 @@ class DayDataRepositoryImpl @Inject constructor(
             if (apiDay != null) {
                 val localTime = localDay.lastUpdate?.let { Instant.parse(it) } ?: Instant.EPOCH
                 val apiTime = apiDay.lastUpdate?.let { Instant.parse(it) } ?: Instant.EPOCH
-                if (apiTime.isAfter(localTime.plusSeconds(30))) { // API plus récente → prendre API et mettre à jour local
+                if (apiTime.isAfter(localTime)) { // API plus récente → prendre API et mettre à jour local
                     result.add(apiDay)
                     updateToLocal(apiDay)
                 } else {// sinon garder local et mettre a jour api
