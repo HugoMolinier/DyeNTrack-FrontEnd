@@ -1,12 +1,14 @@
-package com.dyentrack.app.presentation.screens.analyse.components
+package com.dyentrack.app.presentation.components.chart
 
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
+import com.dyentrack.app.presentation.theme.BlueSub
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.components.XAxis
@@ -18,6 +20,8 @@ import com.github.mikephil.charting.data.CombinedData
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 
 @Composable
 fun CombinedChartMP(
@@ -26,11 +30,10 @@ fun CombinedChartMP(
     barValues: List<Float>,
     lineValues: List<Float>,
 
-    // NEW PARAMETERS
     barLegendLabel: String = "Somme pondérée",
-    barLegendColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+    barLegendColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
     lineLegendLabel: String = "Ratio fail/set",
-    lineLegendColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
+    lineLegendColor: Color = BlueSub
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -77,7 +80,7 @@ fun CombinedChartMP(
                 valueTextColor = colorScheme.onSurface.toArgb()
                 axisDependency = YAxis.AxisDependency.RIGHT
 
-                valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+                valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
                         return "${(value * 100).toInt()}%"
                     }
@@ -99,7 +102,7 @@ fun CombinedChartMP(
             chart.xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 granularity = 1f
-                valueFormatter = com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labelsWithoutYear)
+                valueFormatter = IndexAxisValueFormatter(labelsWithoutYear)
                 textColor = secondaryTextColor.toArgb()
                 textSize = 10f
             }

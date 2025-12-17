@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +34,11 @@ import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.theme.TertiaThree
+import com.dyentrack.app.presentation.theme.TertiaTwo
+import com.dyentrack.app.presentation.utils.toAbbreviatedDate
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 
 @Composable
@@ -41,12 +47,13 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
     if (!state.showAnalyseData) return
 
     LazyRow(
-        modifier = Modifier.padding(bottom = 20.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)    ,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         reverseLayout = true,
     ) {
         state.analyseData.forEach { (date, sets) ->
             if (date != state.daySelected) {
+                val dateFormat= LocalDate.parse(date)
                 item {
                     Box(
                         modifier = Modifier
@@ -57,7 +64,7 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
                             )
                             .background(TertiaOne, shape = RoundedCornerShape(8.dp))
                             .fillMaxWidth(0.8f)
-                            .padding(end = 30.dp),
+                            .padding(end = 20.dp),
                     ) {
 
 
@@ -83,10 +90,19 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
                                     )
 
                                 }
+
                                 Text(
-                                    date,
+                                    "J -"+ ChronoUnit.DAYS.between(dateFormat,LocalDate.parse(state.daySelected)),
                                     style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                                Text(
+                                    ": "+dateFormat.toAbbreviatedDate() ,
+                                    style = MaterialTheme.typography.bodySmall
+                                        .copy(
+                                        color = secondaryTextColor,
                                         fontWeight = FontWeight.Medium
                                     )
                                 )

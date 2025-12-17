@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.components
+package com.dyentrack.app.presentation.components.chart
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -20,6 +20,8 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 
 @Composable
 fun RadarChartMP(
@@ -81,7 +83,7 @@ fun RadarChartMP(
                 color = colorScheme.secondary.toArgb()
                 fillColor = secondaryTextColor.toArgb()
                 fillAlpha = 50
-                lineWidth = 2f
+                lineWidth = 1f
                 setDrawFilled(false)
                 setDrawValues(false)
             }
@@ -90,14 +92,14 @@ fun RadarChartMP(
                 color = colorScheme.primary.toArgb()
                 fillColor = colorScheme.primary.toArgb()
                 fillAlpha = 50
-                lineWidth = 2f
+                lineWidth = 1f
                 setDrawFilled(true)
                 setDrawValues(true)
                 valueTextColor = secondaryTextColor.toArgb()
             }
 
             // Formatter integer
-            dataSet2.valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+            dataSet2.valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     return value.toInt().toString()
                 }
@@ -107,7 +109,7 @@ fun RadarChartMP(
 
             // Axis
             radarChart.xAxis.apply {
-                valueFormatter = com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels)
+                valueFormatter = IndexAxisValueFormatter(labels)
                 textSize = 10f
                 textColor = colorScheme.onSurface.toArgb()
             }
@@ -125,7 +127,7 @@ fun RadarChartMP(
 }
 
 fun createDot(context: Context): Bitmap {
-    val size = (7 * context.resources.displayMetrics.density).toInt()
+    val size = (5 * context.resources.displayMetrics.density).toInt()
     val stroke = (1.5f * context.resources.displayMetrics.density)
 
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)

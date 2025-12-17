@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.analyse
+package com.dyentrack.app.presentation.screens.analyse.viewModel
 
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
@@ -13,7 +13,13 @@ data class AnalyseUiState(
 
     val muscleSetPercentage: List<Triple<Long, Float, MuscleRate>> = emptyList(),
 
-    val dateRange : DateRangeSelected= DateRangeSelected()
+    val dateRange : DateRangeSelected= DateRangeSelected(),
+
+    val exerciceChose: Long=0L,
+    val tempChose:Long=0L,
+    val isBottomSheetVisible: Boolean=false,
+    val allDataExercise: Map<String, MuscleRate> =emptyMap(),
+
 
 
 )

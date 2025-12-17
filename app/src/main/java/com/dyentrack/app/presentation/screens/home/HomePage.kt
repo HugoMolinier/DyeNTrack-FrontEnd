@@ -1,7 +1,6 @@
 package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dyentrack.app.R
 import androidx.navigation.NavController
@@ -52,9 +50,8 @@ import com.dyentrack.app.presentation.components.ButtonVariant
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ProgressLine
-import com.dyentrack.app.presentation.components.RadarChartMP
+import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
-import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @SuppressLint("FrequentlyChangingValue")

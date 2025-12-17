@@ -250,10 +250,6 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun updateSearchQuery(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-    }
-
     fun toggleExerciseSelection(exerciseId: Long) {
         val exercise = getExerciseToAdd()
         val exerciseList = if (exerciseId in exercise) {

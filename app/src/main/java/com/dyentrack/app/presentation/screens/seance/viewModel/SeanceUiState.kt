@@ -20,7 +20,6 @@ data class SeanceUiState(
 
     val expandedExerciseId: Long? = null,
     val isBottomSheetVisible: Boolean = false,
-    val searchQuery: String = "",
 
     val sectionSelect:SectionSelectType?=SectionSelectType.SEANCE,
 

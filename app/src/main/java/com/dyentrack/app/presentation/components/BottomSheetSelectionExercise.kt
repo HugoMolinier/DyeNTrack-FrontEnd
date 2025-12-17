@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.seance.component
+package com.dyentrack.app.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,50 +27,48 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.presentation.components.BottomSheetContent
-import com.dyentrack.app.presentation.components.ButtonEmphasis
-import com.dyentrack.app.presentation.components.CardWithContent
-import com.dyentrack.app.presentation.components.ChipDropDown
-import com.dyentrack.app.presentation.components.ChipsEmphasys
-import com.dyentrack.app.presentation.components.CustomButton
-import com.dyentrack.app.presentation.components.FavoriteIconButton
-import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
-import com.dyentrack.app.presentation.components.MenuItemData
-import com.dyentrack.app.presentation.components.SubTextEmphasis
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.domain.model.InfoExerciseUser
+import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 
 @Composable
 fun BottomSheetSelectionExercise(
-    state: SeanceUiState,
-    viewModel: SeanceViewModel,
-    navController: NavController
+    bottomSheetVisibility: Boolean,
+    selectedExerciseIds: List<Long>,
+    masterDataStatic: MasterDataStatic?,
+    infoMapUser :Map<Long, InfoExerciseUser>,
+    navController: NavController,
+    onClose: () -> Unit= {},
+    onClickExercise: (Long) -> Unit= {},
+    onClickFavorite: (Long) -> Unit= {},
+    onResetFilter: () -> Unit= {},
+    onUpdateQuery:(String) ->Unit= {},
+    footerChildren: @Composable () -> Unit = {}
+
 ) {
+    var searchQuery by remember { mutableStateOf("") }
     var typeFilter by remember { mutableStateOf("Tous") }
     var groupFilter by remember { mutableStateOf("Groupes Musculaires") }
-    val infoMapState by viewModel.infoExerciseUserFlow.collectAsState()
     val filteredExercises = remember(
-        state.searchQuery,
+        searchQuery,
         typeFilter,
         groupFilter,
-        viewModel.masterData?.officialExercise
+        masterDataStatic?.officialExercise
     ) {
-        viewModel.masterData?.officialExercise?.filter { exercise ->
-            val matchesSearch = exercise.nameFR.contains(state.searchQuery, ignoreCase = true)
+        masterDataStatic?.officialExercise?.filter { exercise ->
+            val matchesSearch = exercise.nameFR.contains(searchQuery, ignoreCase = true)
 
             val typeSearch = when (typeFilter) {
                 "Officiel" -> exercise.idCreator == null
-                "Favorie" -> infoMapState[exercise.idExercise]?.favorite ?: false
+                "Favorie" -> infoMapUser[exercise.idExercise]?.favorite ?: false
                 "Non Officiel" -> exercise.idCreator != null
                 else -> true
             }
 
             val groupFilter =
-                groupFilter == "Groupes Musculaires" || viewModel.masterData?.musclesGroup
-                    ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR == groupFilter
+                groupFilter == "Groupes Musculaires" || masterDataStatic.musclesGroup
+                    .firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR == groupFilter
 
 
             matchesSearch && typeSearch && groupFilter
@@ -80,17 +77,18 @@ fun BottomSheetSelectionExercise(
     val nombreFiltresActifs = listOf(
         typeFilter to "Tous",
         groupFilter to "Groupes Musculaires"
-    ).count { it.first != it.second } + if (state.searchQuery.isNotEmpty()) 1 else 0
+    ).count { it.first != it.second } + if (searchQuery.isNotEmpty()) 1 else 0
 
     BottomSheetContent(
         title = "Ajouter un exercice",
-        showBottomSheet = state.isBottomSheetVisible,
-        onDismiss = { viewModel.toggleBottomSheet(false) },
+        showBottomSheet = bottomSheetVisibility,
+        onDismiss = { onClose()},
         childrenForExtend = {
             InputCustom(
-                text = remember { mutableStateOf(TextFieldValue(state.searchQuery)) },
+                text = remember { mutableStateOf(TextFieldValue(searchQuery)) },
                 onValueChange = { newValue ->
-                    viewModel.updateSearchQuery(newValue)
+                    searchQuery = newValue
+                    onUpdateQuery(newValue)
                 },
                 placeholder = "Search",
                 leadingIcon = Icons.Default.Search,
@@ -124,7 +122,7 @@ fun BottomSheetSelectionExercise(
                             ) { typeFilter = it }
                             ChipDropDown(
                                 listOfSelectableItem = listOf("Groupes Musculaires") +
-                                        viewModel.masterData?.musclesGroup?.map { it.nameFR }
+                                        masterDataStatic?.musclesGroup?.map { it.nameFR }
                                             .orEmpty(),
                                 defaultSelected = groupFilter,
                                 emphasys = ChipsEmphasys.SECONDARY
@@ -140,7 +138,7 @@ fun BottomSheetSelectionExercise(
                                     .clickable(enabled = nombreFiltresActifs > 0) {
                                         typeFilter = "Tous"
                                         groupFilter = "Groupes Musculaires"
-                                        viewModel.updateSearchQuery("")
+                                        onResetFilter()
                                     }) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
@@ -154,7 +152,7 @@ fun BottomSheetSelectionExercise(
                                 )
                             }
                             Text(
-                                "${filteredExercises?.count()}/${viewModel.masterData?.officialExercise?.count()}",
+                                "${filteredExercises?.count()}/${masterDataStatic?.officialExercise?.count()}",
                                 style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                             )
                         }
@@ -165,28 +163,20 @@ fun BottomSheetSelectionExercise(
 
                 //exercise
                 items(filteredExercises ?: listOf()) { exercise ->
-                    val isSelected = exercise.idExercise in state.exerciseToAdd
+                    val isSelected = exercise.idExercise in selectedExerciseIds
                     Box(Modifier.padding(12.dp, 4.dp)){
                     CardWithContent(
                         modifier = Modifier.padding(10.dp, 4.dp),
                         exercise.nameFR,
-                        subText = viewModel.masterData?.musclesGroup
+                        subText = masterDataStatic?.musclesGroup
                             ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
                             ?: "NaN",
 
                         leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
                         componentRight = {
                             FavoriteIconButton(
-                                isFavorite = infoMapState[exercise.idExercise]?.favorite ?: false,
-                                onClick = {
-                                    val currentFavorite =
-                                        infoMapState[exercise.idExercise]?.favorite ?: false
-                                    viewModel.updateInfoExerciseUser(
-                                        exercise.idExercise,
-                                        !currentFavorite,
-                                        null
-                                    )
-                                }
+                                isFavorite = infoMapUser[exercise.idExercise]?.favorite ?: false,
+                                onClick = { onClickFavorite(exercise.idExercise) }
                             )
                         },
                         menuOnLongClick = listOf(
@@ -203,36 +193,14 @@ fun BottomSheetSelectionExercise(
                                 )
                             ),
                         subTextEmphasis = SubTextEmphasis.PRIMARY,
-                        onClick = { viewModel.toggleExerciseSelection(exercise.idExercise) },
-                        badgeText = if (isSelected) (state.exerciseToAdd.indexOf(exercise.idExercise) + 1).toString() else null
+                        onClick = { onClickExercise(exercise.idExercise) },
+                        badgeText = if (isSelected) (selectedExerciseIds.indexOf(exercise.idExercise) + 1).toString() else null
                     )}
                 }
             }
         },
         footerComponent = {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp, end = 12.dp, top = 20.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                CustomButton(
-                    label = "Annuler",
-                    emphasis = ButtonEmphasis.SECONDARY,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        viewModel.toggleBottomSheet(false)
-                    }
-                )
-                CustomButton(
-                    label = "Ajouter",
-                    modifier = Modifier.weight(1f),
-                    enable = (state.exerciseToAdd.isNotEmpty()),
-                    onClick = {
-                        viewModel.addExerciseToSeance()
-                    }
-                )
-            }
+            footerChildren()
 
         }
     )

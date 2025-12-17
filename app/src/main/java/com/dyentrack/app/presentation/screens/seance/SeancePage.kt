@@ -4,6 +4,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -30,20 +31,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.presentation.components.ButtonEmphasis
+import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
+import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.screens.seance.component.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.VariantSelection
+import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
-import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
-import com.dyentrack.app.presentation.components.SectionSelector
-import com.dyentrack.app.presentation.components.VariantSelection
+import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
@@ -64,7 +66,7 @@ fun SeancePage(
         daySelected?.let { viewModel.setDaySelected(it) }
     }
     val state by viewModel.uiState.collectAsState()
-
+    val infoMapUser by viewModel.infoExerciseUserFlow.collectAsState()
 
     val lateriteNameMap = viewModel.masterData?.lateralites?.map { it.nameFR } ?: emptyList()
     val equipmentNameMap = viewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
@@ -261,5 +263,35 @@ fun SeancePage(
 
 
 
-    BottomSheetSelectionExercise(state, viewModel, navController)
+    BottomSheetSelectionExercise(
+        bottomSheetVisibility = state.isBottomSheetVisible,
+        selectedExerciseIds = state.exerciseToAdd,
+        navController = navController,
+        onClose = { viewModel.toggleBottomSheet(false) },
+        onClickExercise = { exerciseId ->
+            viewModel.toggleExerciseSelection(exerciseId)
+        },
+        masterDataStatic = viewModel.masterData,
+        infoMapUser = infoMapUser,
+        onClickFavorite = { viewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) },
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CustomButton(
+                label = "Annuler",
+                emphasis = ButtonEmphasis.SECONDARY,
+                modifier = Modifier.weight(1f),
+                onClick = { viewModel.toggleBottomSheet(false) }
+            )
+            CustomButton(
+                label = "Ajouter",
+                modifier = Modifier.weight(1f),
+                onClick = { viewModel.addExerciseToSeance() }
+            )
+        }
+    }
 }

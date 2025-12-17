@@ -13,6 +13,8 @@ val secondaryTextColor = Color(0xFF9CA3AF)
 val TertiaOne = Color(0xFF1E1E1E)
 val TertiaTwo = Color (0xFF181818)
 val TertiaThree = Color(0xFF0E0E0E)
+val BlueSub = Color(0xFF0679b1)
+val GreenSub = Color(0xFF4c6652)
 
 object  addColor{
 

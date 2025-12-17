@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,48 +41,69 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.ButtonEmphasis
+import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
-import com.dyentrack.app.presentation.components.RadarChartMP
+import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
+import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
+import com.dyentrack.app.presentation.screens.analyse.viewModel.AnalyseViewModel
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
+import kotlin.Long
 import kotlin.math.roundToInt
 
 
 @Composable
-fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
-               analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),) {
+fun AnalysePage(
+    modifier: Modifier = Modifier, navController: NavController,
+    analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),
+) {
     val state by analyseViewModel.uiState.collectAsState()
+    val infoMapUser by analyseViewModel.infoExerciseUserFlow.collectAsState()
     var inputIndex by remember { mutableIntStateOf(0) }
     var extendFilter by remember { mutableStateOf(false) }
 
-    Column(modifier=modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(
             "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onClickLeft = { navController.popBackStack() })
-        LazyColumn(modifier = Modifier            .fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 20.dp)) {
-            item { SectionSelector(modifier=Modifier , selectedIndex = inputIndex,itemSection = listOf(
-                MenuItemData(
-                    "2 Weeks",
-                    { analyseViewModel.applyDateRange(14L);inputIndex=0 }
-                ),
-                MenuItemData(
-                    "Month",
-                    { analyseViewModel.applyDateRange(30L);inputIndex=1 }
-                )
-                ,
-                MenuItemData(
-                    "Custom",
-                    { null }
-                )
-            ) ) }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 12.dp, top = 20.dp)
+        ) {
             item {
-                Row(modifier= Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.Center) {
+                SectionSelector(
+                    modifier = Modifier,
+                    selectedIndex = inputIndex,
+                    itemSection = listOf(
+                        MenuItemData(
+                            "2 Weeks",
+                            { analyseViewModel.applyDateRange(14L);inputIndex = 0 }
+                        ),
+                        MenuItemData(
+                            "Month",
+                            { analyseViewModel.applyDateRange(30L);inputIndex = 1 }
+                        ),
+                        MenuItemData(
+                            "Custom",
+                            { null }
+                        )
+                    ))
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
 
                     Text(
                         state.dateRange.oldDate.toAbbreviatedDate() +
@@ -93,34 +115,58 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                 state.dateRange.recentDate.toAbbreviatedDate() +
                                 " ${state.dateRange.recentDate.year}",
                         style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
-                    ) }
+                    )
+                }
             }
             item {
-                Column(modifier= Modifier.padding(top=36.dp)) {
-                    Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge)
-                        IconButton(onClick = {extendFilter=!extendFilter},modifier= Modifier.size(20.dp)) {Icon(Icons.Default.FilterAlt,"Afficher les filtres",     tint = if (extendFilter) MaterialTheme.colorScheme.onSurface else secondaryTextColor) }
-                    }
-                        AnimatedVisibility(
-                            visible = extendFilter,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
+                Column(modifier = Modifier.padding(top = 36.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Indicateur de performance",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        IconButton(
+                            onClick = { extendFilter = !extendFilter },
+                            modifier = Modifier.size(20.dp)
                         ) {
-                            Column {
-                                Text(
-                                    "Filtre par groupe musculaire",
-                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
-                                )
+                            Icon(
+                                Icons.Default.FilterAlt,
+                                "Afficher les filtres",
+                                tint = if (extendFilter) MaterialTheme.colorScheme.onSurface else secondaryTextColor
+                            )
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = extendFilter,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Column {
+                            Text(
+                                "Filtre par groupe musculaire",
+                                style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                            )
 
-                                FilterMuscleGroupRow(analyseViewModel.masterData)
-                            }
-                                        }
+                            FilterMuscleGroupRow(analyseViewModel.masterData)
+                        }
+                    }
                     Column {
                         //debut composant
-                        Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
-                            Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("Nombre de sessions", style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                                Text(  state.mapSeance.filter { it.value.plannedExercises.isNotEmpty() }.count().toString(), style = MaterialTheme.typography.bodyLarge)
+                        Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
+                            Column(
+                                Modifier.padding(vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    "Nombre de sessions",
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+                                Text(state.mapSeance.filter { it.value.plannedExercises.isNotEmpty() }
+                                    .count().toString(), style = MaterialTheme.typography.bodyLarge)
 
                             }
 
@@ -137,7 +183,7 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                 sommeSet += mr.numberSet
                                 sommeEx += mr.numberExercise
                                 sommeSetFail += mr.rateSetSomme?.numberSetFail ?: 0
-                                sommePond+=mr.rateSetSomme?.sommePond?:0.0
+                                sommePond += mr.rateSetSomme?.sommePond ?: 0.0
                             }
                         }
                         val moyenneSetParEx = if (sommeEx > 0) {
@@ -146,35 +192,67 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                         val proportionSetFail = if (sommeSet > 0) {
                             sommeSetFail.toDouble() / sommeSet * 100
                         } else 0.0
-                        Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
-                            Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("Moyenne Set/ Exercices", style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                                Text(  moyenneSetParEx.toString(), style = MaterialTheme.typography.bodyLarge)
+                        Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
+                            Column(
+                                Modifier.padding(vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    "Moyenne Set/ Exercices",
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+                                Text(
+                                    moyenneSetParEx.toString(),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
                             }
 
                         }
                         HorizontalDivider()
-                        Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
-                            Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("Proportion Set échec", style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-                                Text(  String.format("%.2f%%", proportionSetFail), style = MaterialTheme.typography.bodyLarge)
+                        Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
+                            Column(
+                                Modifier.padding(vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    "Proportion Set échec",
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+                                Text(
+                                    String.format("%.2f%%", proportionSetFail),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
                             }
 
                         }
                         HorizontalDivider()
-                        Row( horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
-                            Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
+                            Column(
+                                Modifier.padding(vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     Text(
                                         "Somme pondéré",
                                         style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                     )
-                                    Icon(Icons.Default.Info,"voir info", tint = secondaryTextColor,modifier=Modifier.size(20.dp))
+                                    Icon(
+                                        Icons.Default.Info,
+                                        "voir info",
+                                        tint = secondaryTextColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
 
-                                    Text(  sommePond.toInt().toString()+"kg", style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    sommePond.toInt().toString() + "kg",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
                             }
 
@@ -188,7 +266,8 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(280.dp).padding( vertical = 8.dp)
+                        .height(280.dp)
+                        .padding(vertical = 8.dp)
 
 
                         .wrapContentHeight()
@@ -199,7 +278,9 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                 ) {
                     CombinedChartMP(
                         labels = state.dayRatio.keys.toList(),
-                        barValues = state.dayRatio.values.map { it.rateSetSomme?.sommePond?.toFloat() ?: 0f },
+                        barValues = state.dayRatio.values.map {
+                            it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                        },
                         lineValues = state.dayRatio.values.map {
                             val totalSet = it.numberSet
                             val failSet = it.rateSetSomme?.numberSetFail ?: 0
@@ -210,60 +291,81 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                     )
                 }
             }
-            item {Text("Répartition", style = MaterialTheme.typography.bodyLarge,modifier=Modifier.padding(top = 20.dp, bottom = 8.dp))}
+            item {
+                Text(
+                    "Répartition",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)
+                )
+            }
             item {
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(top=8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
 
-                    item {  Box(
-                        modifier = Modifier
-                            .width(300.dp)
-                            .height(328.dp)
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
 
 
-                            .wrapContentHeight()
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.medium
-                            )
-                    ) {
-                        RadarChartSample(state.graphData, analyseViewModel.masterData)
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            RadarChartSample(state.graphData, analyseViewModel.masterData)
+                        }
                     }
-                    }
-                    item {  Box(
-                        modifier = Modifier
-                            .width(300.dp)
-                            .height(328.dp)
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
 
 
-                            .wrapContentHeight()
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.medium
-                            )
-                    ) {
-                        val labels = state.muscleSetPercentage
-                            .mapNotNull { (muscleId, _, _) ->
-                                analyseViewModel.masterData?.muscles?.find { it.id == muscleId }?.nameFR
-                            }
-                        val values = state.muscleSetPercentage
-                            .map { it.third.numberSet.toFloat() }
-                        val values2 = state.muscleSetPercentage
-                            .map { it.third.numberExercise.toFloat() }
-                        RadarChartMP(modifier,labels,values2,values)
-                    }
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val labels = state.muscleSetPercentage
+                                .mapNotNull { (muscleId, _, _) ->
+                                    analyseViewModel.masterData?.muscles?.find { it.id == muscleId }?.nameFR
+                                }
+                            val values = state.muscleSetPercentage
+                                .map { it.third.numberSet.toFloat() }
+                            val values2 = state.muscleSetPercentage
+                                .map { it.third.numberExercise.toFloat() }
+                            RadarChartMP(modifier, labels, values2, values)
+                        }
                     }
                 }
             }
 
             item {
-                FlowRow(maxItemsInEachRow = 2, modifier= Modifier.padding(vertical = 20.dp),verticalArrangement = Arrangement.spacedBy(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FlowRow(
+                    maxItemsInEachRow = 2,
+                    modifier = Modifier.padding(vertical = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     state.muscleSetPercentage.forEach { (key, value) ->
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.fillMaxWidth(0.48f)) {
-                            Row (modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxWidth(0.48f)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR?.let {
                                     Text(
                                         it,
@@ -275,12 +377,97 @@ fun AnalysePage(modifier:Modifier = Modifier,navController: NavController,
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
                             }
-                            ProgressLine(value,height=4.dp)
+                            ProgressLine(value, height = 4.dp)
                         }
                         analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR
                     }
                 }
             }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                ) {
+                    Text("Par exercice", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .padding(vertical = 8.dp)
+
+
+                        .wrapContentHeight()
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                            .fillMaxWidth()
+                            .height(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            analyseViewModel.masterData?.officialExercise?.find { it.idExercise == state.exerciceChose }?.nameFR
+                                ?: "Aucun Exercice", style = MaterialTheme.typography.bodyMedium
+                        )
+                        IconButton(onClick = { analyseViewModel.toggleBottomSheet(true) }) {
+                            Icon(
+                                Icons.Default.SwapHoriz,
+                                contentDescription = "Changer la sélection",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    CombinedChartMP(
+                        labels = state.allDataExercise.keys.toList(),
+                        barValues = state.allDataExercise.values.map {
+                            it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                        },
+                        lineValues = state.allDataExercise.values.map {
+                            val totalSet = it.numberSet
+                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
+                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+                BottomSheetSelectionExercise(
+                    bottomSheetVisibility = state.isBottomSheetVisible,
+                    selectedExerciseIds=listOf(state.tempChose),
+                    masterDataStatic = analyseViewModel.masterData,
+                    infoMapUser = infoMapUser,
+                    navController = navController,
+                    onClose = { analyseViewModel.toggleBottomSheet(false) },
+                    onClickExercise = {exerciseId ->analyseViewModel.changeTempExercice(exerciseId)},
+                    onClickFavorite = { analyseViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) },
+                ) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CustomButton(
+                            label = "Choisir",
+                            modifier = Modifier.weight(1f),
+                            onClick = { analyseViewModel.choseThisExercise();analyseViewModel.toggleBottomSheet(false) }
+                        )
+                    }
+                }
+
+            }
+
         }
     }
 

@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.exercise
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +40,7 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.VariantSelection
-import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
+import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -46,7 +49,9 @@ fun ExercisePage(
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
 ) {
 
-
+    LaunchedEffect(exercise) {
+        exerciseViewModel.setExercise(exercise)
+    }
     val idUser = 1.toLong()
     val state by exerciseViewModel.uiState.collectAsState()
     val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
@@ -173,14 +178,17 @@ fun ExercisePage(
                                     value = muscleUse.joinToString(", "),
                                     border = true
                                 )
-                                InfoRow(
-                                    label = "Muscle Principal",
-                                    value = exercise.muscleInfos
-                                        .firstOrNull { it.principal }
-                                        ?.idMuscle
-                                        ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
-                                        ?: "Aucun",
-                                )
+                                if(exercise.muscleInfos.size>1){
+                                    InfoRow(
+                                        label = "Muscle Principal",
+                                        value = exercise.muscleInfos
+                                            .firstOrNull { it.principal }
+                                            ?.idMuscle
+                                            ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
+                                            ?: "Aucun",
+                                    )
+                                }
+
                                 InfoRow(
                                     label = "Equipement possible",
                                     value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
@@ -233,8 +241,61 @@ fun ExercisePage(
 
                     }
                 }
-                else{
-                   // CombinedChartMP(Modifier,state.)
+                else {
+                    item{                 Text("Indicateur de performance", style = MaterialTheme.typography.bodyLarge)}
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp).padding(vertical = 8.dp)
+
+
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            CombinedChartMP(
+                                labels = state.allDataExercise.keys.toList(),
+                                barValues = state.allDataExercise.values.map {
+                                    it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                                },
+                                lineValues = state.allDataExercise.values.map {
+                                    val totalSet = it.numberSet
+                                    val failSet = it.rateSetSomme?.numberSetFail ?: 0
+                                    if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+
+                    }
+                    item {
+                        Column {
+                            InfoRow(
+                                label = "Moyenne Poids 5 occurences",
+                                value = exerciseViewModel.getAveragePerSet(5, 0)+" kg"
+                            )
+                            val last14Day = exerciseViewModel.getLast14DaysDataDivided()
+
+                            InfoRow(
+                                label = "Exercice/semaine",
+                                border = true,
+                                value = exerciseViewModel.getFrequencyPerWeek(last14Day).toString()
+                            )
+                            InfoRow(
+                                label = "Set/semaine",
+                                border = true,
+                                value = exerciseViewModel.getTotalSetsPerWeek(last14Day).toString()
+                            )
+                            InfoRow(
+                                label = "Dernière Occurence",
+                                value = exerciseViewModel.getLastDoneDate()
+                            )
+                        }
+                    }
                 }
             }
         }
