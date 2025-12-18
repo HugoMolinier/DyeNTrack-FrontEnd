@@ -1,9 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance.viewModel
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -29,6 +27,7 @@ import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.PlannedExerciseVO
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.SetVO
@@ -183,6 +182,53 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
+    fun updateSet(exerciseId: Long,index: Int,newValue : SetField,rightSet: Boolean,unilateral: Boolean){
+        val day = _uiState.value.daySelected
+        val seance = _uiState.value.seancesParJour[day] ?: return
+        val sets = seance.setsMap[exerciseId] ?: return
+        if (index !in sets.indices) return
+        val left = sets[index]
+        val right = left.linkedRightSet
+
+        val updatedSet = when (newValue) {
+            // ---------- REPS ----------
+            is SetField.Reps -> {
+                if (unilateral && rightSet && right != null) {
+                    left.copy(
+                        linkedRightSet = right.copy(reps = newValue.value)
+                    )
+                } else {
+                    left.copy(reps = newValue.value)
+                }
+            }
+            // ---------- CHARGE (sync L + R) ----------
+            is SetField.Charge -> {
+                if (unilateral) {
+                    left.copy(
+                        charge = newValue.value,
+                        linkedRightSet = right?.copy(charge = newValue.value)
+                    )
+                } else {
+                    left.copy(charge = newValue.value)
+                }
+            }
+
+            // ---------- RIR (sync L + R) ----------
+            is SetField.Rir -> {
+                if (unilateral) {
+                    left.copy(
+                        rir = newValue.value,
+                        linkedRightSet = right?.copy(rir = newValue.value)
+                    )
+                } else {
+                    left.copy(rir = newValue.value)
+                }
+            }
+        }
+        sets[index] = updatedSet
+        changeSaveStatus(SaveType.NOTSAVE)
+    }
+
     fun updateLaterite(exerciseId: Long, lateriteId: Long) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
@@ -194,23 +240,28 @@ class SeanceViewModel @Inject constructor(
         }
 
         val sets = seance.setsMap[exerciseId] ?: return
-        if (lateriteId == 2L) {
-            sets.forEach { set ->
-                if (set.side != SetSide.LEFT) set.side = SetSide.LEFT
-                if (set.linkedRightSet == null) {
-                    set.linkedRightSet = SetData(
-                        type = set.type,
-                        charge = set.charge,
-                        reps = set.reps,
-                        rir = set.rir,
-                        side = SetSide.RIGHT
-                    )
-                }
+        if (lateriteId == 2L) { // unilatéral
+            for (i in sets.indices) {
+                val set = sets[i]
+                val updatedRightSet = set.linkedRightSet ?: SetData(
+                    type = set.type,
+                    charge = set.charge,
+                    reps = set.reps,
+                    rir = set.rir,
+                    side = SetSide.RIGHT
+                )
+                sets[i] = set.copy(
+                    side = SetSide.LEFT,
+                    linkedRightSet = updatedRightSet
+                )
             }
         } else { // bilatéral ou autre
-            sets.forEach { set ->
-                set.linkedRightSet = null
-                set.side = SetSide.BOTH
+            for (i in sets.indices) {
+                val set = sets[i]
+                sets[i] = set.copy(
+                    side = SetSide.BOTH,
+                    linkedRightSet = null
+                )
             }
         }
         changeSaveStatus(SaveType.NOTSAVE)
@@ -315,28 +366,34 @@ class SeanceViewModel @Inject constructor(
 
         val lastCharge = sets.lastOrNull()?.charge
         val lastRir = sets.lastOrNull()?.rir?:1
-        val set = SetData(
-            type = SetType.EFFECTIVE,
-            charge = lastCharge,
-            reps = null,
-            rir = lastRir,
-            side = if (lateraliteName == "Unilatéral") SetSide.LEFT else SetSide.BOTH
-
-        )
-
-        if (lateraliteName == "Unilatéral") {
-            val setright =
-                SetData(
-                    type = SetType.EFFECTIVE,
-                    charge = lastCharge,
-                    reps = null,
-                    rir = null,
-                    side = SetSide.RIGHT
-
-                )
-            set.linkedRightSet = setright
+        val newSet = if (lateraliteName == "Unilatéral") {
+            val rightSet = SetData(
+                type = SetType.EFFECTIVE,
+                charge = lastCharge,
+                reps = null,
+                rir = null,
+                side = SetSide.RIGHT,
+                linkedRightSet = null
+            )
+            SetData(
+                type = SetType.EFFECTIVE,
+                charge = lastCharge,
+                reps = null,
+                rir = lastRir,
+                side = SetSide.LEFT,
+                linkedRightSet = rightSet
+            )
+        } else {
+            SetData(
+                type = SetType.EFFECTIVE,
+                charge = lastCharge,
+                reps = null,
+                rir = lastRir,
+                side = SetSide.BOTH,
+                linkedRightSet = null
+            )
         }
-        sets.add(set)
+        sets.add(newSet)
 
 
         changeSaveStatus(SaveType.NOTSAVE)
@@ -367,15 +424,12 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
-    fun deleteLastSet(exerciseId: Long){
-        val seance = _uiState.value.seancesParJour[_uiState.value.daySelected] ?: return
+    fun deleteSet(exerciseId: Long, setId: String) {
+        val day = _uiState.value.daySelected
+        val seance = _uiState.value.seancesParJour[day] ?: return
         val sets = seance.setsMap[exerciseId] ?: return
-        sets.removeAt(sets.size - 1)
-
+        seance.setsMap[exerciseId] = sets.filter { it.id != setId }.toMutableStateList()
         changeSaveStatus(SaveType.NOTSAVE)
-
-
-
     }
 
     fun expandExercise(exerciseId: Long?) {
@@ -544,23 +598,23 @@ class SeanceViewModel @Inject constructor(
                     )
                     SetSide.LEFT -> {
                         val rightSetVO = plannedExercise.sets.firstOrNull { it.setOrder == setVO.setOrder && it.side == SetSide.RIGHT }
-                        SetData(
+                        val leftSet = SetData(
                             type = setVO.typeOfSet,
                             charge = setVO.charge,
                             reps = setVO.repsNumber,
                             rir = setVO.rir,
-                            side = SetSide.LEFT
-                        ).apply {
+                            side = SetSide.LEFT,
                             linkedRightSet = rightSetVO?.let {
                                 SetData(
-                                    it.typeOfSet,
-                                    it.charge,
-                                    it.rir,
-                                    it.repsNumber,
-                                    SetSide.RIGHT
+                                    type = it.typeOfSet,
+                                    charge = it.charge,
+                                    reps = it.repsNumber,
+                                    rir = it.rir,
+                                    side = SetSide.RIGHT
                                 )
                             }
-                        }
+                        )
+                        leftSet
                     }
                     else -> null
                 }

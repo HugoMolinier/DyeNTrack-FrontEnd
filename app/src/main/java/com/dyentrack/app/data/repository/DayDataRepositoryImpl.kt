@@ -38,7 +38,6 @@ class DayDataRepositoryImpl @Inject constructor(
         } catch (_: Exception) {
             emptyList()
         }
-        _dayDataFlow.value = apiDayData
         // 4. merge local et API
         val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
         _dayDataFlow.value = merged

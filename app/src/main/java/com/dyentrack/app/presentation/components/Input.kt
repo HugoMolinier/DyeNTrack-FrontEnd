@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -49,7 +51,7 @@ fun InputCustom(
     variant : InputVariant ?= InputVariant.FILLED,
     singleLine:Boolean = true,
     replaceZeroToNull:Boolean=false,
-    maxCaracter: Int? = null
+    maxCaracter: Int? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -79,7 +81,13 @@ fun InputCustom(
         BasicTextField(
             value = text.value,
             enabled= enabled,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType,
+                imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onFocusLost?.invoke(text.value.text) // ← commit la valeur quand Done est pressé
+                }
+            ),
             modifier=Modifier.weight(1f).onFocusChanged { focusState ->
                 // FOCUS OUT
                 if (isFocused && !focusState.isFocused) {
