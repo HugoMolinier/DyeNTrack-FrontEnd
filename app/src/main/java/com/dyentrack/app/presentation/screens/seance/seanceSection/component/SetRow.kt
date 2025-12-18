@@ -147,7 +147,7 @@ fun SetRow(
                     keyboardType = KeyboardType.Number,
                     maxCaracter = 2,
                     replaceZeroToNull = true,
-                    onFocusLost = {
+                    onValueChange = {
 
                         viewModel.updateSet(
                             exerciseId = exerciseId,
@@ -168,7 +168,7 @@ fun SetRow(
                         maxCaracter = 2,
                         replaceZeroToNull = true,
                         keyboardType = KeyboardType.Number,
-                        onFocusLost = {
+                        onValueChange = {
                             viewModel.updateSet(
                                 exerciseId = exerciseId,
                                 index = index,
@@ -190,7 +190,7 @@ fun SetRow(
                 modifier = Modifier.weight(1f),
                 maxCaracter = 6,
                 keyboardType = KeyboardType.Decimal,
-                onFocusLost = {
+                onValueChange = {
                     viewModel.updateSet(
                         exerciseId = exerciseId,
                         index = index,
@@ -211,7 +211,7 @@ fun SetRow(
                 modifier = Modifier.width(65.dp),
                 keyboardType = KeyboardType.Number,
                 maxCaracter = 2,
-                onFocusLost = {
+                onValueChange = {
                     viewModel.updateSet(
                         exerciseId = exerciseId,
                         index = index,

@@ -86,8 +86,8 @@ fun NutritionBox(
                 shape = RoundedCornerShape(8.dp)
             )
     ) {
-        Column(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
+
+            Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
 
                 // --- Ligne supérieure avec calories ---
                 Row(
@@ -240,6 +240,5 @@ fun NutritionBox(
                     }
                 }
             }
-        }
     }
 }
