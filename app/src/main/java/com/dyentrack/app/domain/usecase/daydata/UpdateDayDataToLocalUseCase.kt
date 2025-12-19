@@ -5,7 +5,7 @@ import com.dyentrack.app.domain.repository.DayDataRepository
 import javax.inject.Inject
 
 class UpdateDayDataToLocalUseCase @Inject constructor(private val repository: DayDataRepository) {
-    suspend operator fun invoke(dayData: DayDataRequest) {
-        repository.updateToLocal(dayData,null)
+    suspend operator fun invoke(dayData: DayDataRequest,takeExistingExercise: Boolean?=null) {
+        repository.updateToLocal(dayData,null,takeExistingExercise)
     }
 }

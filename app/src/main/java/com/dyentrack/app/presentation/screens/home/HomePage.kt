@@ -49,10 +49,12 @@ import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.ButtonVariant
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
+import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.ExerciseImages
 
 @SuppressLint("FrequentlyChangingValue")
 @Composable
@@ -279,6 +281,7 @@ fun HomePage(
                                 homeViewModel.masterData?.musclesGroup?.find { it.id == muscle?.idMuscularGroup }
                             groupeMusculaire?.nameFR?.let { setGroupMuscu.add(it) }
                         }
+
                         CardWithContent(
                             modifier = Modifier.padding(8.dp, 2.dp),
                             text = setGroupMuscu.joinToString(", "),
@@ -298,6 +301,7 @@ fun HomePage(
                                     }, ""
                                 )
                             },
+                            leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[dayKey]),
                             hasLineShadowBetweenMainAndChildren = true,
                             childrenForExtend = {
                                 Column(

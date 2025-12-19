@@ -45,6 +45,7 @@ import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
+import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SubTextEmphasis
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
@@ -106,7 +107,7 @@ fun ExerciseCard(
         exercise.nameFR,
         canExtend = state.exerciseMode != ExerciseMode.CHANGE_ORDER,
         subText = textSub,
-        leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
+        leftIcon = LeftIcon.Single(ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent),
         expanded = state.expandedExerciseId == exerciseId,
         onExpandChange = { expanded ->
             viewModel.expandExercise(if (expanded) exerciseId else null)

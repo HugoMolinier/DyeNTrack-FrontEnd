@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,13 +53,18 @@ data class MenuItemData(
     val style: TextStyle?=null
 )
 
+sealed class LeftIcon {
+    data class Single(@DrawableRes val icon: Int) : LeftIcon()
+    data class Multiple(@DrawableRes val icons: List<Int>) : LeftIcon()
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardWithContent(
     modifier: Modifier = Modifier,
     text: String,
     subText: String,
-    @DrawableRes leftIcon: Int ? = null,
+    leftIcon: LeftIcon ? = null,
     badgeText: String? = null,
     componentRight: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
@@ -134,14 +140,31 @@ fun CardWithContent(
 
 
                             ) {
-                                if (leftIcon != null) {
-                                    Image(
-                                        painter = painterResource(id = leftIcon),
+                                when(leftIcon) {
+                                    is LeftIcon.Single ->        Image(
+                                        painter = painterResource(id = leftIcon.icon),
                                         contentDescription = "Image de l'exercise",
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Fit
                                     )
+                                    is LeftIcon.Multiple -> {
+                                        FlowRow(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp), // espace horizontal
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)    // espace vertical
+                                        ) {
+                                            leftIcon.icons.forEach { iconRes ->
+                                                Image(
+                                                    painter = painterResource(id = iconRes),
+                                                    contentDescription = "Image de l'exercice",
+                                                    modifier = Modifier.size(24.dp), // adapter la taille selon besoin
+                                                    contentScale = ContentScale.Fit
+                                                )
+                                            }
+                                        }
+                                    }
+                                    null -> {}
                                 }
+
                             }
                             Column(
                                 verticalArrangement = Arrangement.SpaceBetween,

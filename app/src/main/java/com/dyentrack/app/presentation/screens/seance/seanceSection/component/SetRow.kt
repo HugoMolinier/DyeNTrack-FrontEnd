@@ -69,7 +69,7 @@ fun SetRow(
             )
         )
     }
-    val repsRightState = remember(setRightForUni) {
+    val repsRightState = remember{
         mutableStateOf(TextFieldValue(text = setRightForUni?.reps?.toString() ?: ""))
     }
 

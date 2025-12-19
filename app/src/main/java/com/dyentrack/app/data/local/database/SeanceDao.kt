@@ -1,6 +1,11 @@
 package com.dyentrack.app.data.local.database
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.TypeConverters
+import androidx.room.Update
 import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
@@ -35,14 +40,13 @@ interface SeanceDao {
         }
     }
 
-    suspend fun saveOrUpdateSeanceWithoutReplaceNull(seanceDao: SeanceDao, seance: SeanceOfDayLocal,  dateSave: String? = null) {
+    suspend fun saveOrUpdateSeanceWithoutReplaceNull(seanceDao: SeanceDao, seance: SeanceOfDayLocal,  dateSave: String? = null,takeExistingExercise: Boolean?) {
         val existing = seanceDao.getSeanceByDay(seance.day)
         val saveDate = dateSave ?: Instant.now().toString()
-
         val mergedSeance = existing?.copy(
             nutritionTrack = seance.nutritionTrack ?: existing.nutritionTrack,
             physioTrack = seance.physioTrack ?: existing.physioTrack,
-            plannedExercises = seance.plannedExercises.ifEmpty { existing.plannedExercises },
+            plannedExercises = if (takeExistingExercise == true) seance.plannedExercises.ifEmpty { existing.plannedExercises }  else seance.plannedExercises,
             lastUpdate = saveDate
         ) ?: seance.copy(lastUpdate = saveDate)
 

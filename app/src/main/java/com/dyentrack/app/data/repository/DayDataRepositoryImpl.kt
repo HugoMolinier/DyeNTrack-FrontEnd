@@ -60,7 +60,7 @@ class DayDataRepositoryImpl @Inject constructor(
                 val apiTime =  Instant.parse(apiDay.lastUpdate)
                 if (!apiTime.isBefore(localTime)) { // API plus récente ou equal → prendre API et mettre à jour local
                     result.add(apiDay)
-                    updateToLocal(apiDay,apiDay.lastUpdate)
+                    updateToLocal(apiDay,apiDay.lastUpdate,true)
                 } else {// sinon garder local et mettre a jour api
                     result.add(localDay)
                     updateToApi(localDay)
@@ -74,7 +74,7 @@ class DayDataRepositoryImpl @Inject constructor(
         val localDays = local.map { it.dayData }.toSet()
         api.filter { it.dayData !in localDays }.forEach { apiOnlyDay ->
             result.add(apiOnlyDay)
-            updateToLocal(apiOnlyDay,apiOnlyDay.lastUpdate)
+            updateToLocal(apiOnlyDay,apiOnlyDay.lastUpdate,true)
         }
         return result
     }
@@ -97,28 +97,22 @@ class DayDataRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun updateToLocal(dayData: DayDataRequest, dateSave: String? ) {
-        val existing = seanceDao.getSeanceByDay(dayData.dayData)
-        val seanceLocal = dayData.toSeanceOfDayLocal( existing)
-        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal,dateSave)
-
+    override suspend fun updateToLocal(dayData: DayDataRequest, dateSave: String?,takeExistingExercise: Boolean? ) {
+        seanceDao.getSeanceByDay(dayData.dayData)
+        val seanceLocal = dayData.toSeanceOfDayLocal()
+        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal,dateSave,takeExistingExercise)
         val updatedLocal = seanceDao.getAllSeances().map { it.toDayDataRequest() }
         _dayDataFlow.value = updatedLocal.map { it.copy() }
     }
 
 
-    fun DayDataRequest.toSeanceOfDayLocal(
-        existing: SeanceOfDayLocal? = null
-    ): SeanceOfDayLocal {
+    fun DayDataRequest.toSeanceOfDayLocal(): SeanceOfDayLocal {
         return SeanceOfDayLocal(
             day = dayData,
-            nutritionTrack = nutritionTrack ?: existing?.nutritionTrack,
-            physioTrack = physioTrack ?: existing?.physioTrack,
-            plannedExercises = if (seanceTrack?.plannedExercises.isNullOrEmpty()) {
-                existing?.plannedExercises ?: emptyList()
-            } else {
-                seanceTrack.plannedExercises
-            },
+            nutritionTrack = nutritionTrack ,
+            physioTrack = physioTrack ,
+            plannedExercises = seanceTrack?.plannedExercises?:emptyList()
+
         )
     }
 

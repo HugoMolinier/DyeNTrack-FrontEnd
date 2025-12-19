@@ -172,7 +172,7 @@ fun BottomSheetSelectionExercise(
                             ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
                             ?: "NaN",
 
-                        leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
+                        leftIcon = LeftIcon.Single(ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent),
                         componentRight = {
                             FavoriteIconButton(
                                 isFavorite = infoMapUser[exercise.idExercise]?.favorite ?: false,

@@ -91,7 +91,6 @@ class SeanceViewModel @Inject constructor(
                     if (additionalDays.isNotEmpty()) {
                         days.addAll( additionalDays)
                     }
-                    Log.d("days:",days.toString())
                 }
                 val newMap = mutableStateMapOf<String, SeanceDuJour>()
                 dayDataList.forEach { dayData ->
@@ -355,7 +354,6 @@ class SeanceViewModel @Inject constructor(
         seance.exercisesInSceance.removeAll { it.exerciseId == exerciseId }
 
         seance.setsMap.remove(exerciseId)
-
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
@@ -505,7 +503,7 @@ class SeanceViewModel @Inject constructor(
         if (status == SaveType.NOTSAVE||status == SaveType.LocalSAVE) {
             if (status != SaveType.LocalSAVE) {
                 viewModelScope.launch {
-                    updateDayDataToLocalUseCase(buildDayDataRequest(day, seance))
+                    updateDayDataToLocalUseCase(buildDayDataRequest(day, seance),false)
                     _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.LocalSAVE)
                 }
             }
@@ -549,6 +547,7 @@ class SeanceViewModel @Inject constructor(
 
 
     private fun buildDayDataRequest(day: String, seance: SeanceDuJour): DayDataRequest {
+
         val plannedExercises = seance.exercisesInSceance.mapIndexed { exIndex, exercise ->
             val sets = seance.setsMap[exercise.exerciseId]?.flatMapIndexed { setIndex, setData ->
                 val leftSet = SetVO(
@@ -566,7 +565,6 @@ class SeanceViewModel @Inject constructor(
                 exercise.laterite, exercise.equipment , sets
             )
         }
-
         return DayDataRequest(
             idDayData = null,
             dayData = day,

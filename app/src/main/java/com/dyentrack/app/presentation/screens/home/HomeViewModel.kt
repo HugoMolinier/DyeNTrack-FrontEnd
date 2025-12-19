@@ -3,16 +3,20 @@ package com.dyentrack.app.presentation.screens.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.HealthConnectStatus
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
 import com.dyentrack.app.domain.usecase.health.GetDataHealthUseCase
 import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
 import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
+import com.dyentrack.app.presentation.components.LeftIcon
+import com.dyentrack.app.presentation.utils.ExerciseImages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,6 +90,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
+        Log.d("seance","${seance}")
+        if (seance == null) return LeftIcon.Single(R.drawable.logotransparent)
+
+        val first3Icons = seance.plannedExercises
+            .take(3)
+            .mapNotNull { ExerciseImages.map[it.exerciseId]?:R.drawable.logotransparent }.toMutableList()
+
+        if (seance.plannedExercises.size>3){
+        first3Icons.add(R.drawable.point)}
+        return if (first3Icons.isNotEmpty()) {
+            LeftIcon.Multiple(first3Icons)
+        } else {
+            LeftIcon.Single(R.drawable.logotransparent) // fallback si aucun drawable trouvé
+        }
+    }
 
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {
