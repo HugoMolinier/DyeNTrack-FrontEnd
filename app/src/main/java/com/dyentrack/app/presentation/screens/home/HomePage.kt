@@ -148,6 +148,7 @@ fun HomePage(
                     ) {
                         if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true||state.todaySeance?.seanceTrack?.plannedExercises == null) {
                             item {
+
                                 Box(
                                     modifier = Modifier
                                         .size(88.dp).clip(MaterialTheme.shapes.medium)

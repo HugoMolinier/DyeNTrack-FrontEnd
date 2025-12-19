@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -40,7 +38,6 @@ fun SetRow(
     set: SetData,
     index: Int,
     viewModel: SeanceViewModel = viewModel(),
-    setRightForUni: SetData? = null,
     lockInput: Boolean,
     onClickBadge: (() -> Unit)? = null,
     exerciseId: Long
@@ -69,8 +66,9 @@ fun SetRow(
             )
         )
     }
+
     val repsRightState = remember{
-        mutableStateOf(TextFieldValue(text = setRightForUni?.reps?.toString() ?: ""))
+        mutableStateOf(TextFieldValue(text = set.linkedRightSet?.reps?.toString() ?: ""))
     }
 
     var confirmDelete by remember { mutableStateOf(false) }
@@ -142,7 +140,7 @@ fun SetRow(
                 InputCustom(
                     text = repsState,
                     enabled = !lockInput,
-                    placeholder = if (setRightForUni != null) "L" else "Reps",
+                    placeholder = if (set.linkedRightSet != null) "L" else "Reps",
                     modifier = Modifier.weight(1f),
                     keyboardType = KeyboardType.Number,
                     maxCaracter = 2,
@@ -154,12 +152,12 @@ fun SetRow(
                             index = index,
                             newValue = SetField.Reps(repsState.value.text.toIntOrNull()),
                             rightSet = false,
-                            unilateral = setRightForUni != null
+                            unilateral = set.linkedRightSet != null
                         )
                     }
                 )
 
-                if (setRightForUni != null) {
+                if (set.linkedRightSet != null) {
                     InputCustom(
                         text = repsRightState,
                         placeholder = "R",
@@ -196,7 +194,7 @@ fun SetRow(
                         index = index,
                         newValue = SetField.Charge(chargeState.value.text.toDoubleOrNull()),
                         rightSet = false,
-                        unilateral = setRightForUni != null
+                        unilateral = set.linkedRightSet != null
                     )
                 }
 
@@ -217,7 +215,7 @@ fun SetRow(
                         index = index,
                         newValue = SetField.Rir(rirState.value.text.toIntOrNull()),
                         rightSet = false,
-                        unilateral = setRightForUni != null
+                        unilateral = set.linkedRightSet != null
                     )
                 }
             )

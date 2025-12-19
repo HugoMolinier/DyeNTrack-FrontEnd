@@ -19,8 +19,8 @@ class AppViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             try {
-                getMasterDataUseCase()
                 getDayDataUseCase()
+                getMasterDataUseCase()
                 getInfoExerciseUser()
 
             } catch (e: Exception) {

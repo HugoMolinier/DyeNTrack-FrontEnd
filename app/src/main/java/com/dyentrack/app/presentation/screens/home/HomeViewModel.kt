@@ -12,7 +12,6 @@ import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
-import com.dyentrack.app.domain.usecase.health.GetDataHealthUseCase
 import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
 import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
@@ -20,6 +19,7 @@ import com.dyentrack.app.presentation.utils.ExerciseImages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -73,7 +73,9 @@ class HomeViewModel @Inject constructor(
             }
 
         }
+
         viewModelScope.launch {
+            dayDataFlow.first { it != null }
             val status = healthConnectUseCase()
             when (status) {
                 is HealthConnectStatus.Available -> {
@@ -91,12 +93,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
-        Log.d("seance","${seance}")
         if (seance == null) return LeftIcon.Single(R.drawable.logotransparent)
-
         val first3Icons = seance.plannedExercises
             .take(3)
-            .mapNotNull { ExerciseImages.map[it.exerciseId]?:R.drawable.logotransparent }.toMutableList()
+            .map { ExerciseImages.map[it.exerciseId]?:R.drawable.logotransparent }.toMutableList()
 
         if (seance.plannedExercises.size>3){
         first3Icons.add(R.drawable.point)}

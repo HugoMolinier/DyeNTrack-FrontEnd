@@ -242,7 +242,12 @@ class SeanceViewModel @Inject constructor(
         if (lateriteId == 2L) { // unilatéral
             for (i in sets.indices) {
                 val set = sets[i]
-                val updatedRightSet = set.linkedRightSet ?: SetData(
+                val updatedRightSet = set.linkedRightSet?.copy(
+                    reps = set.linkedRightSet?.reps ?: set.reps,
+                    charge = set.linkedRightSet?.charge ?: set.charge,
+                    rir = set.linkedRightSet?.rir ?: set.rir,
+                    type = set.linkedRightSet?.type ?: set.type
+                ) ?: SetData(
                     type = set.type,
                     charge = set.charge,
                     reps = set.reps,

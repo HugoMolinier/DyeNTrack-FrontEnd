@@ -261,7 +261,7 @@ fun ExerciseCard(
 
                 Column {
                     exerciseSets?.forEachIndexed { index, set ->
-                        key(set.id) {
+                        key(set.id,set.side) {
                             var offsetY by remember { mutableFloatStateOf(0f) }
                             var isDragging by remember { mutableStateOf(false) }
                             val animOffset =
@@ -324,7 +324,6 @@ fun ExerciseCard(
                                 SetRow(
                                     set,
                                     index,
-                                    setRightForUni = set.linkedRightSet,
                                     lockInput = isLock,
                                     onClickBadge =
                                         { viewModel.deleteSet(exerciseId,set.id) },

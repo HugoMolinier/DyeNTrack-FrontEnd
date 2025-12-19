@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,12 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
-import com.dyentrack.app.presentation.theme.TertiaThree
-import com.dyentrack.app.presentation.theme.TertiaTwo
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

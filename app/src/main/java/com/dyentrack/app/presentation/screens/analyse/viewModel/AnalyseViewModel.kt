@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.analyse.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.DayDataRequest
@@ -93,7 +92,7 @@ class AnalyseViewModel @Inject constructor(
             }
         }
 
-        Log.d("Analyse", "MuscleRateMap filtered by range: $muscleRateMap")
+
         _uiState.update { it.copy(allDataExercise = muscleRateMap) }
     }
 

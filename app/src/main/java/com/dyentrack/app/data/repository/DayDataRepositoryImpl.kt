@@ -31,6 +31,7 @@ class DayDataRepositoryImpl @Inject constructor(
         //1.5 update le flow car api peut delay
         _dayDataFlow.value = localDayData
 
+
         // 2. récupère l'API
         val apiDayData = try {
             val apiResponse = api.getAllDayDataByDay()
@@ -54,6 +55,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
         //verification du plus récent
         local.forEach { localDay ->
+
             val apiDay = apiMap[localDay.dayData]
             if (apiDay != null) {
                 val localTime = Instant.parse(localDay.lastUpdate)

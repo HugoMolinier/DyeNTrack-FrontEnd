@@ -9,7 +9,6 @@ import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import android.util.Log
 import java.time.ZoneOffset
 import javax.inject.Inject
 
@@ -44,11 +43,9 @@ class SyncHealthDataUseCase @Inject constructor(
                     nutritionTrack = nutrition
                 )
 
-                updateDayDataToLocalUseCase(dayData)
+                updateDayDataToLocalUseCase(dayData,true)
                 updateDayDataToApiUseCase(dayData)
             }
-
-            Log.d("kfsk",steps.toString()+"  "+nutrition.calories.toString())
             SyncedHealthData(
                 steps = steps,
                 nutritionTrack = nutrition

@@ -19,7 +19,6 @@ import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseSummary
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
-import com.dyentrack.app.presentation.utils.toCleanString
 
 @Composable
 fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
