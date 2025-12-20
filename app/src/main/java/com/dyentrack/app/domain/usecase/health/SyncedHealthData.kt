@@ -4,6 +4,7 @@ import androidx.health.connect.client.HealthConnectClient
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
+import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToApiUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,7 @@ class SyncHealthDataUseCase @Inject constructor(
                     nutritionTrack = nutrition
                 )
 
-                updateDayDataToLocalUseCase(dayData,true)
+                updateDayDataToLocalUseCase(dayData, TypeOfAction.UPDATEHEALTH)
                 updateDayDataToApiUseCase(dayData)
             }
             SyncedHealthData(

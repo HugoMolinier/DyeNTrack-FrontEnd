@@ -31,6 +31,7 @@ import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.SetVO
+import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
 import com.dyentrack.app.domain.usecase.GetLastExercisePerfBetweenDateUseCase
@@ -470,7 +471,7 @@ class SeanceViewModel @Inject constructor(
             nutritionTrack = newNutritionTrack
         )
 
-        changeSaveStatus(SaveType.NOTSAVE)
+        changeSaveStatus(SaveType.NOTSAVE,false)
     }
     // +++++++++++ Physio
 
@@ -493,7 +494,7 @@ class SeanceViewModel @Inject constructor(
             physioTrack = newPhysioTrack
         )
 
-        changeSaveStatus(SaveType.NOTSAVE)
+        changeSaveStatus(SaveType.NOTSAVE,false)
     }
 
 
@@ -501,14 +502,14 @@ class SeanceViewModel @Inject constructor(
 
     private val autoSaveJobs = mutableMapOf<String, Job>()
 
-    fun changeSaveStatus(status: SaveType) {
+    fun changeSaveStatus(status: SaveType, exerciseContentEdit : Boolean = true) {
         val day = _uiState.value.daySelected
         val seance = _uiState.value.seancesParJour[day] ?: return
         _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
         if (status == SaveType.NOTSAVE||status == SaveType.LocalSAVE) {
             if (status != SaveType.LocalSAVE) {
                 viewModelScope.launch {
-                    updateDayDataToLocalUseCase(buildDayDataRequest(day, seance),false)
+                    updateDayDataToLocalUseCase(buildDayDataRequest(day, seance),if (exerciseContentEdit) TypeOfAction.FORCESEANCEUPDATE else TypeOfAction.UPDATEBOTH)
                     _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.LocalSAVE)
                 }
             }

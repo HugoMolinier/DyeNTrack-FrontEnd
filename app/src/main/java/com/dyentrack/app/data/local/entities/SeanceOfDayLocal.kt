@@ -21,7 +21,8 @@ data class SeanceOfDayLocal(
     //val note: String? = null,
     val nutritionTrack: NutritionTrack?,
     val physioTrack: PhysioTrack?,
-    val lastUpdate: String = Instant.now().toString()
+    val lastUpdateSeance: String = Instant.now().toString(),
+    val lastUpdateHealth: String = Instant.now().toString(),
 )
 
 

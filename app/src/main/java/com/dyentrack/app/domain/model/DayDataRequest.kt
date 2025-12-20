@@ -9,7 +9,8 @@ data class DayDataRequest(
     val seanceTrack: SeanceTrack?=null,
     val nutritionTrack: NutritionTrack?=null,
     val physioTrack: PhysioTrack?=null,
-    val lastUpdate: String?=null
+    val lastUpdate: String?=null,
+    val lastUpdateHealthLocal: String ?=null  //seulement pour le merge API / local
 )
 
 @Serializable
