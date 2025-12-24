@@ -47,7 +47,8 @@ import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
-import com.dyentrack.app.presentation.components.SubTextEmphasis
+import com.dyentrack.app.presentation.components.type.EmphasisType
+
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
@@ -149,7 +150,7 @@ fun ExerciseCard(
             }
         } else null,
 
-        subTextEmphasis = SubTextEmphasis.SECONDARY,
+        subTextEmphasis = EmphasisType.SECONDARY,
         childrenForExtend = {
             Column(
                 Modifier

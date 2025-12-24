@@ -45,13 +45,14 @@ import com.dyentrack.app.R
 import androidx.navigation.NavController
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.presentation.components.ButtonEmphasis
-import com.dyentrack.app.presentation.components.ButtonVariant
+
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
+import com.dyentrack.app.presentation.components.type.EmphasisType
+import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
@@ -401,8 +402,8 @@ fun HomePage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp, start = 10.dp, end = 10.dp),
-                    variant = ButtonVariant.OUTLINED,
-                    emphasis = ButtonEmphasis.SECONDARY,
+                    variant = VariantType.OUTLINED,
+                    emphasis = EmphasisType.SECONDARY,
                     onClick = { navController.navigate("seance") }
                 )
             }

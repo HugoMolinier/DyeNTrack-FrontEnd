@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 
@@ -118,14 +119,14 @@ fun BottomSheetSelectionExercise(
                                     "Non Officiel"
                                 ),
                                 defaultSelected = typeFilter,
-                                emphasys = ChipsEmphasys.SECONDARY
+                                emphasys = EmphasisType.SECONDARY
                             ) { typeFilter = it }
                             ChipDropDown(
                                 listOfSelectableItem = listOf("Groupes Musculaires") +
                                         masterDataStatic?.musclesGroup?.map { it.nameFR }
                                             .orEmpty(),
                                 defaultSelected = groupFilter,
-                                emphasys = ChipsEmphasys.SECONDARY
+                                emphasys = EmphasisType.SECONDARY
                             ) { groupFilter = it }
                         }
                         Row(
@@ -192,7 +193,7 @@ fun BottomSheetSelectionExercise(
 
                                 )
                             ),
-                        subTextEmphasis = SubTextEmphasis.PRIMARY,
+                        subTextEmphasis = EmphasisType.PRIMARY,
                         onClick = { onClickExercise(exercise.idExercise) },
                         badgeText = if (isSelected) (selectedExerciseIds.indexOf(exercise.idExercise) + 1).toString() else null
                     )}

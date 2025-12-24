@@ -39,8 +39,8 @@ import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
-import com.dyentrack.app.presentation.components.VariantSelection
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
+import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -86,7 +86,7 @@ fun ExercisePage(
                 item {
                     Box (modifier= Modifier.padding(top = 6.dp, bottom = 12.dp)) {
                         SectionSelector(
-                            variant = VariantSelection.FULL,
+                            variant = VariantType.FILLED,
                             selectedIndex = if(state.sectionChose==SectionChose.EXPLAIN)0 else 1 ,
                             itemSection = listOf(
                                 MenuItemData(

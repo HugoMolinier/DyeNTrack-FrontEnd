@@ -15,16 +15,16 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.theme.TertiaOne
 
-enum class VariantSelection { OUTLINE, FULL }
 
 @Composable
 fun SectionSelector(
     modifier: Modifier = Modifier,
     itemSection: List<MenuItemData>? = null,
     selectedIndex: Int? = 0,
-    variant: VariantSelection = VariantSelection.FULL
+    variant: VariantType = VariantType.FILLED
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -32,7 +32,7 @@ fun SectionSelector(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (variant == VariantSelection.OUTLINE) {
+                if (variant == VariantType.OUTLINED) {
                     Modifier.drawBehind {
                         val strokeWidth = 1.dp.toPx()
                         drawLine(
@@ -61,7 +61,7 @@ fun SectionSelector(
 
                     .clickable(enabled = !isSelected, onClick = { onClick.invoke() })
 
-                    .then(if (variant== VariantSelection.OUTLINE){
+                    .then(if (variant== VariantType.OUTLINED){
                         if (isSelected) Modifier.padding(horizontal = 8.dp, vertical = 4.dp).drawBehind {
                         val strokeWidth = 1.dp.toPx()
                         drawLine(
@@ -85,7 +85,7 @@ fun SectionSelector(
                     text = label,
                     textAlign = TextAlign.Center,
                     style =
-                        if (variant == VariantSelection.OUTLINE) {
+                        if (variant == VariantType.OUTLINED) {
                             MaterialTheme.typography.bodyLarge.copy(
                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = if (isSelected) 1f else 0.3f
@@ -102,7 +102,7 @@ fun SectionSelector(
                     modifier = Modifier
                         .fillMaxWidth()
                         .then(
-                            if (variant == VariantSelection.OUTLINE)
+                            if (variant == VariantType.OUTLINED)
                                 Modifier.padding(bottom = 8.dp)
                             else
                                 Modifier.padding(vertical = 8.dp)

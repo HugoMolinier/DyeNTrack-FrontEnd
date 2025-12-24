@@ -56,7 +56,7 @@ class HomeViewModel @Inject constructor(
                 val formatter = DateTimeFormatter.ISO_DATE
                 val today = LocalDate.now()
 
-                val last15Days = (0L..14L).map { today.minusDays(it) }.reversed()
+                val last15Days = (0L until 14L).map { today.minusDays(it) }
                 var todaySeanceTemp: DayDataRequest? = null
                 val newMap = list
                     .mapNotNull { dayData ->

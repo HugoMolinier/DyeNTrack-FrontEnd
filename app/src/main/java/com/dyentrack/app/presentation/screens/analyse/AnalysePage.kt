@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
-import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
@@ -55,7 +54,6 @@ import com.dyentrack.app.presentation.screens.analyse.viewModel.AnalyseViewModel
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
-import kotlin.Long
 import kotlin.math.roundToInt
 
 

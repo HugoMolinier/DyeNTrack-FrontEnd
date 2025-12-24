@@ -18,15 +18,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextStyle
+import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.TertiaThree
 
-enum class ChipsEmphasys { PRIMARY, SECONDARY }
 @Composable
 fun ChipDropDown(
     listOfSelectableItem: List<String>,
     canChange: Boolean = true,
-    emphasys : ChipsEmphasys ?= ChipsEmphasys.PRIMARY,
+    emphasys : EmphasisType ?= EmphasisType.PRIMARY,
     defaultSelected: String?=null,
     textStyle : TextStyle = MaterialTheme.typography.bodySmall,
     onSelected: (String) -> Unit = {}
@@ -49,8 +49,8 @@ fun ChipDropDown(
             },
             shape = MaterialTheme.shapes.large,
             colors = FilterChipDefaults.filterChipColors(
-                containerColor = if (emphasys == ChipsEmphasys.PRIMARY) TertiaThree else TertiaOne,
-                selectedContainerColor = if (emphasys == ChipsEmphasys.PRIMARY) TertiaThree else TertiaOne,
+                containerColor = if (emphasys == EmphasisType.PRIMARY) TertiaThree else TertiaOne,
+                selectedContainerColor = if (emphasys == EmphasisType.PRIMARY) TertiaThree else TertiaOne,
                 labelColor = MaterialTheme.colorScheme.onSurface,
                 selectedLabelColor = MaterialTheme.colorScheme.onSurface
             ),

@@ -9,6 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+//(langue, unités, master data, config)
 class FileLocalDataSource @Inject constructor(
     @ApplicationContext private val context: Context
 ) : LocalDataSource {

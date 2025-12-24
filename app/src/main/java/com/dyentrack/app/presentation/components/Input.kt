@@ -3,6 +3,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,9 +34,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.presentation.components.type.SizeType
 import com.dyentrack.app.presentation.theme.PrimaryTextColor
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -51,9 +59,12 @@ fun InputCustom(
     variant : InputVariant ?= InputVariant.FILLED,
     singleLine:Boolean = true,
     replaceZeroToNull:Boolean=false,
+    size:  SizeType= SizeType.LARGE,
     maxCaracter: Int? = null,
+    hideContent: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    var contentVisible by remember { mutableStateOf(!hideContent) }
 
     Row (
         modifier = modifier
@@ -67,7 +78,20 @@ fun InputCustom(
                     color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
                 ) else Modifier
-            ).padding(horizontal = 16.dp, vertical =if (singleLine)0.dp else 10.dp),
+            ).padding(
+                start = when (size) {
+                    SizeType.LARGE -> 16.dp
+                    SizeType.MEDIUM -> 8.dp
+                    else -> 4.dp
+                },
+                end = when (size) {
+                    SizeType.LARGE -> if (hideContent) 8.dp else 16.dp
+                    SizeType.MEDIUM -> 8.dp
+                    else -> 4.dp
+                },
+                top = if (singleLine) 0.dp else 10.dp,
+                bottom = if (singleLine) 0.dp else 10.dp
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -88,6 +112,7 @@ fun InputCustom(
                     onFocusLost?.invoke(text.value.text) // ← commit la valeur quand Done est pressé
                 }
             ),
+            visualTransformation = if (contentVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier=Modifier.weight(1f).onFocusChanged { focusState ->
                 // FOCUS OUT
                 if (isFocused && !focusState.isFocused) {
@@ -97,7 +122,7 @@ fun InputCustom(
             },
 
             onValueChange = { newValue ->
-                
+
                 var filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
                     KeyboardType.Decimal -> newValue.text
@@ -159,6 +184,15 @@ fun InputCustom(
                         )
                     }
                     innerTextField()
+                    if (hideContent) { // Affiche bouton pour basculer visibilité
+                        IconButton(onClick = { contentVisible = !contentVisible },            modifier = Modifier.align(Alignment.CenterEnd)) {
+                            Icon(
+                                imageVector = if (contentVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                                contentDescription = if (contentVisible) "Masquer" else "Afficher",
+                                tint = secondaryTextColor
+                            )
+                        }
+                    }
                 }
             }
         )

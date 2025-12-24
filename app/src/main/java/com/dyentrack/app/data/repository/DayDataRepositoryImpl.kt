@@ -4,6 +4,7 @@ import android.util.Log
 import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 import com.dyentrack.app.data.network.ApiInterface
+import com.dyentrack.app.domain.model.AuthStatus
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
@@ -19,7 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class DayDataRepositoryImpl @Inject constructor(
     private val api: ApiInterface,
-    private val seanceDao: SeanceDao
+    private val seanceDao: SeanceDao,
+    private val userConnectionRepositoryImpl: UserConnectionRepositoryImpl
 ) : DayDataRepository {
     private val _dayDataFlow = MutableStateFlow<List<DayDataRequest>?>(null)
     override val dayDataFlow: StateFlow<List<DayDataRequest>?> = _dayDataFlow
@@ -34,20 +36,22 @@ class DayDataRepositoryImpl @Inject constructor(
 
 
         // 2. récupère l'API
-        val apiDayData = try {
-            val apiResponse = api.getAllDayDataByDay()
-            if (apiResponse.status == 200) apiResponse.data else emptyList()
-        } catch (_: Exception) {
-            emptyList()
+        if(userConnectionRepositoryImpl.isValideToken()==AuthStatus.CONNECTED) {
+            val apiDayData = try {
+                val apiResponse = api.getAllDayDataByDay()
+                if (apiResponse.status == 200) apiResponse.data else emptyList()
+            } catch (_: Exception) {
+                emptyList()
+            }
+            // 4. merge local et API
+            val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
+            _dayDataFlow.value = merged
         }
-        // 4. merge local et API
-        val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
-        _dayDataFlow.value = merged
 
 
     }
 
-    private suspend fun mergeLocalAndApiByTimestamp(
+    private suspend fun mergeLocalAndApiByTimestamp( // a ajouter verif id telephone pour eviter le cas que sur un autre tel le healthsync date change la date avec seance vide donc api detecte que local>api donc importe seance vide
         local: List<DayDataRequest>,
         api: List<DayDataRequest>
     ): List<DayDataRequest> {
@@ -68,7 +72,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
                 if (updateHealth || updateSeance ) { //api + recent que seance ou api + recent que health
                     result.add(apiDay)
-                    if (apiTime !=localTimeSeance || apiTime !=localTimeHealth ) {
+                    if (apiTime !=localTimeSeance || apiTime !=localTimeHealth ) { //si egal alors donnée importer de l'api et sync en date
                         updateToLocal(
                             apiDay.copy(
                                 nutritionTrack = if (updateHealth) apiDay.nutritionTrack else null,
@@ -83,7 +87,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
                 else {// sinon garder local et mettre a jour api
                     result.add(localDay)
-                    updateToApi(localDay)
+                     updateToApi(localDay)
                 }
 
             }else {// API n'a pas ce jour → on envoie le local

@@ -1,3 +1,7 @@
+import java.util.Properties
+
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,16 +12,32 @@ plugins {
     kotlin("plugin.serialization") version "1.9.10"
 }
 
+
 android {
     namespace = "com.dyentrack.app"
     compileSdk = 36
-
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.dyentrack.app"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        val secretsFile = rootProject.file("local.properties")
+        val properties = Properties()
+        properties.load(secretsFile.inputStream())
+
+        // Return an empty string in case of property being null
+        val apiKey = properties.getProperty("api_key") ?: error("api_key manquante dans local.properties")
+        defaultConfig.buildConfigField(
+            "String",
+            "API_KEY",
+            apiKey
+        )
+
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -56,6 +76,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation("androidx.core:core-splashscreen:1.0.0")
 
+
+
     //santé
     implementation("androidx.health.connect:connect-client:1.1.0")
     //graph
@@ -70,6 +92,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.runtime)
+    implementation(libs.androidx.material3)
 
     // Navigation
     val nav_version = "2.9.5"
@@ -86,6 +109,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+
+    // Encrypted
+    implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
     // Hilt & WorkManager
     implementation("com.google.dagger:hilt-android:2.57.1")

@@ -12,6 +12,7 @@ import com.dyentrack.app.domain.model.TypeOfAction
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 
+//données métier persistantes
 @Dao
 @TypeConverters(Converters::class)
 interface SeanceDao {
@@ -75,6 +76,8 @@ interface SeanceDao {
             seanceDao.updateSeance(mergedSeance)
         }
     }
+
+
 
 }
 

@@ -35,13 +35,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dyentrack.app.presentation.components.ButtonEmphasis
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.VariantSelection
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.type.EmphasisType
+import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
@@ -101,7 +101,7 @@ fun SeancePage(
                 item {
                     Box (modifier= Modifier.padding(top = 6.dp, bottom = 20.dp)) {
                         SectionSelector(
-                            variant = VariantSelection.OUTLINE,
+                            variant = VariantType.OUTLINED,
                             itemSection = listOf(
                                 MenuItemData(
                                     "Scéances",
@@ -283,7 +283,7 @@ fun SeancePage(
         ) {
             CustomButton(
                 label = "Annuler",
-                emphasis = ButtonEmphasis.SECONDARY,
+                emphasis = EmphasisType.SECONDARY,
                 modifier = Modifier.weight(1f),
                 onClick = { viewModel.toggleBottomSheet(false) }
             )

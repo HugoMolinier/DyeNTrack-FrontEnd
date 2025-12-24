@@ -43,10 +43,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
-enum class SubTextEmphasis { PRIMARY, SECONDARY }
 data class MenuItemData(
     val label: String,
     val onClick: () -> Unit,
@@ -73,7 +73,7 @@ fun CardWithContent(
     onExpandChange: ((Boolean) -> Unit)? = null,
     menuOnLongClick: List<MenuItemData>? = null,
     childrenForExtend: @Composable (() -> Unit)? = null,
-    subTextEmphasis: SubTextEmphasis = SubTextEmphasis.SECONDARY,
+    subTextEmphasis: EmphasisType = EmphasisType.SECONDARY,
     hasLineShadowBetweenMainAndChildren: Boolean=false,
 ) {
 
@@ -177,7 +177,7 @@ fun CardWithContent(
                                 Text(
                                     text = subText,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = if (subTextEmphasis == SubTextEmphasis.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
+                                    color = if (subTextEmphasis == EmphasisType.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
