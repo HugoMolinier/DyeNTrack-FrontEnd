@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -185,11 +186,11 @@ fun InputCustom(
                     }
                     innerTextField()
                     if (hideContent) { // Affiche bouton pour basculer visibilité
-                        IconButton(onClick = { contentVisible = !contentVisible },            modifier = Modifier.align(Alignment.CenterEnd)) {
+                        IconButton(onClick = { contentVisible = !contentVisible },            modifier = Modifier.align(Alignment.CenterEnd).size(22.dp)) {
                             Icon(
                                 imageVector = if (contentVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
                                 contentDescription = if (contentVisible) "Masquer" else "Afficher",
-                                tint = secondaryTextColor
+                                tint = secondaryTextColor.copy(alpha = 0.5f)
                             )
                         }
                     }

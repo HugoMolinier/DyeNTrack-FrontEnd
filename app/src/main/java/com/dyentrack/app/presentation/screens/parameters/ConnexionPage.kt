@@ -1,10 +1,11 @@
 package com.dyentrack.app.presentation.screens.parameters
 
-import android.graphics.Color.red
-import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,21 +21,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.AuthStatus
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.screens.home.HomeViewModel
 import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ConnexionPage(
@@ -46,7 +51,7 @@ fun ConnexionPage(
 
     val authResponse by authViewModel.authResponse.collectAsState()
 
-    if (authResponse?.status== AuthStatus.CONNECTED) navController.popBackStack()
+    if (authResponse?.status== AuthStatus.CONNECTED) navController.navigate("parametre")
 
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
@@ -54,76 +59,61 @@ fun ConnexionPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                "Paramètre",
+                "Connection",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.popBackStack() },
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu") })
+                onClickLeft = { navController.navigate("parametre") },
+                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")}))})
 
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(start = 12.dp, end = 12.dp, top = 8.dp)
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 item {
-                    Text("Email")
-                    InputCustom(
-                    text = email, placeholder = "Email", variant = InputVariant.OUTLINED)}
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=12.dp)) {
+                        Text("Email", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 4.dp))
+                        InputCustom(
+                            text = email, variant = InputVariant.OUTLINED,
+                            placeholder = "email"
+                        )
+                    }
+                }
                 item {
-                    Text("Mot de passe")
-                    InputCustom(
-                        text = password,
-                        placeholder = "Password",
-                        variant = InputVariant.OUTLINED,
-                        hideContent = true
-                    )
+
+                    Column (verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)){
+                        Text("Mot de passe",style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
+                        InputCustom(
+                            text = password,
+                            placeholder = "mot de passe",
+                            variant = InputVariant.OUTLINED,
+                            hideContent = true
+                        )
+                    }
 
 
 
                 }
 
                 item {
-                    authResponse?.error?.let { error ->
-                        when (error) {
-                            AuthError.NOT_PASSWORD -> Text(
-                                "Format mot de passe invalide",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 10.sp
-                                )
-                            )
-                            AuthError.NOT_EMAILFORMAT -> Text(
-                                "Format email invalide",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 10.sp
-                                )
-                            )
-                            AuthError.UNAUTHORIZED -> Text(
-                                "Identifiants incorrects",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 10.sp
-                                )
-                            )
-                            AuthError.ERROR_API -> Text(
-                                "Erreur serveur",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 10.sp
-                                )
-                            )
-                            AuthError.INVALID_ARGUMENT -> Text(
-                                "Identifiants incorrects",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 10.sp
-                                )
-                            )
-                            null -> {}
-
+                    Box(modifier= Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
+                        val errorText = when (authResponse?.error) {
+                            AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
+                            AuthError.NOT_EMAILFORMAT -> "Format email invalide"
+                            AuthError.UNAUTHORIZED-> "Identifiants incorrects"
+                            AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
+                            AuthError.ERROR_API -> "Erreur serveur"
+                            null -> ""
+                            AuthError.NOT_PSEUDOFORMAT -> ""
                         }
+
+                        Text(
+                            text = errorText,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color.Red,
+                                fontSize = 12.sp
+                            )
+                        )
                     }
 
                 }
@@ -135,7 +125,34 @@ fun ConnexionPage(
                     )
 
                 }
+                item {
+                    Row(modifier= Modifier.padding(top = 28.dp,start = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(
+                        12.dp,
+                        Alignment.CenterHorizontally
+                    )) {
+                        Text(
+                            text = "Pas de compte ?",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = secondaryTextColor,
+                            )
+                        )
+                        Text(
+                            text = "S'inscrire ici",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier= Modifier.clickable(onClick = {navController.navigate("inscription")})
+                        )
+                    }
 
+                }
+
+            }
+            Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Image(
+                    painter = painterResource(id = R.drawable.hello),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.scale(0.9f)
+                )
             }
 
         }

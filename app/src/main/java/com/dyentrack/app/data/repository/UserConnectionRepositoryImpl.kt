@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.repository
 
-import android.util.Log
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
 import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
@@ -67,7 +66,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
                 error
             )
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ResponseAuth(
                 null,
                 null,
@@ -77,10 +76,34 @@ class UserConnectionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerUser(email: String, password: String): ResponseAuth {
+    override suspend fun registerUser(email: String, password: String,pseudo:String): ResponseAuth {
+        if (!isValideMail(email)|| email.length>100) {
+            return ResponseAuth(
+                userDTO = null,
+                token = null,
+                status = AuthStatus.NOT_CONNECTED,
+                error = AuthError.NOT_EMAILFORMAT
+            )
+        }
+        if(pseudo.length<=2 || pseudo.length>20){
+            return ResponseAuth(
+                userDTO = null,
+                token = null,
+                status = AuthStatus.NOT_CONNECTED,
+                error = AuthError.NOT_PSEUDOFORMAT
+            )
+        }
+        if (!isValidPassword(password)|| password.length>60) {
+            return ResponseAuth(
+                userDTO = null,
+                token = null,
+                status = AuthStatus.NOT_CONNECTED,
+                error = AuthError.NOT_PASSWORD
+            )
+        }
         return try {
             val data = api.registerUser(
-                IdentificationRequest(email, password)
+                IdentificationRequest(email, password,pseudo)
             ).data
 
             val user = data.userDTO
@@ -105,7 +128,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
                 null
             )
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ResponseAuth(
                 null,
                 null,

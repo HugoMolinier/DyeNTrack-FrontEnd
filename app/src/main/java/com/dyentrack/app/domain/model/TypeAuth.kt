@@ -4,6 +4,7 @@ enum class AuthError {
     ERROR_API,
     INVALID_ARGUMENT,
     NOT_EMAILFORMAT,
+    NOT_PSEUDOFORMAT,
     UNAUTHORIZED,
     NOT_PASSWORD
 }

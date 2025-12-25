@@ -6,7 +6,7 @@ import com.dyentrack.app.domain.model.User
 
 interface UserConnectionRepository {
 
-    suspend fun registerUser(email:String,password:String): ResponseAuth
+    suspend fun registerUser(email:String,password:String,pseudo:String): ResponseAuth
     suspend fun loginUser(email:String,password:String): ResponseAuth
     fun isValideToken(): AuthStatus
     fun getUser():User?

@@ -1,6 +1,6 @@
 package com.dyentrack.app.presentation.screens.parameters
 
-import android.R
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,7 +61,7 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                 "Paramètre",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu") })
+                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")})) })
 
             LazyColumn(
                 modifier = modifier.fillMaxWidth().padding(start = 12.dp,end=12.dp,top=8.dp).weight(1f),
@@ -95,7 +95,8 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                             CustomButton(
                                 "S'inscire",
                                 modifier=modifier.fillMaxWidth(),
-                                size = SizeType.MEDIUM
+                                size = SizeType.MEDIUM,
+                                onClick = {navController.navigate("inscription")}
                             )
                             CustomButton(
                                 "Se connecter",
@@ -166,12 +167,17 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
 
 
                 }
-
-                item{
-                    Button(onClick = {authViewModel.logout()},modifier= Modifier.fillMaxWidth(),     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = secondaryTextColor
-                    )) { Text("Déconnection",style = MaterialTheme.typography.bodySmall)}
+                if(authResponse?.status == AuthStatus.CONNECTED) {
+                    item {
+                        Button(
+                            onClick = { authViewModel.logout();navController.navigate("parametre") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = secondaryTextColor
+                            )
+                        ) { Text("Déconnection", style = MaterialTheme.typography.bodySmall) }
+                    }
                 }
             }
         }

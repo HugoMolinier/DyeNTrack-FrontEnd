@@ -54,6 +54,7 @@ import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
+import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 
@@ -62,11 +63,12 @@ import com.dyentrack.app.presentation.utils.ExerciseImages
 fun HomePage(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
-    navController: NavController
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
 ) {
 
+    val authResponse by authViewModel.authResponse.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
-    val pseudo = "Pearlt"
     val objectifStep = 15000
     val objectifCal = 3000
     val objectifsommeil = 8.0
@@ -104,7 +106,7 @@ fun HomePage(
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                         Text(
-                            "$pseudo !",
+                            "${authResponse?.userDTO?.pseudo ?:"Préparons la journée"} !",
                             style = MaterialTheme.typography.titleMedium,
                             modifier= Modifier.padding(top = 4.dp)
                         )

@@ -34,9 +34,9 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String,pseudo:String) {
         viewModelScope.launch {
-            authResponse.value = registerUserUseCase(email, password)
+            authResponse.value = registerUserUseCase(email, password,pseudo)
         }
     }
 

@@ -39,6 +39,7 @@ import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
+import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -132,6 +133,7 @@ fun MyApp() {
             composable("analyse") { AnalysePage(navController=navController) }
             composable("parametre") { ParameterPage(navController=navController) }
             composable("connexion") { ConnexionPage(navController=navController)}
+            composable("inscription") { RegisterPage(navController=navController) }
                 composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry
                     ?.savedStateHandle
