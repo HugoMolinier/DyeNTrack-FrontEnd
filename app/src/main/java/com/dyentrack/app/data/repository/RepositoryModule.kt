@@ -4,6 +4,7 @@ import com.dyentrack.app.domain.repository.DayDataRepository
 import com.dyentrack.app.domain.repository.InfoExerciseUserRepository
 import com.dyentrack.app.domain.repository.MasterDataRepository
 import com.dyentrack.app.domain.repository.UserConnectionRepository
+import com.dyentrack.app.domain.repository.UserPreferenceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -38,6 +39,13 @@ abstract class RepositoryModule {
     abstract fun bindUserConnectionRepository(
         impl: UserConnectionRepositoryImpl
     ): UserConnectionRepository
+
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferenceRepository(
+        impl: UserPreferenceRepositoryImpl
+    ): UserPreferenceRepository
 
 
 }

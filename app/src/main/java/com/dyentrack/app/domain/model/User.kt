@@ -7,5 +7,5 @@ data class User(
     val dateRegister:String,
     val birthdate:String?=null,
     val height: Int?=null,
-    val sexe: Boolean?=null
+    val sexeMale: Boolean?=null
 )

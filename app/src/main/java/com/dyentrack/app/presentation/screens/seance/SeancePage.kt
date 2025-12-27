@@ -42,6 +42,7 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
@@ -60,7 +61,8 @@ fun SeancePage(
     modifier: Modifier = Modifier,
     viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
     navController: NavController,
-    daySelected: String?=null
+    daySelected: String?=null,
+    healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>()
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
@@ -216,7 +218,7 @@ fun SeancePage(
 
                     SectionSelectType.DATA ->
                         item {
-                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour(),state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state)
+                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour(),state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel)
                         }
 
                     else -> null

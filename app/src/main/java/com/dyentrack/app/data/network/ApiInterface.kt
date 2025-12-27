@@ -53,7 +53,7 @@ interface ApiInterface  {
     @PUT("user/update")
     suspend fun updateUser(
         @Body request: UserUpdate
-    ): ApiResponse<ResponseAuth>
+    ): ApiResponse<User>
 
 
 }

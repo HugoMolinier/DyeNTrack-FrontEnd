@@ -36,7 +36,7 @@ import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable

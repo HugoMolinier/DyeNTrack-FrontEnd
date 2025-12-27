@@ -3,6 +3,7 @@ package com.dyentrack.app.data.local.datasource
 import android.content.Context
 import androidx.core.content.edit
 import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.UserPreference
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -24,6 +25,17 @@ class FileLocalDataSource @Inject constructor(
         val json = Gson().toJson(masterDataStatic)
         prefs.edit { putString("master_data_static", json) }
     }
+
+    override fun getUserPreference(): UserPreference? {
+        val json = prefs.getString("user_preference", null)
+        return json?.let { Gson().fromJson(it, UserPreference::class.java) }
+    }
+
+    override fun saveUserPreference(userPreference: UserPreference) {
+        val json = Gson().toJson(userPreference)
+        prefs.edit { putString("user_preference", json) }
+    }
+
 
 
 }

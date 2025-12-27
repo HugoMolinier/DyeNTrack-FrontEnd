@@ -40,7 +40,7 @@ import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
 @Composable
 fun InformationPage(
@@ -59,7 +59,7 @@ fun InformationPage(
     val originalPseudo = remember { mutableStateOf(authState.user?.pseudo ?: "") }
     val originalHeight = remember { mutableStateOf(authState.user?.height?.toString() ?: "170") }
     val originalBirthday = remember { mutableStateOf(authState.user?.birthdate ?: "") }
-    val originalSexe = remember { mutableStateOf(authState.user?.sexe) }
+    val originalSexe = remember { mutableStateOf(authState.user?.sexeMale) }
 
     //  Valeurs modifiables
     val pseudo = remember { mutableStateOf(TextFieldValue(originalPseudo.value)) }
@@ -175,7 +175,7 @@ fun InformationPage(
 
                         Row(
                             horizontalArrangement = Arrangement.Absolute.spacedBy(40.dp),
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,

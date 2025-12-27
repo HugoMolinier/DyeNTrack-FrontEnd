@@ -45,7 +45,7 @@ import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.SizeType
 import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.parameters.component.ParameterBox
-import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -128,7 +128,7 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                                 "Informations",
                                 Icons.Outlined.Person
                             ) else null,
-                            ParameterItem({ }, "App Connecter", Icons.Outlined.DatasetLinked),
+                            ParameterItem({navController.navigate("connectedApp") }, "App Connectée", Icons.Outlined.DatasetLinked),
                             ParameterItem({ }, "Mes Objectifs", Icons.AutoMirrored.Outlined.Rule),
                         )
                         ParameterBox(menu1)

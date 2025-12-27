@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.screens.parameters.viewModel
+package com.dyentrack.app.presentation.globalViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,5 +58,3 @@ class AuthViewModel @Inject constructor(
         logoutUseCase()
     }
 }
-
-

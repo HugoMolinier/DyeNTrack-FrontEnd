@@ -54,7 +54,8 @@ import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
-import com.dyentrack.app.presentation.screens.parameters.viewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 

@@ -66,9 +66,6 @@ class SeanceViewModel @Inject constructor(
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
-    private val healthConnectUseCase: CheckHealthConnectUseCase,
-    private val syncHealthDataUseCase: SyncHealthDataUseCase,
-    private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
@@ -103,36 +100,6 @@ class SeanceViewModel @Inject constructor(
             }
         }
 
-    }
-    fun syncHealthData() {
-        viewModelScope.launch {
-            // Récupérer le status Health Connect
-            when (val status = healthConnectUseCase()) {
-                is HealthConnectStatus.Available -> {
-                    val client = status.client
-                    Log.d("HealthConnect", "Health Connect disponible")
-
-                    val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
-
-                    if (!permissionsGranted) {
-                        val requiredPermissions = requestHealthConnectPermissionsUseCase.getRequiredPermissions()
-                        Log.d("HealthConnect", "Permissions manquantes : $requiredPermissions")
-                        _uiState.update { it.copy(healthConnectPermissionsNeeded=requiredPermissions) }
-                    } else {
-                        syncHealthDataUseCase(client)
-                    }
-                }
-                is HealthConnectStatus.NotAvailable -> {
-                    // Health Connect n'est pas disponible
-                    Log.d("HealthConnect", "Health Connect SDK not available")
-                }
-                is HealthConnectStatus.NeedsUpdate -> {
-                    // Provider doit être mis à jour
-                    Log.d("HealthConnect", "Health Connect provider needs update: ${status.packageName}")
-                }
-                else -> Log.d("a","j")
-            }
-        }
     }
 
 

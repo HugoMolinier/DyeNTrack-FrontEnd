@@ -4,6 +4,6 @@ data class UserUpdate(
     val pseudo:String?=null,
     val birthdate:String?=null,
     val height: Int?=null,
-    val sexe: Boolean?=null
+    val sexeMale: Boolean?=null
 )
 

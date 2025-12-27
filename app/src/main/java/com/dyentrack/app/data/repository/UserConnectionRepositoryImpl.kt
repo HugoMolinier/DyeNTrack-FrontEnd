@@ -1,5 +1,6 @@
 package com.dyentrack.app.data.repository
 
+import android.util.Log
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
 import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
@@ -18,7 +19,9 @@ import retrofit2.HttpException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class UserConnectionRepositoryImpl @Inject constructor(
     private val api: ApiInterface,
     private val secureSessionDataSource: SecureSessionDataSource
@@ -54,19 +57,18 @@ class UserConnectionRepositoryImpl @Inject constructor(
         return try {
             val response = api.updateUser(UserUpdate(pseudo, date, height, sexe))
 
-
-            val user = response.data.userDTO
+            val user = response.data
                 ?: return RequestState.Error(AuthError.ERROR_API)
 
             secureSessionDataSource.updateUserInfo(
                 user.pseudo,
                 user.birthdate,
                 user.height,
-                user.sexe
+                user.sexeMale
             )
 
             updateAuthState()
-            RequestState.Success
+            return RequestState.Success
         }catch (e: HttpException) {
             RequestState.Error(
                 if (e.code() == 401)

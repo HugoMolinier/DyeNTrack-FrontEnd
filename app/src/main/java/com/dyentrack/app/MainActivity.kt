@@ -1,9 +1,11 @@
 package com.dyentrack.app
 
+import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -37,6 +39,7 @@ import com.dyentrack.app.presentation.AppViewModel
 import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
+import com.dyentrack.app.presentation.screens.parameters.ConnectedAppPage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
 import com.dyentrack.app.presentation.screens.parameters.InformationPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
@@ -44,21 +47,23 @@ import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-
-
+    private val healthViewModel: HealthConnectViewModel by viewModels()
+    private val appViewMode: AppViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        appViewMode.apply { }
+        healthViewModel.apply { }
         setContent {
-            val appViewModel: AppViewModel = hiltViewModel()
             DyeNTrackTheme {
                 MyApp()
             }
@@ -135,6 +140,8 @@ fun MyApp() {
             composable("parametre") { ParameterPage(navController=navController) }
             composable("information") { InformationPage(navController=navController) }
             composable("connexion") { ConnexionPage(navController=navController)}
+            composable("connectedApp") { ConnectedAppPage(navController=navController) }
+
             composable("inscription") { RegisterPage(navController=navController) }
                 composable("exercise") { backStackEntry ->
                 val exercise = navController.previousBackStackEntry

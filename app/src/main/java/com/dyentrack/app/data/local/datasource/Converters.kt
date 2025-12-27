@@ -11,7 +11,7 @@ fun User.toLocal() = UserLocal(
     dateRegister = dateRegister,
     birthdate = birthdate,
     height = height,
-    sexe = sexe
+    sexe = sexeMale
 )
 
 fun UserLocal.toDomain() = User(
@@ -20,7 +20,7 @@ fun UserLocal.toDomain() = User(
     dateRegister = dateRegister,
     birthdate = birthdate,
     height = height,
-    sexe = sexe
+    sexeMale = sexe
 )
 
 fun Token.toLocal(): SessionLocal {

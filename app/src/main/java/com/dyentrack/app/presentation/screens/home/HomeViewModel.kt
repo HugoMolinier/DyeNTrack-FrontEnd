@@ -1,25 +1,19 @@
 package com.dyentrack.app.presentation.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.HealthConnectStatus
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
-import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
-import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.utils.ExerciseImages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -31,9 +25,6 @@ import kotlin.math.ceil
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
-    private val healthConnectUseCase: CheckHealthConnectUseCase,
-    private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase,
-    private val syncHealthDataUseCas: SyncHealthDataUseCase
 ) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
@@ -74,22 +65,6 @@ class HomeViewModel @Inject constructor(
 
         }
 
-        viewModelScope.launch {
-            dayDataFlow.first { it != null }
-            val status = healthConnectUseCase()
-            when (status) {
-                is HealthConnectStatus.Available -> {
-                    val client = status.client
-                    val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
-                    if (permissionsGranted) {
-                       syncHealthDataUseCas.invoke(client)
-                    } else {
-                        Log.d("HealthSync", "Permissions non accordées")
-                    }
-                }
-                else -> Log.d("HealthSync", "Health Connect non disponible")
-            }
-        }
     }
 
     fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
