@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
-import com.dyentrack.app.domain.model.AuthStatus
+import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
@@ -49,13 +51,25 @@ fun ConnexionPage(
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
 ) {
 
-    val authResponse by authViewModel.authResponse.collectAsState()
 
-    if (authResponse?.status== AuthStatus.CONNECTED) navController.navigate("parametre")
+    val authState by authViewModel.authState.collectAsState()
+    val requestState by authViewModel.requestState.collectAsState()
+
+    if (authState.isConnected) navController.navigate("parametre")
 
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
-
+    val isLoading = requestState is RequestState.Loading
+    val errorText = when ((requestState as? RequestState.Error)?.error) {
+        AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
+        AuthError.NOT_EMAILFORMAT -> "Format email invalide"
+        AuthError.UNAUTHORIZED-> "Identifiants incorrects"
+        AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
+        AuthError.ERROR_API -> "Erreur serveur"
+        null -> ""
+        AuthError.NOT_PSEUDOFORMAT -> ""
+        AuthError.NOT_HEIGHTFORMAT -> ""
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
@@ -75,7 +89,7 @@ fun ConnexionPage(
                         Text("Email", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 4.dp))
                         InputCustom(
                             text = email, variant = InputVariant.OUTLINED,
-                            placeholder = "email"
+                            placeholder = "votre@email.com"
                         )
                     }
                 }
@@ -85,7 +99,7 @@ fun ConnexionPage(
                         Text("Mot de passe",style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
                         InputCustom(
                             text = password,
-                            placeholder = "mot de passe",
+                            placeholder = "Entrer votre mot de passe",
                             variant = InputVariant.OUTLINED,
                             hideContent = true
                         )
@@ -97,31 +111,27 @@ fun ConnexionPage(
 
                 item {
                     Box(modifier= Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
-                        val errorText = when (authResponse?.error) {
-                            AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
-                            AuthError.NOT_EMAILFORMAT -> "Format email invalide"
-                            AuthError.UNAUTHORIZED-> "Identifiants incorrects"
-                            AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
-                            AuthError.ERROR_API -> "Erreur serveur"
-                            null -> ""
-                            AuthError.NOT_PSEUDOFORMAT -> ""
-                        }
 
-                        Text(
-                            text = errorText,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.Red,
-                                fontSize = 12.sp
+                        Row (horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically){
+                            if (errorText!="")Icon(Icons.Outlined.ErrorOutline,"Error", tint = Color.Red ,modifier= Modifier.size(14.dp))
+                            Text(
+                                text = errorText,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.Red,
+                                    fontSize = 12.sp
+                                )
                             )
-                        )
+                        }
                     }
 
                 }
                 item {
-                    CustomButton (
-                        label = "Connexion" ,
-                        onClick = {authViewModel.login(email.value.text,password.value.text)},
-                        modifier = Modifier.fillMaxWidth()
+                    CustomButton(
+                        label = if(isLoading) "Connexion..." else "Connexion",
+                        onClick = { authViewModel.login(email.value.text, password.value.text) },
+                        modifier = Modifier.fillMaxWidth(),
+                        isLoading = isLoading,
+                        enable = !isLoading
                     )
 
                 }

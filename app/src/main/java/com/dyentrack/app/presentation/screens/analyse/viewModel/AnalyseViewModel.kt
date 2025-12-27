@@ -51,11 +51,27 @@ class AnalyseViewModel @Inject constructor(
                     return@collect
                 }
 
+                var minDate: LocalDate? = null
                 allSeanceByDay.clear()
                 list.forEach { dayData ->
-                    if (dayData.seanceTrack?.plannedExercises?.isNotEmpty() == true) { allSeanceByDay[dayData.dayData]=dayData!!.seanceTrack}
+                    val seance = dayData.seanceTrack
+                    if (seance?.plannedExercises?.isNotEmpty() == true) {
+                        allSeanceByDay[dayData.dayData]=seance
+
+                        val currentDate = LocalDate.parse(dayData.dayData, DateTimeFormatter.ISO_DATE)
+                        minDate = when {
+                            minDate == null -> currentDate
+                            currentDate.isBefore(minDate) -> currentDate
+                            else -> minDate
+                        }
+                    }
                 }
 
+                _uiState.update {
+                    it.copy(
+                        dateRange = it.dateRange.copy(minExistingDate = minDate)
+                    )
+                }
                 applyDateRange(_uiState.value.dateRange.rangeInDays)
             }
 
@@ -100,20 +116,20 @@ class AnalyseViewModel @Inject constructor(
     fun applyDateRange(rangeInDays: Long) {
         val formatter = DateTimeFormatter.ISO_DATE
         val today = LocalDate.now()
-        val lastDays = (0L until rangeInDays).map { today.minusDays(it) }
-
+        val minDate = _uiState.value.dateRange.minExistingDate ?: today
+        val lastDays = (0L until rangeInDays)
+            .map { today.minusDays(it) }
+            .filter { !it.isBefore(minDate) }//pour plus tard quand range personaliser
         val filteredMap = allSeanceByDay.filter { (dateStr, seance) ->
             val day = LocalDate.parse(dateStr, formatter)
-            day in lastDays && seance.plannedExercises.isNotEmpty()
-        }
+            day in lastDays && seance.plannedExercises.isNotEmpty()        }
 
         _uiState.update {
             it.copy(
                 mapSeance = filteredMap,
-                dateRange = it.dateRange.copy(rangeInDays = rangeInDays)
+                dateRange = it.dateRange.copy(rangeInDays = rangeInDays)//refresh
             )
         }
-
         muscleRateOfEachDay(true)
 
         val musclePercentages = computeSetPercentagePerMuscle()

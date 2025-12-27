@@ -2,14 +2,17 @@ package com.dyentrack.app.data.network
 
 import com.dyentrack.app.data.network.dto.IdentificationRequest
 import com.dyentrack.app.data.network.dto.InfoExerciseUserContentRequest
+import com.dyentrack.app.data.network.dto.UserUpdate
 import com.dyentrack.app.domain.model.ApiResponse
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.ResponseAuth
+import com.dyentrack.app.domain.model.User
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ApiInterface  {
@@ -45,6 +48,11 @@ interface ApiInterface  {
     @POST("user/login")
     suspend fun loginUser(
         @Body request: IdentificationRequest
+    ): ApiResponse<ResponseAuth>
+
+    @PUT("user/update")
+    suspend fun updateUser(
+        @Body request: UserUpdate
     ): ApiResponse<ResponseAuth>
 
 

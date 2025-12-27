@@ -1,15 +1,34 @@
 package com.dyentrack.app.domain.repository
 
-import com.dyentrack.app.domain.model.AuthStatus
-import com.dyentrack.app.domain.model.ResponseAuth
+import com.dyentrack.app.domain.model.AuthState
+import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.domain.model.User
+import kotlinx.coroutines.flow.StateFlow
 
 interface UserConnectionRepository {
 
-    suspend fun registerUser(email:String,password:String,pseudo:String): ResponseAuth
-    suspend fun loginUser(email:String,password:String): ResponseAuth
-    fun isValideToken(): AuthStatus
-    fun getUser():User?
+    val authState: StateFlow<AuthState>
+
+    fun getUser(): User?
     fun getToken(): String
-    fun logout():ResponseAuth
+    fun logout()
+
+
+    suspend fun loginUser(
+        email: String,
+        password: String
+    ): RequestState
+
+    suspend fun registerUser(
+        email: String,
+        password: String,
+        pseudo: String
+    ): RequestState
+
+    suspend fun updateUser(
+        pseudo: String,
+        height: Int?,
+        sexe: Boolean?,
+        birthDate: String?
+    ): RequestState
 }

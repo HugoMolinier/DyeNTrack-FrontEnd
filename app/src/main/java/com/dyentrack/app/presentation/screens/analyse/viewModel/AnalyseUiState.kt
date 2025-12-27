@@ -18,7 +18,7 @@ data class AnalyseUiState(
     val exerciceChose: Long=0L,
     val tempChose:Long=0L,
     val isBottomSheetVisible: Boolean=false,
-    val allDataExercise: Map<String, MuscleRate> =emptyMap(),
+    val allDataExercise: Map<String, MuscleRate> =emptyMap()
 
 
 
@@ -26,9 +26,15 @@ data class AnalyseUiState(
 
 
 data class DateRangeSelected(
-    val rangeInDays: Long = 14L, // 7, 14, 30, etc.
-    val recentDate: LocalDate = LocalDate.now()
+    val rangeInDays: Long = 14L,
+    val recentDate: LocalDate = LocalDate.now(),
+    val minExistingDate: LocalDate? = null
 ) {
     val oldDate: LocalDate
-        get() = recentDate.minusDays(rangeInDays - 1L)
+        get() {
+            val computedOldDate = recentDate.minusDays(rangeInDays - 1)
+            return if (minExistingDate != null && computedOldDate.isBefore(minExistingDate)) {
+                minExistingDate
+            } else computedOldDate
+        }
 }

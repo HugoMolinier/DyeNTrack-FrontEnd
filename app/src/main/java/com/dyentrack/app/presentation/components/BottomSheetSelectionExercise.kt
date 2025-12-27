@@ -45,6 +45,7 @@ fun BottomSheetSelectionExercise(
     onClickFavorite: (Long) -> Unit= {},
     onResetFilter: () -> Unit= {},
     onUpdateQuery:(String) ->Unit= {},
+    title:String="",
     footerChildren: @Composable () -> Unit = {}
 
 ) {
@@ -81,7 +82,7 @@ fun BottomSheetSelectionExercise(
     ).count { it.first != it.second } + if (searchQuery.isNotEmpty()) 1 else 0
 
     BottomSheetContent(
-        title = "Ajouter un exercice",
+        title = title,
         showBottomSheet = bottomSheetVisibility,
         onDismiss = { onClose()},
         childrenForExtend = {

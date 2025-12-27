@@ -38,7 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.AuthStatus
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.TopNavigationBar
@@ -53,14 +52,15 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()) {
 
-    val authResponse by authViewModel.authResponse.collectAsState()
+
+    val authState by authViewModel.authState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
                 "Paramètre",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.popBackStack() },
+                onClickLeft = {navController.navigate("home")},
                 rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")})) })
 
             LazyColumn(
@@ -69,7 +69,7 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
             ) {
 
                 //debut composant
-                if (authResponse?.status== AuthStatus.NOT_CONNECTED) {
+                if (!authState.isConnected) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top=12.dp)) {
                             Text(
@@ -123,8 +123,8 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         val menu1 = listOfNotNull(
-                            if (authResponse?.status== AuthStatus.CONNECTED) ParameterItem(
-                                { },
+                            if (authState.isConnected) ParameterItem(
+                                { navController.navigate("information") },
                                 "Informations",
                                 Icons.Outlined.Person
                             ) else null,
@@ -142,7 +142,7 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                         val menu1 = listOfNotNull(
                             ParameterItem({ }, "Unité de mesures", Icons.Outlined.Straighten),
                             ParameterItem({ }, "Langue", Icons.Default.Translate),
-                            if (authResponse?.status== AuthStatus.CONNECTED)
+                            if (authState.isConnected)
                                 ParameterItem({ }, "Export des données", Icons.Outlined.Download)
                             else null
                         )
@@ -167,7 +167,7 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
 
 
                 }
-                if(authResponse?.status == AuthStatus.CONNECTED) {
+                if(authState.isConnected) {
                     item {
                         Button(
                             onClick = { authViewModel.logout();navController.navigate("parametre") },

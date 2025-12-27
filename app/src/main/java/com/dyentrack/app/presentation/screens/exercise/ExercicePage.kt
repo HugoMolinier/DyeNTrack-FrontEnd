@@ -256,6 +256,7 @@ fun ExercisePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
+                            val numberSize= state.allDataExercise.values.size
                             CombinedChartMP(
                                 labels = state.allDataExercise.keys.toList(),
                                 barValues = state.allDataExercise.values.map {
@@ -266,6 +267,8 @@ fun ExercisePage(
                                     val failSet = it.rateSetSomme?.numberSetFail ?: 0
                                     if (totalSet > 0) failSet.toFloat() / totalSet else 0f
                                 },
+                                showValueBar = numberSize<35,
+                                showValueLine = numberSize<20,
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )

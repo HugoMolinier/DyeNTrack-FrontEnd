@@ -38,6 +38,7 @@ import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
+import com.dyentrack.app.presentation.screens.parameters.InformationPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
 import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
@@ -132,6 +133,7 @@ fun MyApp() {
             }
             composable("analyse") { AnalysePage(navController=navController) }
             composable("parametre") { ParameterPage(navController=navController) }
+            composable("information") { InformationPage(navController=navController) }
             composable("connexion") { ConnexionPage(navController=navController)}
             composable("inscription") { RegisterPage(navController=navController) }
                 composable("exercise") { backStackEntry ->

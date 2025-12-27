@@ -29,6 +29,8 @@ fun CombinedChartMP(
     labels: List<String>,
     barValues: List<Float>,
     lineValues: List<Float>,
+    showValueBar:Boolean=true,
+    showValueLine:Boolean=true,
 
     barLegendLabel: String = "Somme pondérée",
     barLegendColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
@@ -68,7 +70,7 @@ fun CombinedChartMP(
             val barDataSet = BarDataSet(barEntries, barLegendLabel).apply {
                 color = barLegendColor.toArgb()
                 axisDependency = YAxis.AxisDependency.LEFT
-                setDrawValues(true)
+                setDrawValues(showValueBar)
                 valueTextColor = colorScheme.onSurface.toArgb()
             }
 
@@ -76,7 +78,7 @@ fun CombinedChartMP(
                 color = lineLegendColor.toArgb()
                 lineWidth = 2f
                 setDrawCircles(true)
-                setDrawValues(true)
+                setDrawValues(showValueLine)
                 valueTextColor = colorScheme.onSurface.toArgb()
                 axisDependency = YAxis.AxisDependency.RIGHT
 

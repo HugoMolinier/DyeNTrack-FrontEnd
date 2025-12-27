@@ -67,7 +67,7 @@ fun HomePage(
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
 ) {
 
-    val authResponse by authViewModel.authResponse.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
     val objectifStep = 15000
     val objectifCal = 3000
@@ -106,7 +106,7 @@ fun HomePage(
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                         Text(
-                            "${authResponse?.userDTO?.pseudo ?:"Préparons la journée"} !",
+                            "${authState.user?.pseudo ?:"Préparons la journée"} !",
                             style = MaterialTheme.typography.titleMedium,
                             modifier= Modifier.padding(top = 4.dp)
                         )

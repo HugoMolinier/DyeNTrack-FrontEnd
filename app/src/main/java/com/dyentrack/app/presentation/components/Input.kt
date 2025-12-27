@@ -164,7 +164,7 @@ fun InputCustom(
             },
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = PrimaryTextColor,
+                color = if (enabled) MaterialTheme .colorScheme.onSurface else secondaryTextColor.copy(alpha= 0.8f),
                         textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
 
             ),

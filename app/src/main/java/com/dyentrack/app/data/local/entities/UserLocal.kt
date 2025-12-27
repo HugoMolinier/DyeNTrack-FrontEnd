@@ -10,5 +10,5 @@ data class UserLocal(
     val dateRegister: String,
     val birthdate: String?,
     val height: Int?,
-    val sexe: Boolean?
+    val sexe: Boolean?,
 )

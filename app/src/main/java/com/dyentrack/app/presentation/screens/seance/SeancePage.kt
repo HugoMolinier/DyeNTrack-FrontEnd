@@ -267,6 +267,7 @@ fun SeancePage(
         bottomSheetVisibility = state.isBottomSheetVisible,
         selectedExerciseIds = state.exerciseToAdd,
         navController = navController,
+        title="Ajouter un exercice",
         onClose = { viewModel.toggleBottomSheet(false) },
         onClickExercise = { exerciseId ->
             viewModel.toggleExerciseSelection(exerciseId)

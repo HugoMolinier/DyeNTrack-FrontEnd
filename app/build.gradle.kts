@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.foundation)
 
     // Navigation
     val nav_version = "2.9.5"

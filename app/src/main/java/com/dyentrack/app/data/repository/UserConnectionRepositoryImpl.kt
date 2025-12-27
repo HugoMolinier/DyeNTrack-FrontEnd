@@ -5,12 +5,18 @@ import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.data.network.dto.IdentificationRequest
+import com.dyentrack.app.data.network.dto.UserUpdate
 import com.dyentrack.app.domain.model.AuthError
+import com.dyentrack.app.domain.model.AuthState
 import com.dyentrack.app.domain.model.AuthStatus
-import com.dyentrack.app.domain.model.ResponseAuth
+import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.domain.model.User
 import com.dyentrack.app.domain.repository.UserConnectionRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.HttpException
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class UserConnectionRepositoryImpl @Inject constructor(
@@ -18,22 +24,67 @@ class UserConnectionRepositoryImpl @Inject constructor(
     private val secureSessionDataSource: SecureSessionDataSource
 ) : UserConnectionRepository {
 
-    override suspend fun loginUser(email: String, password: String): ResponseAuth {
+    private val _authState = MutableStateFlow(
+        AuthState(
+            isConnected = isValideToken() == AuthStatus.CONNECTED,
+            user = getUser()
+        )
+    )
+    override val authState: StateFlow<AuthState> = _authState
+
+    override suspend fun updateUser(
+        pseudo: String,
+        height: Int?,
+        sexe: Boolean?,
+        birthDate: String?
+    ): RequestState {
+        if(!isValidPseudo(pseudo)){
+            return RequestState.Error(AuthError.NOT_PSEUDOFORMAT)
+        }
+        if(height != null && !isValidHeight(height)){
+            return RequestState.Error(AuthError.NOT_HEIGHTFORMAT)
+        }
+        val date = birthDate?.let {
+            runCatching {
+                LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE).toString()
+            }.getOrNull()
+        }
+
+
+        return try {
+            val response = api.updateUser(UserUpdate(pseudo, date, height, sexe))
+
+
+            val user = response.data.userDTO
+                ?: return RequestState.Error(AuthError.ERROR_API)
+
+            secureSessionDataSource.updateUserInfo(
+                user.pseudo,
+                user.birthdate,
+                user.height,
+                user.sexe
+            )
+
+            updateAuthState()
+            RequestState.Success
+        }catch (e: HttpException) {
+            RequestState.Error(
+                if (e.code() == 401)
+                    AuthError.UNAUTHORIZED
+                else
+                    AuthError.ERROR_API
+            )
+        } catch (_: Exception) {
+            RequestState.Error(AuthError.ERROR_API)
+        }
+    }
+
+    override suspend fun loginUser(email: String, password: String): RequestState  {
             if (!isValideMail(email)) {
-                return ResponseAuth(
-                    userDTO = null,
-                    token = null,
-                    status = AuthStatus.NOT_CONNECTED,
-                    error = AuthError.NOT_EMAILFORMAT
-                )
+                return RequestState.Error(AuthError.NOT_EMAILFORMAT)
             }
             if (!isValidPassword(password)) {
-                return ResponseAuth(
-                    userDTO = null,
-                    token = null,
-                    status = AuthStatus.NOT_CONNECTED,
-                    error = AuthError.NOT_PASSWORD
-                )
+                return RequestState.Error(AuthError.NOT_PASSWORD)
             }
         return try {
             val response = api.loginUser(IdentificationRequest(email, password))
@@ -41,65 +92,31 @@ class UserConnectionRepositoryImpl @Inject constructor(
             val user = data.userDTO
             val token = data.token
             if (user == null || token == null) {
-                return ResponseAuth(
-                    null,
-                    null,
-                    AuthStatus.NOT_CONNECTED,
-                    AuthError.ERROR_API
-                )
+                return RequestState.Error(AuthError.ERROR_API)
             }
             secureSessionDataSource.saveUser(user.toLocal())
             secureSessionDataSource.saveSession(token.toLocal())
 
-            return data.copy(status = AuthStatus.CONNECTED)
-        } catch (e: HttpException) {
-            val error = if (e.code() == 401) {
-                AuthError.UNAUTHORIZED
-            } else {
-                AuthError.ERROR_API
-            }
-
-            ResponseAuth(
-                null,
-                null,
-                AuthStatus.NOT_CONNECTED,
-                error
+            updateAuthState()
+            return RequestState.Success
+        }catch (e: HttpException) {
+            RequestState.Error(
+                if (e.code() == 401) AuthError.UNAUTHORIZED else AuthError.ERROR_API
             )
-
         } catch (_: Exception) {
-            ResponseAuth(
-                null,
-                null,
-                AuthStatus.NOT_CONNECTED,
-                AuthError.ERROR_API
-            )
+            RequestState.Error(AuthError.ERROR_API)
         }
     }
 
-    override suspend fun registerUser(email: String, password: String,pseudo:String): ResponseAuth {
+    override suspend fun registerUser(email: String, password: String,pseudo:String): RequestState {
         if (!isValideMail(email)|| email.length>100) {
-            return ResponseAuth(
-                userDTO = null,
-                token = null,
-                status = AuthStatus.NOT_CONNECTED,
-                error = AuthError.NOT_EMAILFORMAT
-            )
+            return RequestState.Error(AuthError.NOT_EMAILFORMAT)
         }
-        if(pseudo.length<=2 || pseudo.length>20){
-            return ResponseAuth(
-                userDTO = null,
-                token = null,
-                status = AuthStatus.NOT_CONNECTED,
-                error = AuthError.NOT_PSEUDOFORMAT
-            )
+        if(!isValidPseudo(pseudo)){
+            return RequestState.Error(AuthError.NOT_PSEUDOFORMAT)
         }
         if (!isValidPassword(password)|| password.length>60) {
-            return ResponseAuth(
-                userDTO = null,
-                token = null,
-                status = AuthStatus.NOT_CONNECTED,
-                error = AuthError.NOT_PASSWORD
-            )
+            return RequestState.Error(AuthError.NOT_PASSWORD)
         }
         return try {
             val data = api.registerUser(
@@ -107,38 +124,31 @@ class UserConnectionRepositoryImpl @Inject constructor(
             ).data
 
             val user = data.userDTO
+                ?: return RequestState.Error(AuthError.ERROR_API)
             val token = data.token
+                ?: return RequestState.Error(AuthError.ERROR_API)
 
-            if (user == null || token == null) {
-                return ResponseAuth(
-                    null,
-                    null,
-                    AuthStatus.NOT_CONNECTED,
-                    AuthError.ERROR_API
-                )
-            }
 
             secureSessionDataSource.saveUser(user.toLocal())
             secureSessionDataSource.saveSession(token.toLocal())
 
-            ResponseAuth(
-                userDTO = user,
-                token = token,
-                status = AuthStatus.CONNECTED,
-                null
-            )
+            updateAuthState()
 
-        } catch (_: Exception) {
-            ResponseAuth(
-                null,
-                null,
-                AuthStatus.NOT_CONNECTED,
-                AuthError.ERROR_API
+            RequestState.Success
+
+        } catch (e: HttpException) {
+            RequestState.Error(
+                if (e.code() == 401)
+                    AuthError.UNAUTHORIZED
+                else
+                    AuthError.ERROR_API
             )
+        } catch (_: Exception) {
+            RequestState.Error(AuthError.ERROR_API)
         }
     }
 
-    override fun isValideToken(): AuthStatus {
+     fun isValideToken(): AuthStatus {
         val session = secureSessionDataSource.getSession()
             ?: return AuthStatus.NOT_CONNECTED
 
@@ -161,14 +171,9 @@ class UserConnectionRepositoryImpl @Inject constructor(
         return secureSessionDataSource.getUser()?.toDomain()
     }
 
-    override fun logout():ResponseAuth {
+    override fun logout() {
         secureSessionDataSource.clearAll()
-        return             ResponseAuth(
-            null,
-            null,
-            AuthStatus.NOT_CONNECTED,
-            null
-        )
+        updateAuthState()
     }
 
     /**
@@ -187,4 +192,19 @@ class UserConnectionRepositoryImpl @Inject constructor(
         return regex.matches(password)
     }
 
+    private fun isValidPseudo(pseudo: String): Boolean {
+        return pseudo.length in 3..20
+    }
+
+    private fun isValidHeight(height: Int): Boolean {
+        return height in 50..300
+    }
+
+
+    private fun updateAuthState() {
+        _authState.value = AuthState(
+            isConnected = isValideToken() == AuthStatus.CONNECTED,
+            user = getUser()
+        )
+    }
 }

@@ -11,6 +11,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Singleton
 class SecureSessionDataSource @Inject constructor(
@@ -41,9 +43,27 @@ class SecureSessionDataSource @Inject constructor(
     /* -------- USER -------- */
 
     fun saveUser(user: UserLocal) {
-        Log.d("saveUser","save")
         prefs.edit { putString(KEY_USER, gson.toJson(user)) }
     }
+
+    fun updateUserInfo(
+        pseudo: String,
+        birthdate: String?,
+        height: Int?,
+        sexe: Boolean?
+    ) {
+        val currentUser = getUser() ?: return
+
+        val updatedUser = currentUser.copy(
+            pseudo = pseudo,
+            birthdate = birthdate,
+            height = height,
+            sexe = sexe
+        )
+
+        saveUser(updatedUser)
+    }
+
 
     fun getUser(): UserLocal? {
         return prefs.getString(KEY_USER, null)?.let { gson.fromJson(it, UserLocal::class.java) }
@@ -56,7 +76,6 @@ class SecureSessionDataSource @Inject constructor(
     /* -------- SESSION -------- */
 
     fun saveSession(session: SessionLocal) {
-        Log.d("saveSession","${session}")
         prefs.edit { putString(KEY_SESSION, gson.toJson(session)) }
     }
 

@@ -64,7 +64,7 @@ fun DateSelectorRange(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .padding(end = 8.dp, bottom = 24.dp)
-            .height(68.dp)
+            .height(72.dp)
     ) {
         items(days.size) { index ->
             val day = days.toList()[index]

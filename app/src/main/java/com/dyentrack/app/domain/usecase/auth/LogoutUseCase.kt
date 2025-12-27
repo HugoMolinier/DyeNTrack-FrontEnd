@@ -8,7 +8,7 @@ import javax.inject.Inject
 class LogoutUseCase @Inject constructor(
     private val repository: UserConnectionRepository
 ) {
-    operator fun invoke(): ResponseAuth  {
-        return repository.logout()
+    operator fun invoke()  {
+        repository.logout()
     }
 }

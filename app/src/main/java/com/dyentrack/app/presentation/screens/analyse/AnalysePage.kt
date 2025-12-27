@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.outlined.SettingsInputComponent
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -49,9 +55,11 @@ import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
+import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
 import com.dyentrack.app.presentation.screens.analyse.viewModel.AnalyseViewModel
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
+import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
 import kotlin.math.roundToInt
@@ -77,23 +85,60 @@ fun AnalysePage(
                 .padding(start = 12.dp, end = 12.dp, top = 20.dp)
         ) {
             item {
-                SectionSelector(
-                    modifier = Modifier,
-                    selectedIndex = inputIndex,
-                    itemSection = listOf(
-                        MenuItemData(
-                            "2 Weeks",
-                            { analyseViewModel.applyDateRange(14L);inputIndex = 0 }
-                        ),
-                        MenuItemData(
-                            "Month",
-                            { analyseViewModel.applyDateRange(30L);inputIndex = 1 }
-                        ),
-                        MenuItemData(
-                            "Custom",
-                            { null }
-                        )
-                    ))
+                Row (horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()){
+                    Box(modifier= Modifier.weight(1f)) {
+                        SectionSelector(
+                            modifier = Modifier,
+                            selectedIndex = inputIndex,
+                            itemSection = listOf(
+                                MenuItemData(
+                                    "2 Weeks",
+                                    { analyseViewModel.applyDateRange(14L);inputIndex = 0 }
+                                ),
+                                MenuItemData(
+                                    "Month",
+                                    { analyseViewModel.applyDateRange(30L);inputIndex = 1 }
+                                ),
+                                MenuItemData(
+                                    "Tout",
+                                    { analyseViewModel.applyDateRange(3000L);inputIndex = 2 }
+                                )
+                            ))
+                    }
+                    val isSelected = inputIndex == 3
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                TertiaOne,
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .clickable(
+                                enabled = !isSelected,
+                                onClick = { inputIndex = 3 }
+                            )
+                            .padding(2.dp)
+                            .background(
+                                if (isSelected)
+                                    MaterialTheme.colorScheme.background
+                                else
+                                    Color.Transparent,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
+                    ) {
+                            Icon(
+                                Icons.Outlined.SettingsInputComponent,
+                                contentDescription = "Custom",
+                                modifier = Modifier.size(18.dp).padding(2.dp),
+                                tint = if (isSelected)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            )
+
+                    }
+                }
+
             }
             item {
                 Row(
@@ -274,6 +319,7 @@ fun AnalysePage(
                             shape = MaterialTheme.shapes.medium
                         )
                 ) {
+                    val sizeDayRatio= state.dayRatio.values.size
                     CombinedChartMP(
                         labels = state.dayRatio.keys.toList(),
                         barValues = state.dayRatio.values.map {
@@ -284,6 +330,8 @@ fun AnalysePage(
                             val failSet = it.rateSetSomme?.numberSetFail ?: 0
                             if (totalSet > 0) failSet.toFloat() / totalSet else 0f
                         },
+                        showValueBar =sizeDayRatio<35,
+                        showValueLine = sizeDayRatio<25,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -426,6 +474,7 @@ fun AnalysePage(
                             )
                         }
                     }
+                    val numberSize= state.allDataExercise.values.size
                     CombinedChartMP(
                         labels = state.allDataExercise.keys.toList(),
                         barValues = state.allDataExercise.values.map {
@@ -436,6 +485,8 @@ fun AnalysePage(
                             val failSet = it.rateSetSomme?.numberSetFail ?: 0
                             if (totalSet > 0) failSet.toFloat() / totalSet else 0f
                         },
+                        showValueBar = numberSize<35,
+                        showValueLine = numberSize<20,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -445,6 +496,7 @@ fun AnalysePage(
                     selectedExerciseIds=listOf(state.tempChose),
                     masterDataStatic = analyseViewModel.masterData,
                     infoMapUser = infoMapUser,
+                    title="Choisir un exercice",
                     navController = navController,
                     onClose = { analyseViewModel.toggleBottomSheet(false) },
                     onClickExercise = {exerciseId ->analyseViewModel.changeTempExercice(exerciseId)},
