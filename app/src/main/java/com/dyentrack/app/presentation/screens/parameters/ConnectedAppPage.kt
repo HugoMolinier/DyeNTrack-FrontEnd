@@ -20,8 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +34,6 @@ import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.SizeType
-import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectEtat
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
@@ -47,7 +44,6 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun ConnectedAppPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     healthViewModel: HealthConnectViewModel = hiltViewModel<HealthConnectViewModel>()
 ) {
@@ -65,8 +61,7 @@ fun ConnectedAppPage(
     }
     if (autorisationNeed?.isNotEmpty() == true) {
         HealthConnectPermissionsScreen(
-            healthConnectPermissionsNeeded = autorisationNeed!!,
-            viewModel = healthViewModel
+            healthConnectPermissionsNeeded = autorisationNeed!!, viewModel = healthViewModel
         )
     }
 
@@ -94,7 +89,7 @@ fun ConnectedAppPage(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
@@ -103,8 +98,7 @@ fun ConnectedAppPage(
                                 modifier = Modifier.size(30.dp)
                             )
                             Text(
-                                text = "Health Connect",
-                                modifier = Modifier.padding(start = 8.dp)
+                                text = "Health Connect", modifier = Modifier.padding(start = 8.dp)
                             )
                         }
 
@@ -125,8 +119,7 @@ fun ConnectedAppPage(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Text(
-                            "Cette application permet de suivre ton activité, ta nutrition et ton sommeil.\n \n" +
-                                    "Nous lisons les informations nécessaires : pas, nutrition, poids et sommeil. Tes séances d’exercices seront enregistrées pour que d'autre application le voit..",
+                            "Cette application permet de suivre ton activité, ta nutrition et ton sommeil.\n \n" + "Nous lisons les informations nécessaires : pas, nutrition, poids et sommeil. Tes séances d’exercices seront enregistrées pour que d'autre application le voit..",
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                     }
@@ -135,8 +128,7 @@ fun ConnectedAppPage(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            "Auto-Sync",
-                            style = MaterialTheme.typography.bodyLarge
+                            "Auto-Sync", style = MaterialTheme.typography.bodyLarge
                         )
 
                         Row(
@@ -154,13 +146,11 @@ fun ConnectedAppPage(
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
-                                    isSelected = userPreference?.autoSync == true,
-                                    onClick = {
+                                    isSelected = userPreference?.autoSync == true, onClick = {
                                         userPreferenceViewModel.updateUserPreference(
                                             UserPreference(autoSync = true)
                                         )
-                                    },
-                                    userPreference?.autoSync == false
+                                    }, userPreference?.autoSync == false
 
                                 )
                             }
@@ -173,13 +163,11 @@ fun ConnectedAppPage(
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
-                                    isSelected = userPreference?.autoSync == false,
-                                    onClick = {
+                                    isSelected = userPreference?.autoSync == false, onClick = {
                                         userPreferenceViewModel.updateUserPreference(
                                             UserPreference(autoSync = false)
                                         )
-                                    },
-                                    userPreference?.autoSync == true
+                                    }, userPreference?.autoSync == true
                                 )
                             }
                         }

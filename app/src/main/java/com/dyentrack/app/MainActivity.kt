@@ -42,6 +42,9 @@ import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.parameters.ConnectedAppPage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
 import com.dyentrack.app.presentation.screens.parameters.InformationPage
+import com.dyentrack.app.presentation.screens.parameters.LanguagePage
+import com.dyentrack.app.presentation.screens.parameters.MesureUnitPage
+import com.dyentrack.app.presentation.screens.parameters.ObjectifPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
 import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
@@ -124,23 +127,28 @@ fun MyApp() {
         ) {
             composable("home") { HomePage(navController=navController) }
             composable(
-                route = "seance?dayKey={dayKey}",
+                route = "seance?dayKey={dayKey}&section={section}",
                 arguments = listOf(
                     navArgument("dayKey") {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
-                    }
+                    },
+                    navArgument("section") { type = NavType.StringType; nullable = true; defaultValue = null }
                 )
             ) { backStackEntry ->
                 val dayKey = backStackEntry.arguments?.getString("dayKey") // null si non fourni
-                SeancePage(navController = navController, daySelected = dayKey)
+                val section = backStackEntry.arguments?.getString("section")
+                SeancePage(navController = navController, daySelected = dayKey,section=section)
             }
             composable("analyse") { AnalysePage(navController=navController) }
             composable("parametre") { ParameterPage(navController=navController) }
             composable("information") { InformationPage(navController=navController) }
             composable("connexion") { ConnexionPage(navController=navController)}
             composable("connectedApp") { ConnectedAppPage(navController=navController) }
+            composable("objectif") { ObjectifPage(navController=navController) }
+            composable("mesureUnit") { MesureUnitPage(navController=navController) }
+            composable("language") { LanguagePage(navController=navController) }
 
             composable("inscription") { RegisterPage(navController=navController) }
                 composable("exercise") { backStackEntry ->

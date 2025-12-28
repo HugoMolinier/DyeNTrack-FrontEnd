@@ -5,4 +5,10 @@ data class UserPreference(
     val objCalorie:Int?=null,
     val objStep: Int?=null,
     val objHourSleep: Double?=null,
+
+    val mesureUnit:MesureUnit?=MesureUnit.KG,
+    val language:LANGUAGE?=LANGUAGE.FR
 )
+
+enum class MesureUnit{ KG,LBS}
+enum class LANGUAGE{ FR,EN}

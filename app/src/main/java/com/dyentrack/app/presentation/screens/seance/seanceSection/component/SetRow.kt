@@ -25,12 +25,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.utils.convertWeight
 import kotlinx.coroutines.delay
 
 @Composable
@@ -40,13 +42,17 @@ fun SetRow(
     viewModel: SeanceViewModel = viewModel(),
     lockInput: Boolean,
     onClickBadge: (() -> Unit)? = null,
-    exerciseId: Long
+    exerciseId: Long,
+    userUnit: MesureUnit
 ) {
     val chargeState = remember {
         mutableStateOf(
             TextFieldValue(
-                text = set.charge?.toString() ?: "",
-                )
+                text = set.charge
+                    ?.let { convertWeight(it, MesureUnit.KG, userUnit) }
+                    ?.let { String.format("%.1f", it) }
+                    ?: ""
+            )
         )
     }
 
@@ -54,7 +60,7 @@ fun SetRow(
         mutableStateOf(
             TextFieldValue(
                 text = set.rir?.toString() ?: "",
-                )
+            )
         )
     }
 
@@ -67,7 +73,7 @@ fun SetRow(
         )
     }
 
-    val repsRightState = remember{
+    val repsRightState = remember {
         mutableStateOf(TextFieldValue(text = set.linkedRightSet?.reps?.toString() ?: ""))
     }
 
@@ -79,146 +85,153 @@ fun SetRow(
         }
     }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(15.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    ) {
+        Badge(
+            content = {
+                Text(
+                    text = if (set.type == SetType.EFFECTIVE) {
+                        if (confirmDelete) "-" else (index + 1).toString()
+                    } else set.type.toString().uppercase()
+                )
+            },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        ) {
-            Badge(
-                content = {
-                    Text(
-                        text = if (set.type == SetType.EFFECTIVE) {
-                            if (confirmDelete) "-" else (index + 1).toString()
-                        } else set.type.toString().uppercase()
-                    )
-                },
-                modifier = Modifier
-                    .width(24.dp)
-                    .height(24.dp)
-                    .clickable(enabled = !lockInput && onClickBadge != null) {
-                        if (!confirmDelete) {
-                            confirmDelete = true
-                        } else {
-                            onClickBadge?.invoke()
-                            confirmDelete = false
-                        }
+                .width(24.dp)
+                .height(24.dp)
+                .clickable(enabled = !lockInput && onClickBadge != null) {
+                    if (!confirmDelete) {
+                        confirmDelete = true
+                    } else {
+                        onClickBadge?.invoke()
+                        confirmDelete = false
+                    }
 
+                }
+                .then(
+                    if (confirmDelete) {
+                        Modifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    } else {
+                        Modifier
                     }
-                    .then(
-                        if (confirmDelete) {
-                            Modifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                        } else {
-                            Modifier
-                        }
-                    ),
-                containerColor = if (confirmDelete) {
-                    Color.Transparent
-                } else {
-                    when (set.type) {
-                        SetType.EFFECTIVE -> if (rirState.value.text.toIntOrNull() == 0) addColor.setEch else MaterialTheme.colorScheme.primary
-                        else -> addColor.setWarm
-                    }
-                },
-                contentColor = if (confirmDelete) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    when (set.type) {
-                        SetType.WARMUP -> MaterialTheme.colorScheme.onSurface
-                        else -> MaterialTheme.colorScheme.background
-                    }
-                },
+                ),
+            containerColor = if (confirmDelete) {
+                Color.Transparent
+            } else {
+                when (set.type) {
+                    SetType.EFFECTIVE -> if (rirState.value.text.toIntOrNull() == 0) addColor.setEch else MaterialTheme.colorScheme.primary
+                    else -> addColor.setWarm
+                }
+            },
+            contentColor = if (confirmDelete) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                when (set.type) {
+                    SetType.WARMUP -> MaterialTheme.colorScheme.onSurface
+                    else -> MaterialTheme.colorScheme.background
+                }
+            },
+        )
+
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+
+
+            InputCustom(
+                text = repsState,
+                enabled = !lockInput,
+                placeholder = if (set.linkedRightSet != null) "L" else "Reps",
+                modifier = Modifier.weight(1f),
+                keyboardType = KeyboardType.Number,
+                maxCaracter = 2,
+                replaceZeroToNull = true,
+                onValueChange = {
+
+                    viewModel.updateSet(
+                        exerciseId = exerciseId,
+                        index = index,
+                        newValue = SetField.Reps(repsState.value.text.toIntOrNull()),
+                        rightSet = false,
+                        unilateral = set.linkedRightSet != null
+                    )
+                }
             )
 
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-
-
+            if (set.linkedRightSet != null) {
                 InputCustom(
-                    text = repsState,
+                    text = repsRightState,
+                    placeholder = "R",
                     enabled = !lockInput,
-                    placeholder = if (set.linkedRightSet != null) "L" else "Reps",
                     modifier = Modifier.weight(1f),
-                    keyboardType = KeyboardType.Number,
                     maxCaracter = 2,
                     replaceZeroToNull = true,
+                    keyboardType = KeyboardType.Number,
                     onValueChange = {
-
                         viewModel.updateSet(
                             exerciseId = exerciseId,
                             index = index,
-                            newValue = SetField.Reps(repsState.value.text.toIntOrNull()),
-                            rightSet = false,
-                            unilateral = set.linkedRightSet != null
+                            newValue = SetField.Reps(repsRightState.value.text.toIntOrNull()),
+                            rightSet = true,
+                            unilateral = true
                         )
                     }
                 )
 
-                if (set.linkedRightSet != null) {
-                    InputCustom(
-                        text = repsRightState,
-                        placeholder = "R",
-                        enabled = !lockInput,
-                        modifier = Modifier.weight(1f),
-                        maxCaracter = 2,
-                        replaceZeroToNull = true,
-                        keyboardType = KeyboardType.Number,
-                        onValueChange = {
-                            viewModel.updateSet(
-                                exerciseId = exerciseId,
-                                index = index,
-                                newValue = SetField.Reps(repsRightState.value.text.toIntOrNull()),
-                                rightSet = true,
-                                unilateral = true
-                            )
-                        }
-                    )
+            }
+        }
 
-                }
+        InputCustom(
+            text = chargeState,
+            placeholder = "Charge",
+            enabled = !lockInput,
+            replaceZeroToNull = true,
+            modifier = Modifier.weight(1f),
+            maxCaracter = 6,
+            keyboardType = KeyboardType.Decimal,
+            onValueChange = {
+                viewModel.updateSet(
+                    exerciseId = exerciseId,
+                    index = index,
+                    newValue = SetField.Charge(
+                        convertWeight(
+                            chargeState.value.text.toDoubleOrNull(),
+                            userUnit,
+                            MesureUnit.KG
+                        )
+
+                    ),
+                    rightSet = false,
+                    unilateral = set.linkedRightSet != null
+                )
             }
 
-            InputCustom(
-                text = chargeState,
-                placeholder = "Charge",
-                enabled = !lockInput,
-                replaceZeroToNull = true,
-                modifier = Modifier.weight(1f),
-                maxCaracter = 6,
-                keyboardType = KeyboardType.Decimal,
-                onValueChange = {
-                    viewModel.updateSet(
-                        exerciseId = exerciseId,
-                        index = index,
-                        newValue = SetField.Charge(chargeState.value.text.toDoubleOrNull()),
-                        rightSet = false,
-                        unilateral = set.linkedRightSet != null
-                    )
-                }
-
-            )
+        )
 
 
 
-            InputCustom(
-                text = rirState,
-                placeholder = "RIR",
-                enabled = !lockInput,
-                modifier = Modifier.width(65.dp),
-                keyboardType = KeyboardType.Number,
-                maxCaracter = 2,
-                onValueChange = {
-                    viewModel.updateSet(
-                        exerciseId = exerciseId,
-                        index = index,
-                        newValue = SetField.Rir(rirState.value.text.toIntOrNull()),
-                        rightSet = false,
-                        unilateral = set.linkedRightSet != null
-                    )
-                }
-            )
+        InputCustom(
+            text = rirState,
+            placeholder = "RIR",
+            enabled = !lockInput,
+            modifier = Modifier.width(65.dp),
+            keyboardType = KeyboardType.Number,
+            maxCaracter = 2,
+            onValueChange = {
+                viewModel.updateSet(
+                    exerciseId = exerciseId,
+                    index = index,
+                    newValue = SetField.Rir(rirState.value.text.toIntOrNull()),
+                    rightSet = false,
+                    unilateral = set.linkedRightSet != null
+                )
+            }
+        )
 
 
     }

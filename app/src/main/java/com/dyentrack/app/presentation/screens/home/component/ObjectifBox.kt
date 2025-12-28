@@ -39,6 +39,8 @@ fun ObjectifBox(
     drawableTop: Int? = null,
     unit: String? = null,
     onClick: (() -> Unit)? = null,
+    onClickObjectif: (() -> Unit)? = null,
+
     children: @Composable (() -> Unit)? = null,
 ) {
 
@@ -83,7 +85,7 @@ fun ObjectifBox(
                         Box(
                             modifier = Modifier
                                 .height(20.dp).fillMaxWidth(0.7f)
-                                .background(TertiaOne, shape = MaterialTheme.shapes.small),
+                                .background(TertiaOne, shape = MaterialTheme.shapes.small) .clickable { onClickObjectif?.invoke() },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(

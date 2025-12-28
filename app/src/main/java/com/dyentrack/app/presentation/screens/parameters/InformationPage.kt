@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.parameters
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -69,32 +72,46 @@ fun InformationPage(
     val isEditing = remember { mutableStateOf(false) }
 
 
-    val errorText =  when ((requestState as? RequestState.Error)?.error) {
+    val errorText = when ((requestState as? RequestState.Error)?.error) {
         AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
         AuthError.NOT_EMAILFORMAT -> "Format email invalide"
-        AuthError.UNAUTHORIZED-> "Identifiants incorrects"
+        AuthError.UNAUTHORIZED -> "Identifiants incorrects"
         AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
         AuthError.ERROR_API -> "Erreur serveur"
         null -> ""
         AuthError.NOT_PSEUDOFORMAT -> "Format pseudo invalide, 3 à 20 caractères"
         AuthError.NOT_HEIGHTFORMAT -> "Taille entre 50 et 300 cm"
     }
-    if (isEditing.value &&requestState is RequestState.Success ) {
+    if (isEditing.value && requestState is RequestState.Success) {
         isEditing.value = false
         authViewModel.clearRequestState()
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        }
+    ) {
         Column {
             TopNavigationBar(
                 "Information",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")}))})
+                rightSide = {
+                    Icon(
+                        Icons.Default.Close,
+                        "Retourner au menu",
+                        modifier = Modifier.clickable(onClick = { navController.navigate("home") })
+                    )
+                })
 
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 12.dp)
                     .weight(1f),
             ) {
                 item {
@@ -151,7 +168,7 @@ fun InformationPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        DatePickerInput(birthday,isEditing.value || isLoading)
+                        DatePickerInput(birthday, isEditing.value || isLoading)
                     }
 
 
@@ -166,7 +183,7 @@ fun InformationPage(
                     }
                 }
                 item {
-                    Column (verticalArrangement = Arrangement.spacedBy(8.dp)){
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             "Sexe",
                             style = MaterialTheme.typography.bodyLarge,
@@ -175,7 +192,9 @@ fun InformationPage(
 
                         Row(
                             horizontalArrangement = Arrangement.Absolute.spacedBy(40.dp),
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -229,10 +248,18 @@ fun InformationPage(
                 }
 
                 item {
-                    Box(modifier= Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
+                    Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
 
-                        Row (horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically){
-                            if (errorText!="")Icon(Icons.Outlined.ErrorOutline,"Error", tint = Color.Red ,modifier= Modifier.size(14.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (errorText != "") Icon(
+                                Icons.Outlined.ErrorOutline,
+                                "Error",
+                                tint = Color.Red,
+                                modifier = Modifier.size(14.dp)
+                            )
                             Text(
                                 text = errorText,
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -247,12 +274,17 @@ fun InformationPage(
                 }
 
 
-
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp), modifier = Modifier.padding(bottom=12.dp)) {
-                if(isEditing.value) {
-                    Row(modifier= Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                if (isEditing.value) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         CustomButton(
                             label = "Annuler",
                             onClick = {
@@ -268,7 +300,7 @@ fun InformationPage(
                             enable = requestState !is RequestState.Loading
                         )
                         CustomButton(
-                            label = if(isLoading) "Appliquer..." else "Appliquer",
+                            label = if (isLoading) "Appliquer..." else "Appliquer",
                             onClick = {
                                 authViewModel.updateUser(
                                     pseudo.value.text,
@@ -282,9 +314,8 @@ fun InformationPage(
                             enable = requestState !is RequestState.Loading
                         )
                     }
-                }
-                else{
-                    Row(modifier= Modifier.padding(horizontal = 12.dp)) {
+                } else {
+                    Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                         CustomButton(
                             label = "Modifier les infos",
                             onClick = {

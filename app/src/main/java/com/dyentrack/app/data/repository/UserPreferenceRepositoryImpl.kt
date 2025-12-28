@@ -1,6 +1,9 @@
 package com.dyentrack.app.data.repository
 
+import android.util.Log
 import com.dyentrack.app.data.local.datasource.LocalDataSource
+import com.dyentrack.app.domain.model.LANGUAGE
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.domain.repository.UserPreferenceRepository
 import javax.inject.Inject
@@ -24,7 +27,9 @@ class UserPreferenceRepositoryImpl  @Inject constructor(
             autoSync = userPreference.autoSync ?: localPref?.autoSync ?: true,
             objCalorie = userPreference.objCalorie ?: localPref?.objCalorie,
             objStep = userPreference.objStep ?: localPref?.objStep,
-            objHourSleep = userPreference.objHourSleep ?: localPref?.objHourSleep
+            objHourSleep = userPreference.objHourSleep ?: localPref?.objHourSleep,
+            mesureUnit = userPreference.mesureUnit?:localPref?.mesureUnit?: MesureUnit.KG,
+            language = userPreference.language?:localPref?.language?: LANGUAGE.FR
         )
         localDataSource.saveUserPreference(mergedPref)
     }

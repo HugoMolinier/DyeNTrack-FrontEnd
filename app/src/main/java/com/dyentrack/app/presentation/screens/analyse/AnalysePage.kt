@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
@@ -56,11 +57,13 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.analyse.components.FilterMuscleGroupRow
 import com.dyentrack.app.presentation.screens.analyse.viewModel.AnalyseViewModel
 import com.dyentrack.app.presentation.screens.home.RadarChartSample
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.convertWeight
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
 import kotlin.math.roundToInt
 
@@ -69,12 +72,15 @@ import kotlin.math.roundToInt
 fun AnalysePage(
     modifier: Modifier = Modifier, navController: NavController,
     analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),
+    userPreferenceViewModel: UserPreferenceViewModel= hiltViewModel<UserPreferenceViewModel>(),
 ) {
     val state by analyseViewModel.uiState.collectAsState()
+    val userPref by userPreferenceViewModel.userPreference.collectAsState()
+
     val infoMapUser by analyseViewModel.infoExerciseUserFlow.collectAsState()
     var inputIndex by remember { mutableIntStateOf(0) }
     var extendFilter by remember { mutableStateOf(false) }
-
+    val userUnit = userPref?.mesureUnit?: MesureUnit.KG
     Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(
             "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
@@ -235,6 +241,8 @@ fun AnalysePage(
                         val proportionSetFail = if (sommeSet > 0) {
                             sommeSetFail.toDouble() / sommeSet * 100
                         } else 0.0
+
+                        val sommePondUserUnit = convertWeight(sommePond, MesureUnit.KG, userUnit)
                         Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
                             Column(
                                 Modifier.padding(vertical = 12.dp),
@@ -293,7 +301,7 @@ fun AnalysePage(
                                 }
 
                                 Text(
-                                    sommePond.toInt().toString() + "kg",
+                                    sommePondUserUnit?.toInt().toString() + userUnit.toString().lowercase(),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
 
@@ -323,7 +331,7 @@ fun AnalysePage(
                     CombinedChartMP(
                         labels = state.dayRatio.keys.toList(),
                         barValues = state.dayRatio.values.map {
-                            it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                            convertWeight(it.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?.toFloat() ?: 0f
                         },
                         lineValues = state.dayRatio.values.map {
                             val totalSet = it.numberSet
@@ -478,7 +486,7 @@ fun AnalysePage(
                     CombinedChartMP(
                         labels = state.allDataExercise.keys.toList(),
                         barValues = state.allDataExercise.values.map {
-                            it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                            convertWeight(it.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?.toFloat() ?: 0f
                         },
                         lineValues = state.allDataExercise.values.map {
                             val totalSet = it.numberSet

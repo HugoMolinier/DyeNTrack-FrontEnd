@@ -30,7 +30,7 @@ class UserPreferenceViewModel @Inject constructor(
         _userPreference.value = getUserPreferenceUseCase()
     }
 
-    fun updateUserPreference(newPref: UserPreference) {
+    fun   updateUserPreference(newPref: UserPreference) {
         saveUserPreferenceUseCase(newPref)
         _userPreference.value = getUserPreferenceUseCase()
     }

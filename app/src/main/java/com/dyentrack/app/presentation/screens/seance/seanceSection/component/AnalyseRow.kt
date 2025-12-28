@@ -27,19 +27,21 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.convertWeight
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 
 @Composable
-fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
+fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,userUnit: MesureUnit) {
 
     if (!state.showAnalyseData) return
 
@@ -134,7 +136,12 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState) {
                                             },
                                         )
                                         Text(
-                                            "${set.reps}${set.linkedRightSet?.let { "/${it.reps}" } ?: ""} x ${set.charge}kg",
+                                            "${set.reps}${set.linkedRightSet?.let { "/${it.reps}" } ?: ""} x ${
+                                                set.charge?.let {
+                                                    val converted = convertWeight(it, MesureUnit.KG, userUnit)
+                                                    if (converted != null) String.format("%.1f", converted) else ""
+                                                } ?: ""
+                                            }${userUnit.toString().lowercase()}",
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                         )
 

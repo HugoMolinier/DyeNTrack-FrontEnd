@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.parameters
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,14 +69,28 @@ fun RegisterPage(
         AuthError.NOT_HEIGHTFORMAT -> ""
         else -> ""
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        }
+    ) {
         Column {
             TopNavigationBar(
                 "Inscription",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
 
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")})) })
+                rightSide = {
+                    Icon(
+                        Icons.Default.Close,
+                        "Retourner au menu",
+                        modifier = Modifier.clickable(onClick = { navController.navigate("home") })
+                    )
+                })
 
             LazyColumn(
                 modifier = modifier
@@ -82,8 +99,15 @@ fun RegisterPage(
                     .weight(1f),
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=12.dp)) {
-                        Text("Email", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 4.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 12.dp)
+                    ) {
+                        Text(
+                            "Email",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
                         InputCustom(
                             text = email, variant = InputVariant.OUTLINED,
                             placeholder = "votre@email.com"
@@ -91,8 +115,15 @@ fun RegisterPage(
                     }
                 }
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=12.dp)) {
-                        Text("Entrer votre pseudo", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 4.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 12.dp)
+                    ) {
+                        Text(
+                            "Entrer votre pseudo",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
                         InputCustom(
                             text = pseudo, variant = InputVariant.OUTLINED,
                             placeholder = "pseudo"
@@ -101,8 +132,15 @@ fun RegisterPage(
                 }
                 item {
 
-                    Column (verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)){
-                        Text("Mot de passe",style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text(
+                            "Mot de passe",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
                         InputCustom(
                             text = password,
                             placeholder = "Entrer votre mot de passe",
@@ -112,13 +150,20 @@ fun RegisterPage(
                     }
 
 
-
                 }
 
                 item {
-                    Box(modifier= Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
-                        Row (horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically){
-                            if (errorText!="")Icon(Icons.Outlined.ErrorOutline,"Error", tint = Color.Red ,modifier= Modifier.size(14.dp))
+                    Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (errorText != "") Icon(
+                                Icons.Outlined.ErrorOutline,
+                                "Error",
+                                tint = Color.Red,
+                                modifier = Modifier.size(14.dp)
+                            )
                             Text(
                                 text = errorText,
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -132,9 +177,15 @@ fun RegisterPage(
 
                 }
                 item {
-                    CustomButton (
-                        label =  if(isLoading) "Inscription..." else "Finaliser l'inscription" ,
-                        onClick = {authViewModel.register(email.value.text,password.value.text,pseudo.value.text)},
+                    CustomButton(
+                        label = if (isLoading) "Inscription..." else "Finaliser l'inscription",
+                        onClick = {
+                            authViewModel.register(
+                                email.value.text,
+                                password.value.text,
+                                pseudo.value.text
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         isLoading = isLoading,
                         enable = !isLoading
@@ -142,10 +193,15 @@ fun RegisterPage(
 
                 }
                 item {
-                    Row(modifier= Modifier.padding(top = 28.dp,start = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(
-                        12.dp,
-                        Alignment.CenterHorizontally
-                    )) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 28.dp, start = 8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            12.dp,
+                            Alignment.CenterHorizontally
+                        )
+                    ) {
                         Text(
                             text = "Déjà un compte ?",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -155,7 +211,7 @@ fun RegisterPage(
                         Text(
                             text = "Connectez-vous ici",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier= Modifier.clickable(onClick = {navController.navigate("connexion")})
+                            modifier = Modifier.clickable(onClick = { navController.navigate("connexion") })
                         )
                     }
 

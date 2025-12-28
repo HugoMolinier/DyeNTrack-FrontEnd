@@ -20,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.presentation.components.FavoriteIconButton
 import com.dyentrack.app.presentation.components.InfoRow
@@ -41,14 +44,20 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.convertWeight
 
 @Composable
 fun ExercisePage(
     modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
-) {
+    userPreferenceViewModel: UserPreferenceViewModel= hiltViewModel<UserPreferenceViewModel>(),
 
+    ) {
+
+    val userPref by userPreferenceViewModel.userPreference.collectAsState()
+    val userUnit = userPref?.mesureUnit?: MesureUnit.KG
     LaunchedEffect(exercise) {
         exerciseViewModel.setExercise(exercise)
     }
@@ -56,20 +65,14 @@ fun ExercisePage(
     val state by exerciseViewModel.uiState.collectAsState()
     val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
 
+
+
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                })
-
-            }) {
+    Box(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+        detectTapGestures(onTap = {
+            focusManager.clearFocus()
+        })}
+    ) {
         Column {
             TopNavigationBar(
                 "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
@@ -260,7 +263,7 @@ fun ExercisePage(
                             CombinedChartMP(
                                 labels = state.allDataExercise.keys.toList(),
                                 barValues = state.allDataExercise.values.map {
-                                    it.rateSetSomme?.sommePond?.toFloat() ?: 0f
+                                    convertWeight(it.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?.toFloat() ?: 0f
                                 },
                                 lineValues = state.allDataExercise.values.map {
                                     val totalSet = it.numberSet
@@ -279,7 +282,15 @@ fun ExercisePage(
                         Column {
                             InfoRow(
                                 label = "Moyenne Poids 5 occurences",
-                                value = exerciseViewModel.getAveragePerSet(5, 0)+" kg"
+                                value = String.format(
+                                    "%.1f%s",
+                                    convertWeight(
+                                        exerciseViewModel.getAveragePerSet(5, 0)?.toDoubleOrNull(),
+                                        MesureUnit.KG,
+                                        userUnit
+                                    ) ?: 0.0,
+                                    userUnit.toString().lowercase()
+                                )
                             )
                             val last14Day = exerciseViewModel.getLast14DaysDataDivided()
 

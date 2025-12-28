@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,25 +32,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.viewModel.SectionSelectType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -62,11 +65,18 @@ fun SeancePage(
     viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
     navController: NavController,
     daySelected: String?=null,
+    section:String?=null,
+    userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
+
     healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>()
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
+        section?.let { viewModel.setSectionSelected(it) }
     }
+    val userPreference by userPreferenceViewModel.userPreference.collectAsState()
+
+
     val state by viewModel.uiState.collectAsState()
     val infoMapUser by viewModel.infoExerciseUserFlow.collectAsState()
 
@@ -74,7 +84,13 @@ fun SeancePage(
     val equipmentNameMap = viewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
 
 
-    Box(modifier = modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    val userUnit =userPreference?.mesureUnit?: MesureUnit.KG
+    Box(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+        detectTapGestures(onTap = {
+            focusManager.clearFocus()
+        })}
+    ) {
         Column {
             TopNavigationBar(
                 "Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
@@ -186,11 +202,12 @@ fun SeancePage(
                                         viewModel,
                                         navController,
                                         lateriteNameMap,
-                                        equipmentNameMap
+                                        equipmentNameMap,
+                                        userUnit
                                     )
                                 }
                             }
-                            item { ShowInfoOfSeance(viewModel) }
+                            item { ShowInfoOfSeance(viewModel,userUnit) }
 
 
                         } else {
@@ -218,7 +235,7 @@ fun SeancePage(
 
                     SectionSelectType.DATA ->
                         item {
-                            DataSection(viewModel,    state.seancesParJour[state.daySelected]?: SeanceDuJour(),state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel)
+                            DataSection(viewModel,    state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel,userPreference?.autoSync?:true)
                         }
 
                     else -> null

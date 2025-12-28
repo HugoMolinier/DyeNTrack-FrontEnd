@@ -44,7 +44,8 @@ fun NutritionBox(
     viewModel: SeanceViewModel = viewModel(),
     state: SeanceUiState,
     lockInput: Boolean = false,
-    day: String
+    day: String,
+    isAutoSync:Boolean
 ) {
     val currentSeance = state.seancesParJour[day] ?: SeanceDuJour()
     val nutritionTrack = currentSeance.nutritionTrack
@@ -129,7 +130,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CALORIES, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
 
                         Row(
@@ -178,7 +180,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.PROTEINS, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
                         NutrientRow(
                             label = "Glucides",
@@ -188,7 +191,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CARBOHYDRATES, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
                         NutrientRow(
                             label = "Lipides",
@@ -198,7 +202,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.LIPIDS, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
                     }
 
@@ -224,7 +229,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.FIBER, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
                         NutrientRow(
                             label = "Caféine",
@@ -235,7 +241,8 @@ fun NutritionBox(
                                 newValue.toIntOrNull()?.let { value ->
                                     viewModel.updateNutrition(NutritionField.CAFEINS, value)
                                 }
-                            }
+                            },
+                            autoSync = isAutoSync
                         )
                     }
                 }

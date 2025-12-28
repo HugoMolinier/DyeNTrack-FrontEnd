@@ -2,6 +2,7 @@ package com.dyentrack.app.presentation.screens.parameters
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -63,20 +66,34 @@ fun ConnexionPage(
     val errorText = when ((requestState as? RequestState.Error)?.error) {
         AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
         AuthError.NOT_EMAILFORMAT -> "Format email invalide"
-        AuthError.UNAUTHORIZED-> "Identifiants incorrects"
+        AuthError.UNAUTHORIZED -> "Identifiants incorrects"
         AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
         AuthError.ERROR_API -> "Erreur serveur"
         null -> ""
         AuthError.NOT_PSEUDOFORMAT -> ""
         AuthError.NOT_HEIGHTFORMAT -> ""
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        }
+    ) {
         Column {
             TopNavigationBar(
                 "Connection",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")}))})
+                rightSide = {
+                    Icon(
+                        Icons.Default.Close,
+                        "Retourner au menu",
+                        modifier = Modifier.clickable(onClick = { navController.navigate("home") })
+                    )
+                })
 
             LazyColumn(
                 modifier = modifier
@@ -85,8 +102,15 @@ fun ConnexionPage(
                     .weight(1f),
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=12.dp)) {
-                        Text("Email", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 4.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 12.dp)
+                    ) {
+                        Text(
+                            "Email",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
                         InputCustom(
                             text = email, variant = InputVariant.OUTLINED,
                             placeholder = "votre@email.com"
@@ -95,8 +119,15 @@ fun ConnexionPage(
                 }
                 item {
 
-                    Column (verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)){
-                        Text("Mot de passe",style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text(
+                            "Mot de passe",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
                         InputCustom(
                             text = password,
                             placeholder = "Entrer votre mot de passe",
@@ -106,14 +137,21 @@ fun ConnexionPage(
                     }
 
 
-
                 }
 
                 item {
-                    Box(modifier= Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
+                    Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
 
-                        Row (horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically){
-                            if (errorText!="")Icon(Icons.Outlined.ErrorOutline,"Error", tint = Color.Red ,modifier= Modifier.size(14.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (errorText != "") Icon(
+                                Icons.Outlined.ErrorOutline,
+                                "Error",
+                                tint = Color.Red,
+                                modifier = Modifier.size(14.dp)
+                            )
                             Text(
                                 text = errorText,
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -127,7 +165,7 @@ fun ConnexionPage(
                 }
                 item {
                     CustomButton(
-                        label = if(isLoading) "Connexion..." else "Connexion",
+                        label = if (isLoading) "Connexion..." else "Connexion",
                         onClick = { authViewModel.login(email.value.text, password.value.text) },
                         modifier = Modifier.fillMaxWidth(),
                         isLoading = isLoading,
@@ -136,10 +174,15 @@ fun ConnexionPage(
 
                 }
                 item {
-                    Row(modifier= Modifier.padding(top = 28.dp,start = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(
-                        12.dp,
-                        Alignment.CenterHorizontally
-                    )) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 28.dp, start = 8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            12.dp,
+                            Alignment.CenterHorizontally
+                        )
+                    ) {
                         Text(
                             text = "Pas de compte ?",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -149,14 +192,14 @@ fun ConnexionPage(
                         Text(
                             text = "S'inscrire ici",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier= Modifier.clickable(onClick = {navController.navigate("inscription")})
+                            modifier = Modifier.clickable(onClick = { navController.navigate("inscription") })
                         )
                     }
 
                 }
 
             }
-            Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Image(
                     painter = painterResource(id = R.drawable.hello),
                     contentDescription = null,

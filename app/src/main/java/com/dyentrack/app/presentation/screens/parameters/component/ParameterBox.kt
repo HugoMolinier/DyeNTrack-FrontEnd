@@ -1,18 +1,16 @@
 package com.dyentrack.app.presentation.screens.parameters.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -37,10 +37,16 @@ fun ParameterBox(items: List<ParameterItem>) {
         Column(
             Modifier.fillMaxWidth().padding()
         ) {
-            items.forEachIndexed { index,(onClick, label, icon) ->
+            items.forEachIndexed { index,(onClick, label, icon,composableRight) ->
                 Box(
                     Modifier
-                        .fillMaxWidth().clickable(onClick = onClick)
+                        .fillMaxWidth()        .then(
+                            if (onClick != null) {
+                                Modifier.clickable(
+                                    onClick = onClick,
+                                )
+                            } else Modifier
+                        )
                         .then(
                             if (index != items.lastIndex) {
 
@@ -62,11 +68,47 @@ fun ParameterBox(items: List<ParameterItem>) {
                         horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(icon, label, modifier = Modifier.size(24.dp), tint = secondaryTextColor)
-                            Text(label, style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            when (icon) {
+                                is ParameterIcon.Vector -> {
+                                    Icon(
+                                        imageVector = icon.icon,
+                                        contentDescription = label,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = secondaryTextColor
+                                    )
+                                }
+
+                                is ParameterIcon.Resource -> {
+                                    Icon(
+                                        painter = painterResource(icon.resId),
+                                        contentDescription = label,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = secondaryTextColor
+                                    )
+                                }
+
+
+                                null -> null
+                            }
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                            )
                         }
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Aller au menu", modifier = Modifier.size(20.dp), tint = secondaryTextColor)
+                        if (composableRight != null) {
+                            composableRight()
+                        } else {
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                "Aller au menu",
+                                modifier = Modifier.size(20.dp),
+                                tint = secondaryTextColor
+                            )
+                        }
                     }
 
                 }

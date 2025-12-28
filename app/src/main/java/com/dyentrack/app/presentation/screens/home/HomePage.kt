@@ -41,23 +41,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dyentrack.app.R
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
-
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
-import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
-import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
-import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
+import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import com.dyentrack.app.presentation.utils.ExerciseImages
 
 @SuppressLint("FrequentlyChangingValue")
 @Composable
@@ -66,13 +63,16 @@ fun HomePage(
     homeViewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
 ) {
+
+    val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
     val authState by authViewModel.authState.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
-    val objectifStep = 15000
-    val objectifCal = 3000
-    val objectifsommeil = 8.0
+    val objectifStep = userPreference?.objStep ?:0
+    val objectifCal = userPreference?.objCalorie ?:0
+    val objectifsommeil = userPreference?.objHourSleep ?:0.0
 
     var pourcentage = 0f
     if (state.todaySeance?.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
@@ -183,12 +183,20 @@ fun HomePage(
                         }
                         item {
                             val steps = remember(state.todaySeance) { state.todaySeance?.physioTrack?.step ?: 0 }
-                            val progressSteps = remember(steps, objectifStep) { (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f) }
+                            val progressSteps = remember(steps, objectifStep) {
+                                if ( objectifStep == 0) {
+                                    0f
+                                } else {
+                                    (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
 
                             ObjectifBox(
                                 value = steps.toString(),
-                                objectif = objectifStep.toString(),
+                                objectif = if (objectifStep==0) "NaN" else objectifStep.toString(),
+                                onClickObjectif = {navController.navigate("objectif")},
                                 unit = "pas",
+                                onClick = {navController.navigate("seance?section=data")},
                                 drawableTop =  R.drawable.icon_step
 
                             ) {
@@ -202,11 +210,19 @@ fun HomePage(
                         }
                         item {
                             val calories = remember(state.todaySeance) { state.todaySeance?.nutritionTrack?.calories ?: 0 }
-                            val progressCalories = remember(calories, objectifCal) { (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f) }
+                            val progressCalories = remember(calories, objectifCal) {
+                                if (objectifCal == 0) {
+                                    0f
+                                } else {
+                                    (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
                             ObjectifBox(
                                 value = calories.toString(),
-                                objectif = objectifCal.toString(),
+                                objectif = if (objectifCal==0) "NaN" else objectifCal.toString(),
                                 unit = "Cal",
+                                onClick = {navController.navigate("seance?section=data")},
+                                onClickObjectif = {navController.navigate("objectif")},
                                 drawableTop =  R.drawable.icon_cal
                             ) {
                                 ProgressLine(
@@ -219,11 +235,19 @@ fun HomePage(
                         }
                         item {
                             val sleep = remember(state.todaySeance) { state.todaySeance?.physioTrack?.hourOfSleep ?: 0 }
-                            val progressSleep = remember(sleep, objectifsommeil) { (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f) }
+                            val progressSleep = remember(sleep, objectifsommeil) {
+                                if (objectifsommeil == 0.0) {
+                                    0f
+                                } else {
+                                    (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
                             ObjectifBox(
                                 value = sleep.toString(),
-                                objectif = objectifsommeil.toString(),
+                                objectif = if (objectifsommeil==0.0) "NaN" else objectifsommeil.toString(),
                                 unit = "h",
+                                onClick = {navController.navigate("seance?section=data")},
+                                onClickObjectif = {navController.navigate("objectif")},
                                 drawableTop =  R.drawable.icon_sleep
                             ) {
                                 ProgressLine(

@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -62,10 +63,12 @@ fun InputCustom(
     replaceZeroToNull:Boolean=false,
     size:  SizeType= SizeType.LARGE,
     maxCaracter: Int? = null,
-    hideContent: Boolean = false
+    hideContent: Boolean = false,
+    centerText: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
     var contentVisible by remember { mutableStateOf(!hideContent) }
+
 
     Row (
         modifier = modifier
@@ -165,13 +168,14 @@ fun InputCustom(
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
                 color = if (enabled) MaterialTheme .colorScheme.onSurface else secondaryTextColor.copy(alpha= 0.8f),
-                        textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
+                textAlign = if (centerText) TextAlign.Center else if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
 
             ),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment =  if(singleLine)if (variant == InputVariant.EMPTY)Alignment.CenterEnd else  Alignment.CenterStart else Alignment.TopStart
+                    contentAlignment = if (singleLine) if (centerText) Alignment.Center else if (variant == InputVariant.EMPTY) Alignment.CenterEnd else Alignment.CenterStart else Alignment.TopStart
+
                 ) {
                     if (text.value.text.isEmpty()) {
                         Text(

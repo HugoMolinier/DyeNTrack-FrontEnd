@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.TopNavigationBar
@@ -49,8 +50,10 @@ import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
-fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
-                   authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()) {
+fun ParameterPage(
+    modifier: Modifier = Modifier, navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
+) {
 
 
     val authState by authViewModel.authState.collectAsState()
@@ -60,61 +63,113 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
             TopNavigationBar(
                 "Paramètre",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = {navController.navigate("home")},
-                rightSide = { Icon(Icons.Default.Close, "Retourner au menu",modifier=Modifier.clickable(onClick = {navController.navigate("home")})) })
+                onClickLeft = { navController.navigate("home") },
+                rightSide = {
+                    Icon(
+                        Icons.Default.Close,
+                        "Retourner au menu",
+                        modifier = Modifier.clickable(onClick = { navController.navigate("home") })
+                    )
+                })
 
             LazyColumn(
-                modifier = modifier.fillMaxWidth().padding(start = 12.dp,end=12.dp,top=8.dp).weight(1f),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
                 //debut composant
                 if (!authState.isConnected) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top=12.dp)) {
+                    item {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(top = 12.dp)
+                        ) {
                             Text(
                                 "Inscrivez-vous pour profiter de fonctionnalité",
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier= Modifier.fillMaxWidth(), textAlign = TextAlign.Center
+                                modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                             )
-                            Row (horizontalArrangement = Arrangement.spacedBy(12.dp),           modifier= Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top=12.dp), verticalAlignment = Alignment.CenterVertically){
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp, end = 8.dp, top = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Icon(Icons.Outlined.Save, "saveIcon")
-                                Text("Garder une sauvegarde des données sur un serveur",style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                                Text(
+                                    "Garder une sauvegarde des données sur un serveur",
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                                )
                             }
-                        Row (horizontalArrangement = Arrangement.spacedBy(12.dp),           modifier= Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically){
-                            Icon(Icons.Outlined.Create, "saveIcon")
-                            Text("Crée des exercices, accéder au note et favorie",style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        }
-                        Row (horizontalArrangement = Arrangement.spacedBy(12.dp),           modifier= Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically){
-                            Icon(Icons.Outlined.WbIncandescent, "saveIcon")
-                            Text("Collectionner plein d'achievement", style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        }
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Outlined.Create, "saveIcon")
+                                Text(
+                                    "Crée des exercices, accéder au note et favorie",
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                                )
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Outlined.WbIncandescent, "saveIcon")
+                                Text(
+                                    "Collectionner plein d'achievement",
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                                )
+                            }
 
-                        Column(           modifier = Modifier.fillMaxWidth()
-                            .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CustomButton(
-                                "S'inscire",
-                                modifier=modifier.fillMaxWidth(),
-                                size = SizeType.MEDIUM,
-                                onClick = {navController.navigate("inscription")}
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CustomButton(
+                                    "S'inscire",
+                                    modifier = modifier.fillMaxWidth(),
+                                    size = SizeType.MEDIUM,
+                                    onClick = { navController.navigate("inscription") }
+                                )
+                                CustomButton(
+                                    "Se connecter",
+                                    variant = VariantType.OUTLINED,
+                                    emphasis = EmphasisType.SECONDARY,
+                                    modifier = modifier.fillMaxWidth(),
+                                    size = SizeType.MEDIUM,
+                                    onClick = { navController.navigate("connexion") }
+                                )
+                            }
+                            HorizontalDivider(
+                                color = secondaryTextColor.copy(alpha = 0.15f),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding()
                             )
-                            CustomButton(
-                                "Se connecter",
-                                variant = VariantType.OUTLINED,
-                                emphasis = EmphasisType.SECONDARY,
-                                modifier=modifier.fillMaxWidth(),
-                                size = SizeType.MEDIUM,
-                                onClick = {navController.navigate("connexion")}
-                            )
-                        }
-                        HorizontalDivider(color =  secondaryTextColor.copy(alpha = 0.15f), modifier = Modifier.fillMaxWidth().padding())
                         }
                     }
 
 
                 }
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
 
 
                         Text(
@@ -126,10 +181,18 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                             if (authState.isConnected) ParameterItem(
                                 { navController.navigate("information") },
                                 "Informations",
-                                Icons.Outlined.Person
+                                icon = ParameterIcon.Vector(Icons.Outlined.Person)
                             ) else null,
-                            ParameterItem({navController.navigate("connectedApp") }, "App Connectée", Icons.Outlined.DatasetLinked),
-                            ParameterItem({ }, "Mes Objectifs", Icons.AutoMirrored.Outlined.Rule),
+                            ParameterItem(
+                                { navController.navigate("connectedApp") },
+                                "App Connectée",
+                                ParameterIcon.Vector(Icons.Outlined.DatasetLinked)
+                            ),
+                            ParameterItem(
+                                { navController.navigate("objectif") },
+                                "Mes Objectifs",
+                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Rule)
+                            ),
                         )
                         ParameterBox(menu1)
 
@@ -137,13 +200,32 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
 
                 }
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)) {
-                        Text("Préférence et données", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text(
+                            "Préférence et données",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
                         val menu1 = listOfNotNull(
-                            ParameterItem({ }, "Unité de mesures", Icons.Outlined.Straighten),
-                            ParameterItem({ }, "Langue", Icons.Default.Translate),
+                            ParameterItem(
+                                { navController.navigate("mesureUnit") },
+                                "Unité de mesures",
+                                ParameterIcon.Vector(Icons.Outlined.Straighten)
+                            ),
+                            ParameterItem(
+                                {navController.navigate("language") },
+                                "Langue",
+                                ParameterIcon.Vector(Icons.Default.Translate)
+                            ),
                             if (authState.isConnected)
-                                ParameterItem({ }, "Export des données", Icons.Outlined.Download)
+                                ParameterItem(
+                                    { },
+                                    "Export des données",
+                                    ParameterIcon.Vector(Icons.Outlined.Download)
+                                )
                             else null
                         )
                         ParameterBox(menu1)
@@ -153,21 +235,37 @@ fun ParameterPage (modifier: Modifier = Modifier, navController: NavController,
                 }
 
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top=20.dp)) {
-                        Text("Autre", style = MaterialTheme.typography.bodyLarge,modifier= Modifier.padding(start = 8.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text(
+                            "Autre",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
                         val menu1 = listOf(
-                            ParameterItem({ }, "Accessibilité",
-                                Icons.Outlined.Accessibility
+                            ParameterItem(
+                                { }, "Accessibilité",
+                                ParameterIcon.Vector(Icons.Outlined.Accessibility)
                             ),
-                            ParameterItem({ }, "Confidentialité", Icons.AutoMirrored.Outlined.Assignment),
-                            ParameterItem({ }, "Mention Légales", Icons.AutoMirrored.Outlined.Assignment),
+                            ParameterItem(
+                                { },
+                                "Confidentialité",
+                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
+                            ),
+                            ParameterItem(
+                                { },
+                                "Mention Légales",
+                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
+                            ),
                         )
                         ParameterBox(menu1)
                     }
 
 
                 }
-                if(authState.isConnected) {
+                if (authState.isConnected) {
                     item {
                         Button(
                             onClick = { authViewModel.logout();navController.navigate("parametre") },

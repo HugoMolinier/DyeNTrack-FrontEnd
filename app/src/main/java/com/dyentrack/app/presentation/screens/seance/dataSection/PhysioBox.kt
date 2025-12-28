@@ -37,7 +37,8 @@ fun PhysioBox(
     viewModel: SeanceViewModel = viewModel(),
     state: SeanceUiState,
     lockInput: Boolean = false,
-    day: String
+    day: String,
+    isAutoSync:Boolean
 ) {
     val currentSeance = state.seancesParJour[day] ?: SeanceDuJour()
     val physioTrack = currentSeance.physioTrack
@@ -94,7 +95,8 @@ fun PhysioBox(
                             newValue.toIntOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.STEP, value)
                             }
-                        }
+                        },
+                        autoSync = isAutoSync
                     )
                 }
 
@@ -120,7 +122,8 @@ fun PhysioBox(
                             newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.HOUR_OF_SLEEP, value)
                             }
-                        }
+                        },
+                        autoSync = isAutoSync
                     )
                 }
 
@@ -148,7 +151,8 @@ fun PhysioBox(
                             newValue.toFloatOrNull()?.let { value ->
                                 viewModel.updatePhysio(PhysioField.WEIGHT, value)
                             }
-                        }
+                        },
+                        autoSync = false
                     )
                 }
 

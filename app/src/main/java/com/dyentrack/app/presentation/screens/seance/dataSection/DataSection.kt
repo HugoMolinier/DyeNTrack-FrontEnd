@@ -27,17 +27,26 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
-fun DataSection(    viewModel: SeanceViewModel = viewModel(),seanceDuJour: SeanceDuJour,lockInput:Boolean =false,day:String,state: SeanceUiState
-,healthViewModel: HealthConnectViewModel= viewModel()){
+fun DataSection(
+    viewModel: SeanceViewModel = viewModel(),
+    lockInput: Boolean = false,
+    day: String,
+    state: SeanceUiState,
+    healthViewModel: HealthConnectViewModel = viewModel(),
+    isAutoSync: Boolean
+) {
 
     val autorisationNeed by healthViewModel.autorisationNeed.collectAsState()
 
-    Column(modifier = Modifier.padding(10.dp, 4.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-      NutritionBox(viewModel,state,lockInput,day)
+    Column(
+        modifier = Modifier.padding(10.dp, 4.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        NutritionBox(viewModel, state, lockInput, day, isAutoSync)
 
-        PhysioBox(viewModel,state,lockInput,day)
+        PhysioBox(viewModel, state, lockInput, day, isAutoSync)
 
-        if(autorisationNeed?.isNotEmpty() == true) {
+        if (autorisationNeed?.isNotEmpty() == true) {
             HealthConnectPermissionsScreen(
                 healthConnectPermissionsNeeded = autorisationNeed!!,
                 viewModel = healthViewModel
@@ -50,13 +59,18 @@ fun DataSection(    viewModel: SeanceViewModel = viewModel(),seanceDuJour: Seanc
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically,modifier=Modifier.padding(bottom = 20.dp)){
-                IconButton(onClick = {healthViewModel.syncHealthData()}) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 20.dp)
+            ) {
+                IconButton(onClick = { healthViewModel.syncHealthData() }) {
                     Icon(
                         Icons.Default.Sync,
                         "sync ",
                         tint = secondaryTextColor,
-                        modifier = Modifier.size(28.dp).padding(4.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(4.dp)
                     )
                 }
                 Text(

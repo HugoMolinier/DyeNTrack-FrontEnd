@@ -14,14 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseSummary
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.utils.convertWeight
 
 @Composable
-fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
+fun ShowInfoOfSeance(viewModel: SeanceViewModel, userUnit: MesureUnit) {
 
     val state by viewModel.uiState.collectAsState()
 
@@ -53,17 +55,19 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
                 ?: emptySet()
         }
         val setsMap = state.seancesParJour[state.daySelected]?.setsMap ?: emptyMap()
-        val (totalSets, sommePond) = setsMap.values.flatten().fold(0 to 0.0) { (count, sum), setData ->
-            val newSum = if (setData.linkedRightSet == null) {
-                sum + (setData.reps ?: 0) * (setData.charge ?: 0.0)
-            } else {
-                // moyenne des reps multipliée par la charge
-                sum + (((setData.reps ?: 0) + (setData.linkedRightSet?.reps ?: 0)) * (setData.charge ?: 0.0) / 2)
+        val (totalSets, sommePond) = setsMap.values.flatten()
+            .fold(0 to 0.0) { (count, sum), setData ->
+                val newSum = if (setData.linkedRightSet == null) {
+                    sum + (setData.reps ?: 0) * (setData.charge ?: 0.0)
+                } else {
+                    // moyenne des reps multipliée par la charge
+                    sum + (((setData.reps ?: 0) + (setData.linkedRightSet?.reps
+                        ?: 0)) * (setData.charge ?: 0.0) / 2)
+                }
+                (count + 1) to newSum
             }
-            (count + 1) to newSum
-        }
 
-        ExerciseSummary(exercisesList, mainFocusSet, totalSets,sommePond.fastRoundToInt())
+        ExerciseSummary(exercisesList, mainFocusSet, totalSets, sommePond.fastRoundToInt())
     }
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
@@ -74,10 +78,22 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel) {
         )
 
         InfoRow(label = "Muscle utilisé", value = exerciseSummary.mainFocus.joinToString(", "))
-        InfoRow(label = "Nombre de série", value = exerciseSummary.totalSets.toString(), border = true)
-        InfoRow(label = "Nombre d'exercices", value = exerciseSummary.exercises.count().toString(), border = true)
-        InfoRow(label = "Somme Pondéré", value = exerciseSummary.sommePond.toString()+"kg")
-
+        InfoRow(
+            label = "Nombre de série",
+            value = exerciseSummary.totalSets.toString(),
+            border = true
+        )
+        InfoRow(
+            label = "Nombre d'exercices",
+            value = exerciseSummary.exercises.count().toString(),
+            border = true
+        )
+        InfoRow(
+            label = "Somme Pondéré",
+            value = convertWeight(exerciseSummary.sommePond.toDouble(), MesureUnit.KG, userUnit)
+                ?.let { String.format("%.1f", it) }
+                .orEmpty() + userUnit.toString().lowercase()
+        )
         InputCustom(
             modifier = Modifier
                 .padding(top = 12.dp)

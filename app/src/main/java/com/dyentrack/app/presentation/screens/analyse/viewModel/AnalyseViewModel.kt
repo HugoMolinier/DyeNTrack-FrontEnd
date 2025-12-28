@@ -13,6 +13,7 @@ import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
+import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,7 @@ class AnalyseViewModel @Inject constructor(
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
+    private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
     private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase
 
     ) : ViewModel() {
@@ -39,7 +41,7 @@ class AnalyseViewModel @Inject constructor(
     var masterData: MasterDataStatic? = null
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
     private val allSeanceByDay = mutableMapOf<String, SeanceTrack>()
-
+    val userUnit = getUserPreferenceUseCase.invoke().mesureUnit
 
     init {
         viewModelScope.launch {

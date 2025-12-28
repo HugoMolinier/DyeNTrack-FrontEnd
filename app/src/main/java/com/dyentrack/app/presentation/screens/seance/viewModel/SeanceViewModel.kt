@@ -108,6 +108,12 @@ class SeanceViewModel @Inject constructor(
     fun setDaySelected(daySelected:String){
         _uiState.update { current-> current.copy(daySelected=daySelected) }
     }
+
+    fun setSectionSelected(section:String){
+        if(section=="data"){
+            _uiState.update { current-> current.copy(sectionSelect = SectionSelectType.DATA) }
+        }
+    }
     fun toggleMode(newMode: ExerciseMode) {
         _uiState.update { current ->
             if (current.exerciseMode == newMode) {

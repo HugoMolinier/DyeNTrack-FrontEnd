@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.utils
 
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetVO
 import java.time.LocalDate
@@ -10,7 +11,15 @@ fun Double.toCleanString(): String =
     toInt().takeIf { it.toDouble() == this }?.toString() ?: toString()
 
 
-
+fun convertWeight(value: Double?, sourceUnit: MesureUnit, finalUnit: MesureUnit): Double? {
+    if (value == null) return null
+    return when {
+        sourceUnit == finalUnit -> value
+        sourceUnit == MesureUnit.KG && finalUnit == MesureUnit.LBS -> value * 2.20462262185
+        sourceUnit == MesureUnit.LBS && finalUnit == MesureUnit.KG -> value * 0.45359237
+        else -> value
+    }
+}
 private val SLASH_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 private val ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 private val ABBREVIATED_FORMATTER =

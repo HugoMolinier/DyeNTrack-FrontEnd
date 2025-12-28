@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.components.CardWithContent
@@ -48,13 +51,13 @@ import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.type.EmphasisType
-
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.convertWeight
 import kotlin.math.roundToInt
 
 
@@ -65,7 +68,8 @@ fun ExerciseCard(
     viewModel: SeanceViewModel,
     navController: NavController,
     lateriteNameMap: List<String>,
-    equipmentNameMap: List<String>
+    equipmentNameMap: List<String>,
+    userUnit: MesureUnit
 ) {
     val exerciseId = exInSeance.exerciseId
     val exercise =
@@ -84,7 +88,9 @@ fun ExerciseCard(
         exerciseSets?.forEach {
             if (stop) return@forEach
             if (it.charge != chargePres && chargePres != null) {
-                append(chargePres, "kg");append(" | ")
+                append(convertWeight(chargePres,
+                    MesureUnit.KG,userUnit)?.let { String.format("%.1f", it) }
+                    .orEmpty() + userUnit.toString().lowercase());append(" | ")
             }
             append(it.reps ?: " ")
             if (it.side == SetSide.LEFT) append("/", it.linkedRightSet?.reps ?: "_")
@@ -97,7 +103,11 @@ fun ExerciseCard(
         }
 
         if (!stop && chargePres != null) {
-            append("${chargePres}kg")
+            append(
+                convertWeight(chargePres, MesureUnit.KG, userUnit)
+                    ?.let { String.format("%.1f", it) }
+                    .orEmpty() + userUnit.toString().lowercase()
+            )
         }
     }
 
@@ -160,7 +170,7 @@ fun ExerciseCard(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 4.dp)
                         .height(32.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -215,7 +225,7 @@ fun ExerciseCard(
                             viewModel.toggleShowAnalyseData()
                             viewModel.getLastExercicePerfBetweenDate(
                                 state.daySelected,
-                                "2025-10-20"
+                                "1970-01-01"
                             )
                         },
                         Modifier
@@ -257,10 +267,24 @@ fun ExerciseCard(
 
 
                 }
-                AnalyseRow(viewModel, state)
+                AnalyseRow(viewModel, state,userUnit)
 
 
                 Column {
+                    if (exerciseSets?.isNotEmpty()==true){
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(15.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp)
+                        ) {
+                            Spacer(modifier = Modifier.width(24.dp))
+                            Text("rep", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
+                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
+                            Text("rir", modifier = Modifier.width(65.dp)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
+                        }
+                    }
                     exerciseSets?.forEachIndexed { index, set ->
                         key(set.id,set.side) {
                             var offsetY by remember { mutableFloatStateOf(0f) }
@@ -328,7 +352,8 @@ fun ExerciseCard(
                                     lockInput = isLock,
                                     onClickBadge =
                                         { viewModel.deleteSet(exerciseId,set.id) },
-                                    exerciseId = exerciseId
+                                    exerciseId = exerciseId,
+                                    userUnit=userUnit
 
                                 )
                             }
