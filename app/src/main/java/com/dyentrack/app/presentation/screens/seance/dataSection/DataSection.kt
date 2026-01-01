@@ -17,8 +17,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.HealthConnectPermissionsScreen
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
@@ -33,7 +36,8 @@ fun DataSection(
     day: String,
     state: SeanceUiState,
     healthViewModel: HealthConnectViewModel = viewModel(),
-    isAutoSync: Boolean
+    isAutoSync: Boolean,
+    userUnit: MesureUnit
 ) {
 
     val autorisationNeed by healthViewModel.autorisationNeed.collectAsState()
@@ -44,7 +48,7 @@ fun DataSection(
     ) {
         NutritionBox(viewModel, state, lockInput, day, isAutoSync)
 
-        PhysioBox(viewModel, state, lockInput, day, isAutoSync)
+        PhysioBox(viewModel, state, lockInput, day, isAutoSync, userUnit  )
 
         if (autorisationNeed?.isNotEmpty() == true) {
             HealthConnectPermissionsScreen(
@@ -74,7 +78,7 @@ fun DataSection(
                     )
                 }
                 Text(
-                    "Refresh",
+                    stringResource(R.string.reload),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     )

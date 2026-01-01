@@ -10,5 +10,5 @@ data class UserPreference(
     val language:LANGUAGE?=LANGUAGE.FR
 )
 
-enum class MesureUnit{ KG,LBS}
+enum class MesureUnit { KG, LBS }
 enum class LANGUAGE{ FR,EN}

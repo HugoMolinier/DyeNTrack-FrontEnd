@@ -1,4 +1,4 @@
-package com.dyentrack.app.utils
+package com.dyentrack.app.core.utils
 
 import android.content.Context
 import android.content.ContextWrapper

@@ -13,7 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import com.dyentrack.app.R
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.github.mikephil.charting.charts.RadarChart
 import com.github.mikephil.charting.components.Legend
@@ -28,7 +30,9 @@ fun RadarChartMP(
     modifier: Modifier = Modifier,
     labels: List<String>,
     values1: List<Float>,
-    values2: List<Float>
+    values2: List<Float>,
+    legend1: String = stringResource(R.string.legend_exercises),
+    legend2: String = stringResource(R.string.legend_sets)
 ) {
     val colorScheme = MaterialTheme.colorScheme
     AndroidView(
@@ -79,7 +83,7 @@ fun RadarChartMP(
                 }
             }
 
-            val dataSet1 = RadarDataSet(entries1, "Nombre Exercices").apply {
+            val dataSet1 = RadarDataSet(entries1, legend1).apply {
                 color = colorScheme.secondary.toArgb()
                 fillColor = secondaryTextColor.toArgb()
                 fillAlpha = 50
@@ -88,7 +92,7 @@ fun RadarChartMP(
                 setDrawValues(false)
             }
 
-            val dataSet2 = RadarDataSet(entries2, "Nombre Séries").apply {
+            val dataSet2 = RadarDataSet(entries2, legend2).apply {
                 color = colorScheme.primary.toArgb()
                 fillColor = colorScheme.primary.toArgb()
                 fillAlpha = 50

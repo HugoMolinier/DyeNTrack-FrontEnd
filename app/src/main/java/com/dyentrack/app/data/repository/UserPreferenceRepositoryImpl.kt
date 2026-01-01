@@ -32,5 +32,6 @@ class UserPreferenceRepositoryImpl  @Inject constructor(
             language = userPreference.language?:localPref?.language?: LANGUAGE.FR
         )
         localDataSource.saveUserPreference(mergedPref)
+
     }
 }

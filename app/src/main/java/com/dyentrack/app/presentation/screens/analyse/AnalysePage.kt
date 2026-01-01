@@ -44,10 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
@@ -81,9 +84,10 @@ fun AnalysePage(
     var inputIndex by remember { mutableIntStateOf(0) }
     var extendFilter by remember { mutableStateOf(false) }
     val userUnit = userPref?.mesureUnit?: MesureUnit.KG
+    val userLANGUAGE =analyseViewModel.languageUser
     Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(
-            "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+            stringResource(R.string.full_analysis), leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onClickLeft = { navController.popBackStack() })
         LazyColumn(
             modifier = Modifier
@@ -98,15 +102,15 @@ fun AnalysePage(
                             selectedIndex = inputIndex,
                             itemSection = listOf(
                                 MenuItemData(
-                                    "2 Weeks",
+                                    stringResource(R.string.two_weeks),
                                     { analyseViewModel.applyDateRange(14L);inputIndex = 0 }
                                 ),
                                 MenuItemData(
-                                    "Month",
+                                    stringResource(R.string.month),
                                     { analyseViewModel.applyDateRange(30L);inputIndex = 1 }
                                 ),
                                 MenuItemData(
-                                    "Tout",
+                                    stringResource(R.string.all),
                                     { analyseViewModel.applyDateRange(3000L);inputIndex = 2 }
                                 )
                             ))
@@ -134,7 +138,7 @@ fun AnalysePage(
                     ) {
                             Icon(
                                 Icons.Outlined.SettingsInputComponent,
-                                contentDescription = "Custom",
+                                contentDescription = stringResource(R.string.custom_section),
                                 modifier = Modifier.size(18.dp).padding(2.dp),
                                 tint = if (isSelected)
                                     MaterialTheme.colorScheme.primary
@@ -155,13 +159,13 @@ fun AnalysePage(
                 ) {
 
                     Text(
-                        state.dateRange.oldDate.toAbbreviatedDate() +
+                        state.dateRange.oldDate.toAbbreviatedDate(userLANGUAGE) +
                                 if (state.dateRange.oldDate.year != state.dateRange.recentDate.year) {
                                     " ${state.dateRange.oldDate.year} - "
                                 } else {
                                     " - "
                                 } +
-                                state.dateRange.recentDate.toAbbreviatedDate() +
+                                state.dateRange.recentDate.toAbbreviatedDate(userLANGUAGE) +
                                 " ${state.dateRange.recentDate.year}",
                         style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                     )
@@ -175,7 +179,7 @@ fun AnalysePage(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Indicateur de performance",
+                            stringResource(R.string.performance_indicator),
                             style = MaterialTheme.typography.bodyLarge
                         )
                         IconButton(
@@ -184,7 +188,7 @@ fun AnalysePage(
                         ) {
                             Icon(
                                 Icons.Default.FilterAlt,
-                                "Afficher les filtres",
+                                stringResource(R.string.show_filters),
                                 tint = if (extendFilter) MaterialTheme.colorScheme.onSurface else secondaryTextColor
                             )
                         }
@@ -196,11 +200,13 @@ fun AnalysePage(
                     ) {
                         Column {
                             Text(
-                                "Filtre par groupe musculaire",
+                                stringResource(R.string.filter_by_muscle_group),
                                 style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                             )
 
-                            FilterMuscleGroupRow(analyseViewModel.masterData)
+                            if(state.masterDataMaps?.musclesGroupMap?.isNotEmpty() == true) {
+                                FilterMuscleGroupRow(state.masterDataMaps!!.musclesGroupMap)
+                            }
                         }
                     }
                     Column {
@@ -211,7 +217,7 @@ fun AnalysePage(
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    "Nombre de sessions",
+                                    stringResource(R.string.number_of_sessions),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
                                 Text(state.mapSeance.filter { it.value.plannedExercises.isNotEmpty() }
@@ -249,7 +255,7 @@ fun AnalysePage(
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    "Moyenne Set/ Exercices",
+                                    stringResource(R.string.avg_set_per_exercise),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
                                 Text(
@@ -267,7 +273,7 @@ fun AnalysePage(
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    "Proportion Set échec",
+                                    stringResource(R.string.fail_set_ratio),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
                                 Text(
@@ -289,7 +295,7 @@ fun AnalysePage(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(
-                                        "Somme pondéré",
+                                        stringResource(R.string.weighted_sum),
                                         style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                     )
                                     Icon(
@@ -341,13 +347,16 @@ fun AnalysePage(
                         showValueBar =sizeDayRatio<35,
                         showValueLine = sizeDayRatio<25,
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        barLegendLabel = stringResource(R.string.weighted_sum),
+                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
+
                     )
                 }
             }
             item {
                 Text(
-                    "Répartition",
+                    stringResource(R.string.distribution),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)
                 )
@@ -374,7 +383,7 @@ fun AnalysePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
-                            RadarChartSample(state.graphData, analyseViewModel.masterData)
+                            RadarChartSample(state.graphData, state.masterDataMaps?.musclesGroupMap)
                         }
                     }
                     item {
@@ -390,10 +399,10 @@ fun AnalysePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
-                            val labels = state.muscleSetPercentage
-                                .mapNotNull { (muscleId, _, _) ->
-                                    analyseViewModel.masterData?.muscles?.find { it.id == muscleId }?.nameFR
-                                }
+                            val labels = state.muscleSetPercentage.mapNotNull { (muscleId, _, _) ->
+                                // On récupère le nom depuis musclesGroupMap en fonction de la langue utilisateur
+                                state.masterDataMaps?.muscleMap?.get(muscleId)?.getName(userLANGUAGE)
+                            }
                             val values = state.muscleSetPercentage
                                 .map { it.third.numberSet.toFloat() }
                             val values2 = state.muscleSetPercentage
@@ -420,12 +429,11 @@ fun AnalysePage(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR?.let {
-                                    Text(
-                                        it,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
+                                Text(
+                                    state.masterDataMaps?.muscleMap?.get(key)?.getName(userLANGUAGE) ?: "N/A",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+
                                 Text(
                                     String.format("%.2f%%", value * 100),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
@@ -433,7 +441,6 @@ fun AnalysePage(
                             }
                             ProgressLine(value, height = 4.dp)
                         }
-                        analyseViewModel.masterData?.muscles?.find { it.id == key }?.nameFR
                     }
                 }
             }
@@ -444,7 +451,7 @@ fun AnalysePage(
                         .fillMaxWidth()
                         .padding(top = 20.dp)
                 ) {
-                    Text("Par exercice", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.per_exercise), style = MaterialTheme.typography.bodyLarge)
                 }
             }
             item {
@@ -470,13 +477,14 @@ fun AnalysePage(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            analyseViewModel.masterData?.officialExercise?.find { it.idExercise == state.exerciceChose }?.nameFR
-                                ?: "Aucun Exercice", style = MaterialTheme.typography.bodyMedium
+                            text= state.masterDataMaps?.exerciseMap?.get(state.exerciceChose)?.getName(userLANGUAGE)
+                                ?: stringResource(R.string.no_exercise),
+                            style = MaterialTheme.typography.bodyMedium
                         )
                         IconButton(onClick = { analyseViewModel.toggleBottomSheet(true) }) {
                             Icon(
                                 Icons.Default.SwapHoriz,
-                                contentDescription = "Changer la sélection",
+                                contentDescription = stringResource(R.string.change_selection),
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -496,19 +504,23 @@ fun AnalysePage(
                         showValueBar = numberSize<35,
                         showValueLine = numberSize<20,
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        barLegendLabel = stringResource(R.string.weighted_sum),
+                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
                     )
                 }
                 BottomSheetSelectionExercise(
                     bottomSheetVisibility = state.isBottomSheetVisible,
                     selectedExerciseIds=listOf(state.tempChose),
-                    masterDataStatic = analyseViewModel.masterData,
+                    officialExercise = analyseViewModel.masterData?.officialExercise,
                     infoMapUser = infoMapUser,
-                    title="Choisir un exercice",
+                    title=stringResource(R.string.choose_exercise),
                     navController = navController,
                     onClose = { analyseViewModel.toggleBottomSheet(false) },
                     onClickExercise = {exerciseId ->analyseViewModel.changeTempExercice(exerciseId)},
                     onClickFavorite = { analyseViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) },
+                    userlanguage = userLANGUAGE,
+                    musclesGroupMap = state.masterDataMaps?.musclesGroupMap
                 ) {
                     Row(
                         Modifier
@@ -517,7 +529,7 @@ fun AnalysePage(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         CustomButton(
-                            label = "Choisir",
+                            label = stringResource(R.string.choose),
                             modifier = Modifier.weight(1f),
                             onClick = { analyseViewModel.choseThisExercise();analyseViewModel.toggleBottomSheet(false) }
                         )

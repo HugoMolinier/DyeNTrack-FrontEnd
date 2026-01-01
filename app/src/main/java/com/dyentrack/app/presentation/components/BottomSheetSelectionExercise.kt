@@ -23,12 +23,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.mapper.toSearchKey
 import com.dyentrack.app.domain.model.InfoExerciseUser
-import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.LANGUAGE
+import com.dyentrack.app.domain.model.exercise.Exercise
+import com.dyentrack.app.domain.model.exercise.ExerciseTypeFilter
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
@@ -37,7 +43,7 @@ import com.dyentrack.app.presentation.utils.ExerciseImages
 fun BottomSheetSelectionExercise(
     bottomSheetVisibility: Boolean,
     selectedExerciseIds: List<Long>,
-    masterDataStatic: MasterDataStatic?,
+    officialExercise: List<Exercise>?,
     infoMapUser :Map<Long, InfoExerciseUser>,
     navController: NavController,
     onClose: () -> Unit= {},
@@ -45,40 +51,48 @@ fun BottomSheetSelectionExercise(
     onClickFavorite: (Long) -> Unit= {},
     onResetFilter: () -> Unit= {},
     onUpdateQuery:(String) ->Unit= {},
+    musclesGroupMap:Map<Long, String>?=emptyMap(),
     title:String="",
-    footerChildren: @Composable () -> Unit = {}
+    userlanguage: LANGUAGE,
+    footerChildren: @Composable () -> Unit = {},
 
-) {
+    ) {
+    val context = LocalContext.current
+    val muscleGroupsDefault = stringResource(R.string.filter_muscle_groups)
     var searchQuery by remember { mutableStateOf("") }
-    var typeFilter by remember { mutableStateOf("Tous") }
-    var groupFilter by remember { mutableStateOf("Groupes Musculaires") }
+    var typeFilter by remember { mutableStateOf(ExerciseTypeFilter.ALL) }
+    var groupFilter by remember { mutableStateOf(muscleGroupsDefault)}
     val filteredExercises = remember(
         searchQuery,
         typeFilter,
         groupFilter,
-        masterDataStatic?.officialExercise
+        officialExercise,
+        userlanguage
     ) {
-        masterDataStatic?.officialExercise?.filter { exercise ->
-            val matchesSearch = exercise.nameFR.contains(searchQuery, ignoreCase = true)
+        officialExercise?.filter { exercise ->
+
+            val matchesSearch =  searchQuery.isBlank() || when(userlanguage){
+                LANGUAGE.FR -> exercise.toSearchKey().contains(searchQuery)
+                LANGUAGE.EN -> exercise.nameEN.contains(searchQuery, ignoreCase = true)
+            }
 
             val typeSearch = when (typeFilter) {
-                "Officiel" -> exercise.idCreator == null
-                "Favorie" -> infoMapUser[exercise.idExercise]?.favorite ?: false
-                "Non Officiel" -> exercise.idCreator != null
+                ExerciseTypeFilter.OFFICIAL -> exercise.idCreator == null
+                ExerciseTypeFilter.FAVORITE -> infoMapUser[exercise.idExercise]?.favorite ?: false
+                ExerciseTypeFilter.USER_CREATED -> exercise.idCreator != null
                 else -> true
             }
 
             val groupFilter =
-                groupFilter == "Groupes Musculaires" || masterDataStatic.musclesGroup
-                    .firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR == groupFilter
+                groupFilter == muscleGroupsDefault || musclesGroupMap?.get (exercise.mainFocusGroup ) == groupFilter
 
 
             matchesSearch && typeSearch && groupFilter
         }
     }
     val nombreFiltresActifs = listOf(
-        typeFilter to "Tous",
-        groupFilter to "Groupes Musculaires"
+        typeFilter to ExerciseTypeFilter.ALL,
+        groupFilter to muscleGroupsDefault
     ).count { it.first != it.second } + if (searchQuery.isNotEmpty()) 1 else 0
 
     BottomSheetContent(
@@ -92,7 +106,7 @@ fun BottomSheetSelectionExercise(
                     searchQuery = newValue
                     onUpdateQuery(newValue)
                 },
-                placeholder = "Search",
+                placeholder = stringResource(R.string.filter_search),
                 leadingIcon = Icons.Default.Search,
                 modifier = Modifier.padding(12.dp, 20.dp),
                 variant = InputVariant.OUTLINED
@@ -113,19 +127,12 @@ fun BottomSheetSelectionExercise(
 
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             ChipDropDown(
-                                listOfSelectableItem = listOf(
-                                    "Tous",
-                                    "Officiel",
-                                    "Favorie",
-                                    "Non Officiel"
-                                ),
-                                defaultSelected = typeFilter,
+                                listOfSelectableItem = ExerciseTypeFilter.entries.map { it.toDisplayString(context) },
+                                defaultSelected =  typeFilter.toDisplayString(context),
                                 emphasys = EmphasisType.SECONDARY
-                            ) { typeFilter = it }
+                            ) {   selectedString -> typeFilter = ExerciseTypeFilter.entries.first { it.toDisplayString(context) == selectedString }}
                             ChipDropDown(
-                                listOfSelectableItem = listOf("Groupes Musculaires") +
-                                        masterDataStatic?.musclesGroup?.map { it.nameFR }
-                                            .orEmpty(),
+                                listOfSelectableItem =  listOf(muscleGroupsDefault) + musclesGroupMap?.values.orEmpty(),
                                 defaultSelected = groupFilter,
                                 emphasys = EmphasisType.SECONDARY
                             ) { groupFilter = it }
@@ -138,23 +145,23 @@ fun BottomSheetSelectionExercise(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
                                     .clickable(enabled = nombreFiltresActifs > 0) {
-                                        typeFilter = "Tous"
-                                        groupFilter = "Groupes Musculaires"
+                                        typeFilter = ExerciseTypeFilter.ALL
+                                        groupFilter = muscleGroupsDefault
                                         onResetFilter()
                                     }) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Effacer les filtres",
+                                    contentDescription = stringResource(R.string.filter_clear),
                                     modifier = Modifier.size(14.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    "Effacer les filtres (${nombreFiltresActifs})",
+                                    stringResource(R.string.filter_clear)+ " (${nombreFiltresActifs})",
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
                             }
                             Text(
-                                "${filteredExercises?.count()}/${masterDataStatic?.officialExercise?.count()}",
+                                "${filteredExercises?.count()}/${officialExercise?.count()}",
                                 style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                             )
                         }
@@ -169,11 +176,8 @@ fun BottomSheetSelectionExercise(
                     Box(Modifier.padding(12.dp, 4.dp)){
                     CardWithContent(
                         modifier = Modifier.padding(10.dp, 4.dp),
-                        exercise.nameFR,
-                        subText = masterDataStatic?.musclesGroup
-                            ?.firstOrNull { it.id == exercise.mainFocusGroup }?.nameFR?.uppercase()
-                            ?: "NaN",
-
+                        exercise.getName(userlanguage),
+                        subText = musclesGroupMap?.get(exercise.mainFocusGroup)?.uppercase() ?: "NaN",
                         leftIcon = LeftIcon.Single(ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent),
                         componentRight = {
                             FavoriteIconButton(
@@ -183,7 +187,7 @@ fun BottomSheetSelectionExercise(
                         },
                         menuOnLongClick = listOf(
                                 MenuItemData(
-                                    "Voir Exercice",
+                                    stringResource(R.string.exercise_view),
                                     {
                                         navController.currentBackStackEntry?.savedStateHandle?.set(
                                             "exercise",

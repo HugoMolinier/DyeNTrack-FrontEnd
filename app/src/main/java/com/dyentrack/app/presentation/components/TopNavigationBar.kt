@@ -15,7 +15,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.R
 
 @Composable
 fun TopNavigationBar(
@@ -53,7 +55,7 @@ fun TopNavigationBar(
             if (leftIcon != null) {
                 Icon(
                     imageVector = leftIcon,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     modifier = Modifier.size(24.dp)
                 )
             }

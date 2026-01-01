@@ -24,9 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.UserPreference
@@ -59,13 +61,13 @@ fun MesureUnitPage(
         }) {
         Column {
             TopNavigationBar(
-                "Unité de mesure",
+                stringResource(R.string.measurement_unit),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -80,7 +82,7 @@ fun MesureUnitPage(
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.padding(top = 12.dp)) {
 
                         Text(
-                            "Définir l'unité affiché",
+                            stringResource(R.string.set_display_unit),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
@@ -141,25 +143,37 @@ fun MesureUnitPage(
                         modifier = Modifier.padding(top = 20.dp, start = 8.dp)
                     ) {
                         Text(
-                            "Information",
+                            stringResource(R.string.information),
                             style = MaterialTheme.typography.bodyLarge,
                         )
-                        Text(
-                            "Attention, les charges sont stockés en kilos.\nPour Pound, cela n'est qu'une conversion pour l'affichage.\n\nLa conversion se fait:",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
+                        Column{
+                            Text(
+                                stringResource(R.string.info_measure_unit_1),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
+                            )
+                            Text(
+                                stringResource(R.string.info_measure_unit_2),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
+                            )
+                            Text(
+                                stringResource(R.string.info_measure_unit_3),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
+                                modifier= Modifier.padding(top=12.dp)
+                            )
 
-                        )
+                        }
+
                         Row(modifier = Modifier.padding(start = 24.dp, top = 4.dp)) {
                             Text("• ", color = secondaryTextColor)
                             Text(
-                                "Pound -> Kilo : poids x 0.45359237",
+                                "Pound -> Kilo : "+stringResource(R.string.weight)+" x 0.45359237",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                             )
                         }
                         Row(modifier = Modifier.padding(start = 24.dp, bottom = 2.dp)) {
                             Text("• ", color = secondaryTextColor)
                             Text(
-                                "Kilo -> Pound : poids x 2.20462262185",
+                                "Kilo -> Pound : "+stringResource(R.string.weight)+" x 2.20462262185",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                             )
                         }

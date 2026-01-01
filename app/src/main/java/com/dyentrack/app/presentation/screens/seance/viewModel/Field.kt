@@ -29,8 +29,8 @@ enum class NutritionField {
     CAFEINS
 }
 
-data class ExerciseSummary(
-    val exercises: List<Exercise>,
+data class SeanceSummary(
+    val exercisesList: List<Exercise>,
     val mainFocus: Set<String>,
     val totalSets: Int,
     val sommePond: Int

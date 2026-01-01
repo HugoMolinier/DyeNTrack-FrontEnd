@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -51,13 +52,14 @@ fun ConnectedAppPage(
     val healthEtat by healthViewModel.etat.collectAsState()
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
     val autorisationNeed by healthViewModel.autorisationNeed.collectAsState()
+
     val textHealthStatus = when (healthEtat) {
-        HealthConnectEtat.VERIFICATION -> "Vérification..."
-        HealthConnectEtat.INSTALLER -> "Installer"
-        HealthConnectEtat.AUTORISER -> "Autoriser"
-        HealthConnectEtat.OPERATIONNEL -> "Opérationnel"
-        HealthConnectEtat.METTRE_A_JOUR -> "Mettre à jour"
-        HealthConnectEtat.NON_DISPONIBLE -> "Non disponible"
+        HealthConnectEtat.VERIFICATION -> stringResource(R.string.checking)
+        HealthConnectEtat.INSTALLER -> stringResource(R.string.install)
+        HealthConnectEtat.AUTORISER -> stringResource(R.string.authorize)
+        HealthConnectEtat.OPERATIONNEL -> stringResource(R.string.operational)
+        HealthConnectEtat.METTRE_A_JOUR -> stringResource(R.string.update)
+        HealthConnectEtat.NON_DISPONIBLE -> stringResource(R.string.not_available)
     }
     if (autorisationNeed?.isNotEmpty() == true) {
         HealthConnectPermissionsScreen(
@@ -68,13 +70,13 @@ fun ConnectedAppPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                "Applicaton Lié",
+                stringResource(R.string.connected_app),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -98,7 +100,7 @@ fun ConnectedAppPage(
                                 modifier = Modifier.size(30.dp)
                             )
                             Text(
-                                text = "Health Connect", modifier = Modifier.padding(start = 8.dp)
+                                text =stringResource(R.string.health_connect), modifier = Modifier.padding(start = 8.dp)
                             )
                         }
 
@@ -115,20 +117,28 @@ fun ConnectedAppPage(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            "Information",
+                            stringResource(R.string.information),
                             style = MaterialTheme.typography.bodyLarge,
                         )
+                        Column(verticalArrangement = Arrangement.spacedBy(32.dp)){
+
+
                         Text(
-                            "Cette application permet de suivre ton activité, ta nutrition et ton sommeil.\n \n" + "Nous lisons les informations nécessaires : pas, nutrition, poids et sommeil. Tes séances d’exercices seront enregistrées pour que d'autre application le voit..",
+                            stringResource(R.string.info_text_1),
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
+                            Text(
+                                stringResource(R.string.info_text_2),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                            )
+                        }
                     }
                 }
 
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            "Auto-Sync", style = MaterialTheme.typography.bodyLarge
+                            text = stringResource(R.string.auto_sync),style = MaterialTheme.typography.bodyLarge
                         )
 
                         Row(
@@ -142,7 +152,7 @@ fun ConnectedAppPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    "Oui",
+                                    text = stringResource(R.string.yes),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
@@ -159,7 +169,7 @@ fun ConnectedAppPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    "Non",
+                                    text = stringResource(R.string.no),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
@@ -172,7 +182,7 @@ fun ConnectedAppPage(
                             }
                         }
                         Text(
-                            "Syncronisation a chaque démarage si opérationnel et autorisé",
+                            text = stringResource(R.string.auto_sync_desc),
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
                             modifier = Modifier.padding(top = 8.dp)
                         )

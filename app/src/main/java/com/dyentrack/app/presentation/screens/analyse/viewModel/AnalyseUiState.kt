@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.analyse.viewModel
 
+import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
 import java.time.LocalDate
@@ -14,6 +15,7 @@ data class AnalyseUiState(
     val muscleSetPercentage: List<Triple<Long, Float, MuscleRate>> = emptyList(),
 
     val dateRange : DateRangeSelected= DateRangeSelected(),
+    val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
 
     val exerciceChose: Long=0L,
     val tempChose:Long=0L,

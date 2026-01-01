@@ -2,4 +2,229 @@
     <string name="app_name">DyeNTrack</string>
     <string name="show_less">Show less</string>
     <string name="show_more">Show more</string>
+    <string name="exercise_detail">Détail de l\'exercice</string>
+    <string name="average_weight_5">Moyenne Poids 5 occurrences</string>
+    <string name="muscle_use">Muscle utilisé</string>
+    <string name="primary_muscle">Muscle principal</string>
+    <string name="possible_equipment">Equipement possible</string>
+    <string name="possible_execution">Exécution possible</string>
+    <string name="add_note">Ajouter une note</string>
+    <string name="details">Détails</string>
+    <string name="made_by">Crée par %1$s</string>
+
+    <string name="explanation">Explication</string>
+    <string name="statistics">Statistique</string>
+
+    <string name="exercise_per_week">Exercice/semaine</string>
+    <string name="sets_per_week">Set/semaine</string>
+    <string name="last_occurrence">Dernière occurrence</string>
+    <string name="performance_indicator">Indicateur de performance</string>
+    <string name="weighted_sum">Somme pondérée</string>
+    <string name="fail_set_ratio">Ratio échec / set</string>
+
+    <string name="you">Vous</string>
+    <string name="a_user">Un utilisateur</string>
+    <string name="back">Retour à la page précédente</string>
+
+    <string name="today_session">Séance du jour</string>
+    <string name="sessions">Séances</string>
+    <string name="data">Data</string>
+
+    <string name="no_workout">Aucun exercice pour le moment</string>
+    <string name="add_workout">Ajouter un exercice ou une routine</string>
+    <string name="add_exercise">Ajouter un exercice</string>
+
+    <string name="seance_detail">Détails de la séance</string>
+    <string name="number_of_sets">Nombre de séries</string>
+    <string name="number_of_exercises">Nombre d\'exercices</string>
+
+    <string name="number_steps">Nombre de pas</string>
+    <string name="step">Pas</string>
+
+    <string name="sleep">Sommeil</string>
+    <string name="sleep_hours">Heure de sommeil</string>
+    <string name="weight">Poids</string>
+    <string name="last">Dernière occurence :</string>
+
+    <string name="proteins">Protéines</string>
+    <string name="carbohydrates">Glucides</string>
+    <string name="lipids">Lipides</string>
+    <string name="fiber">Fibres</string>
+    <string name="caffeine">Caféine</string>
+    <string name="calories">Calories</string>
+    <string name="calculated">Calculé</string>
+    <string name="show_calculation">Afficher Calcul</string>
+    <string name="reload">Recharger</string>
+
+    <string name="cancel">Annuler</string>
+    <string name="add">Ajouter</string>
+
+    <string name="filter_search">Recherche</string>
+    <string name="filter_muscle_groups">Groupes Musculaires</string>
+    <string name="filter_all">Tous</string>
+    <string name="filter_official">Officiel</string>
+    <string name="filter_favorite">Favori</string>
+    <string name="filter_user_created">Non Officiel</string>
+    <string name="filter_clear">Effacer les filtres</string>
+    <string name="exercise_view">Voir Exercice</string>
+
+    <string name="mode_lock">Verrouillé entré</string>
+    <string name="mode_change_order">Changer l\'ordre</string>
+    <string name="mode_menu">Menu</string>
+
+    <string name="favorite_login_prompt">Connectez-vous pour ajouter un favori</string>
+
+    <string name="filter_by_muscle_group">Filtre par groupe musculaire</string>
+    <string name="number_of_sessions">Nombre de sessions</string>
+    <string name="no_exercise">Aucun Exercice</string>
+    <string name="choose_exercise">Choisir un exercice</string>
+    <string name="choose">Choisir</string>
+
+    <string name="change_selection">Changer la sélection</string>
+    <string name="per_exercise">Par exercice</string>
+    <string name="distribution">Répartition</string>
+    <string name="see_info">voir info</string>
+    <string name="avg_set_per_exercise">Moyenne Set/ Exercices</string>
+    <string name="full_analysis">Analyse complète</string>
+    <string name="show_filters">Afficher les filtres</string>
+
+    <string name="custom_section">Personnalisé</string>
+    <string name="two_weeks">2 Semaines</string>
+    <string name="month">Mois</string>
+    <string name="all">Tout</string>
+
+    <plurals name="set">
+        <item quantity="one">Série</item>
+        <item quantity="other">Séries</item>
+    </plurals>
+
+    <plurals name="muscle">
+        <item quantity="one">Muscle</item>
+        <item quantity="other">Muscles</item>
+    </plurals>
+
+    <plurals name="exercise">
+        <item quantity="one">Exercice</item>
+        <item quantity="other">Exercices</item>
+    </plurals>
+
+    <string name="add_session">Ajouter une séance</string>
+    <string name="daily_data">Données du jour</string>
+    <string name="previous_workouts">Séances précédentes</string>
+    <string name="view_workouts">Voir les séances</string>
+
+    <string name="see_more">Voir plus</string>
+    <string name="analysis">Analyse</string>
+    <plurals name="days">
+        <item quantity="one">Jour</item>
+        <item quantity="other">Jours</item>
+    </plurals>
+    <string name="hello">Bonjour</string>
+    <string name="prepare_day">Préparons la journée</string>
+    <string name="legend_exercises">Nombre d\'exercices</string>
+    <string name="legend_sets">Nombre de séries</string>
+
+
+    <string name="parameter">Paramètre</string>
+    <string name="back_to_menu">Retourner au menu</string>
+
+    <!-- Non connecté -->
+    <string name="signup_prompt">Inscrivez-vous pour profiter de fonctionnalité</string>
+    <string name="save_data">Garder une sauvegarde des données sur un serveur</string>
+    <string name="create_exercises">Crée des exercices, accéder au note et favorie</string>
+    <string name="collect_achievements">Collectionner plein d\'achievement</string>
+    <string name="signup">S\'inscire</string>
+    <string name="login">Se connecter</string>
+
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="information">Informations</string>
+    <string name="connected_app">App Connectée</string>
+    <string name="my_goals">Mes Objectifs</string>
+
+    <!-- Préférence et données -->
+    <string name="preferences_and_data">Préférence et données</string>
+    <string name="measurement_unit">Unité de mesures</string>
+    <string name="language">Langue</string>
+    <string name="export_data">Export des données</string>
+
+    <!-- Autre -->
+    <string name="other">Autre</string>
+    <string name="accessibility">Accessibilité</string>
+    <string name="privacy">Confidentialité</string>
+    <string name="legal_notices">Mention Légales</string>
+
+    <!-- Déconnexion -->
+    <string name="logout">Déconnection</string>
+
+    <string name="set_display_language">Définir la langue affichée</string>
+
+    <string name="set_display_unit">Définir l\'unité affichée</string>
+    <string name="info_measure_unit_1">Attention, les charges sont stockées en kilos.</string>
+    <string name="info_measure_unit_2">Pour Pound, cela n\'est qu\'une conversion pour l\'affichage.</string>
+    <string name="info_measure_unit_3">La conversion se fait :</string>
+
+    <string name="define_goals">Définir mes objectifs</string>
+
+    <string name="email_label">Email</string>
+    <string name="email_placeholder">votre@email.com</string>
+    <string name="pseudo_label">Pseudo</string>
+    <string name="pseudo_placeholder">Entrer votre pseudo</string>
+    <string name="password_label">Mot de passe</string>
+    <string name="password_placeholder">Entrer votre mot de passe</string>
+
+    <!-- Erreurs -->
+    <string name="error_invalid_password">Format mot de passe invalide, 8 à 60 caractères (1 chiffre et 1 lettre)</string>
+    <string name="error_invalid_email">Format email invalide</string>
+    <string name="error_wrong_credentials">Identifiants incorrects</string>
+    <string name="error_email_used">Identifiants déjà utilisés</string>
+    <string name="error_invalid_pseudo">Format pseudo invalide, 3 à 20 caractères</string>
+
+    <!-- Boutons -->
+    <string name="registering">Inscription...</string>
+    <string name="finish_registration">Finaliser l\'inscription</string>
+
+    <!-- Liens -->
+    <string name="already_account">Déjà un compte ?</string>
+    <string name="login_here">Connectez-vous ici</string>
+
+    <string name="logging_in">Connexion...</string>
+
+    <!-- Liens -->
+    <string name="no_account">Pas de compte ?</string>
+    <string name="signup_here">S\'inscrire ici</string>
+
+    <string name="error_api">Erreur serveur</string>
+
+    <string name="height_label">Taille</string>
+    <string name="birthday_label">Anniversaire</string>
+    <string name="sex_label">Sexe</string>
+    <string name="male_label">Homme</string>
+    <string name="female_label">Femme</string>
+    <string name="other_label">Autre</string>
+    <string name="error_invalid_height">Taille entre 50 et 300 cm</string>
+    <string name="edit_info">Modifier les infos</string>
+    <string name="apply">Appliquer</string>
+    <string name="applying">Appliquer...</string>
+
+
+    <string name="health_connect">Health Connect</string>
+    <string name="checking">Vérification...</string>
+    <string name="install">Installer</string>
+    <string name="authorize">Autoriser</string>
+    <string name="operational">Opérationnel</string>
+    <string name="update">Mettre à jour</string>
+    <string name="not_available">Non disponible</string>
+
+    <string name="info_text_1">
+        Cette application permet de suivre ton activité, ta nutrition et ton sommeil.
+    </string>
+    <string name="info_text_2">Nous lisons les informations nécessaires : pas, nutrition et sommeil. Tes séances d’exercices seront enregistrées pour que d\'autres applications les voient.</string>
+    <string name="auto_sync">Auto-Sync</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="auto_sync_desc">Synchronisation à chaque démarrage si opérationnel et autorisé</string>
+    <string name="home">Accueil</string>
+    <string name="workout">Séance</string>
+
 </resources>

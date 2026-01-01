@@ -47,9 +47,11 @@ class DayDataRepositoryImpl @Inject constructor(
             val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
             _dayDataFlow.value = merged
         }
-
-
     }
+
+
+
+
 
     private suspend fun mergeLocalAndApiByTimestamp( // a ajouter verif id telephone pour eviter le cas que sur un autre tel le healthsync date change la date avec seance vide donc api detecte que local>api donc importe seance vide
         local: List<DayDataRequest>,
@@ -104,6 +106,11 @@ class DayDataRepositoryImpl @Inject constructor(
         return result
     }
 
+    override suspend fun getDayLocal(day:String): DayDataRequest? {
+        return seanceDao
+            .getSeanceByDay(day)
+            ?.toDayDataRequest()
+    }
 
     override suspend fun updateToApi(dayData: DayDataRequest): Int {
         return try {

@@ -32,6 +32,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +45,7 @@ import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.globalViewModel.AppViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -52,26 +54,28 @@ fun ConnexionPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    appViewModel: AppViewModel = hiltViewModel<AppViewModel>(),
 ) {
 
 
     val authState by authViewModel.authState.collectAsState()
     val requestState by authViewModel.requestState.collectAsState()
 
-    if (authState.isConnected) navController.navigate("parametre")
+    if (authState.isConnected) {
+        appViewModel.syncUserData()
+        navController.navigate("parametre")
+    }
 
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
     val isLoading = requestState is RequestState.Loading
     val errorText = when ((requestState as? RequestState.Error)?.error) {
-        AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
-        AuthError.NOT_EMAILFORMAT -> "Format email invalide"
-        AuthError.UNAUTHORIZED -> "Identifiants incorrects"
-        AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
-        AuthError.ERROR_API -> "Erreur serveur"
-        null -> ""
-        AuthError.NOT_PSEUDOFORMAT -> ""
-        AuthError.NOT_HEIGHTFORMAT -> ""
+        AuthError.NOT_PASSWORD -> stringResource(R.string.error_invalid_password)
+        AuthError.NOT_EMAILFORMAT -> stringResource(R.string.error_invalid_email)
+        AuthError.UNAUTHORIZED -> stringResource(R.string.error_email_used)
+        AuthError.INVALID_ARGUMENT -> stringResource(R.string.error_email_used)
+        AuthError.ERROR_API -> stringResource(R.string.error_api)
+        else -> ""
     }
     val focusManager = LocalFocusManager.current
     Box(modifier = Modifier
@@ -84,13 +88,13 @@ fun ConnexionPage(
     ) {
         Column {
             TopNavigationBar(
-                "Connection",
+                stringResource(R.string.login),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -107,13 +111,13 @@ fun ConnexionPage(
                         modifier = Modifier.padding(top = 12.dp)
                     ) {
                         Text(
-                            "Email",
+                            stringResource(R.string.email_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
                             text = email, variant = InputVariant.OUTLINED,
-                            placeholder = "votre@email.com"
+                            placeholder = stringResource(R.string.email_placeholder)
                         )
                     }
                 }
@@ -124,13 +128,13 @@ fun ConnexionPage(
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
                         Text(
-                            "Mot de passe",
+                            stringResource(R.string.password_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         InputCustom(
                             text = password,
-                            placeholder = "Entrer votre mot de passe",
+                            placeholder = stringResource(R.string.password_placeholder),
                             variant = InputVariant.OUTLINED,
                             hideContent = true
                         )
@@ -165,7 +169,7 @@ fun ConnexionPage(
                 }
                 item {
                     CustomButton(
-                        label = if (isLoading) "Connexion..." else "Connexion",
+                        label = if (isLoading) stringResource(R.string.logging_in) else stringResource(R.string.signup),
                         onClick = { authViewModel.login(email.value.text, password.value.text) },
                         modifier = Modifier.fillMaxWidth(),
                         isLoading = isLoading,
@@ -184,13 +188,13 @@ fun ConnexionPage(
                         )
                     ) {
                         Text(
-                            text = "Pas de compte ?",
+                            text =stringResource(R.string.no_account),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = secondaryTextColor,
                             )
                         )
                         Text(
-                            text = "S'inscrire ici",
+                            text = stringResource(R.string.signup_here),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.clickable(onClick = { navController.navigate("inscription") })
                         )

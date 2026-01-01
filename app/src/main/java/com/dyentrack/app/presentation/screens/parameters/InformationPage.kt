@@ -28,12 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.presentation.components.CustomButton
@@ -73,14 +75,14 @@ fun InformationPage(
 
 
     val errorText = when ((requestState as? RequestState.Error)?.error) {
-        AuthError.NOT_PASSWORD -> "Format mot de passe invalide"
-        AuthError.NOT_EMAILFORMAT -> "Format email invalide"
-        AuthError.UNAUTHORIZED -> "Identifiants incorrects"
-        AuthError.INVALID_ARGUMENT -> "Identifiants incorrects"
-        AuthError.ERROR_API -> "Erreur serveur"
-        null -> ""
-        AuthError.NOT_PSEUDOFORMAT -> "Format pseudo invalide, 3 à 20 caractères"
-        AuthError.NOT_HEIGHTFORMAT -> "Taille entre 50 et 300 cm"
+        AuthError.NOT_PASSWORD ->     stringResource(R.string.error_invalid_password)
+        AuthError.NOT_EMAILFORMAT -> stringResource(R.string.error_invalid_email)
+        AuthError.UNAUTHORIZED -> stringResource(R.string.error_email_used)
+        AuthError.INVALID_ARGUMENT -> stringResource(R.string.error_email_used)
+        AuthError.ERROR_API -> stringResource(R.string.error_api)
+        AuthError.NOT_PSEUDOFORMAT -> stringResource(R.string.error_invalid_pseudo)
+        AuthError.NOT_HEIGHTFORMAT -> stringResource(R.string.error_invalid_height)
+        else -> ""
     }
     if (isEditing.value && requestState is RequestState.Success) {
         isEditing.value = false
@@ -97,13 +99,13 @@ fun InformationPage(
     ) {
         Column {
             TopNavigationBar(
-                "Information",
+                stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -120,13 +122,13 @@ fun InformationPage(
                         modifier = Modifier.padding(top = 12.dp)
                     ) {
                         Text(
-                            "Pseudo",
+                            stringResource(R.string.pseudo_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
                             text = pseudo, variant = InputVariant.OUTLINED,
-                            placeholder = "pseudo",
+                            placeholder = stringResource(R.string.pseudo_label),
                             enabled = isEditing.value || isLoading
                         )
                     }
@@ -138,13 +140,13 @@ fun InformationPage(
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
                         Text(
-                            "Taille",
+                            stringResource(R.string.height_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         InputCustom(
                             text = height,
-                            placeholder = "taille",
+                            placeholder = "170",
                             variant = InputVariant.OUTLINED,
                             maxCaracter = 3,
                             keyboardType = KeyboardType.Number,
@@ -164,7 +166,7 @@ fun InformationPage(
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
                         Text(
-                            "Anniversaire",
+                            stringResource(R.string.birthday_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
@@ -185,7 +187,7 @@ fun InformationPage(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            "Sexe",
+                            stringResource(R.string.sex_label),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
@@ -201,7 +203,7 @@ fun InformationPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    "Homme",
+                                    stringResource(R.string.male_label),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
@@ -217,7 +219,7 @@ fun InformationPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    "Femme",
+                                    stringResource(R.string.female_label),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
@@ -231,7 +233,7 @@ fun InformationPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    "Autre",
+                                    stringResource(R.string.other_label),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
@@ -286,7 +288,7 @@ fun InformationPage(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         CustomButton(
-                            label = "Annuler",
+                            label = stringResource(R.string.cancel),
                             onClick = {
                                 pseudo.value = TextFieldValue(originalPseudo.value)
                                 height.value = TextFieldValue(originalHeight.value)
@@ -300,7 +302,7 @@ fun InformationPage(
                             enable = requestState !is RequestState.Loading
                         )
                         CustomButton(
-                            label = if (isLoading) "Appliquer..." else "Appliquer",
+                            label = if (isLoading) stringResource(R.string.applying) else stringResource(R.string.apply),
                             onClick = {
                                 authViewModel.updateUser(
                                     pseudo.value.text,
@@ -317,7 +319,7 @@ fun InformationPage(
                 } else {
                     Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                         CustomButton(
-                            label = "Modifier les infos",
+                            label = stringResource(R.string.edit_info),
                             onClick = {
 
                                 isEditing.value = true

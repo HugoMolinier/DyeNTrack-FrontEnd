@@ -37,14 +37,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ProgressLine
@@ -74,23 +76,18 @@ fun HomePage(
     val objectifCal = userPreference?.objCalorie ?:0
     val objectifsommeil = userPreference?.objHourSleep ?:0.0
 
+    val language = homeViewModel.languageUser
     var pourcentage = 0f
-    if (state.todaySeance?.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.nutritionTrack?.calories !=0 && state.todaySeance?.nutritionTrack?.calories !=null ) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.physioTrack?.step !=0 &&state.todaySeance?.physioTrack?.step !=null) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.physioTrack?.hourOfSleep !=0.0&&state.todaySeance?.physioTrack?.hourOfSleep !=null) {
-        pourcentage += 0.25f
+    state.todaySeance?.let { seance ->
+        var pourcentage = 0f
+        if (seance.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
+            pourcentage += 0.25f
+        }
+        seance.nutritionTrack?.calories?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
+        seance.physioTrack?.step?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
+        seance.physioTrack?.hourOfSleep?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
     }
 
-    val muscleName: Map<Long, String> = homeViewModel.masterData?.muscles
-        ?.associate { muscle -> muscle.id to muscle.nameFR }
-        ?: emptyMap()
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier
             .fillMaxWidth()) {
@@ -103,11 +100,11 @@ fun HomePage(
                 ) {
                     Column {
                         Text(
-                            "Bonjour,",
+                            stringResource(R.string.hello) +",",
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                         Text(
-                            "${authState.user?.pseudo ?:"Préparons la journée"} !",
+                            "${authState.user?.pseudo ?:stringResource(R.string.prepare_day)} !",
                             style = MaterialTheme.typography.titleMedium,
                             modifier= Modifier.padding(top = 4.dp)
                         )
@@ -128,7 +125,7 @@ fun HomePage(
             item { Column(Modifier.fillMaxWidth().padding(start = 24.dp,end= 24.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
                     Text(
-                        "Données du jour ",
+                        stringResource(R.string.daily_data),
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600 )
                     )
                     Text(
@@ -167,10 +164,10 @@ fun HomePage(
                                         Icon(
                                             imageVector = Icons.Default.Add,
                                             tint = MaterialTheme.colorScheme.background,
-                                            contentDescription = "ajouter une séance"
+                                            contentDescription = stringResource(R.string.add)
                                         )
                                         Text(
-                                            "Ajouter une séance",
+                                            stringResource(R.string.add_session),
                                             textAlign = TextAlign.Center,
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 color = MaterialTheme.colorScheme.background,
@@ -195,7 +192,7 @@ fun HomePage(
                                 value = steps.toString(),
                                 objectif = if (objectifStep==0) "NaN" else objectifStep.toString(),
                                 onClickObjectif = {navController.navigate("objectif")},
-                                unit = "pas",
+                                unit = stringResource(R.string.step),
                                 onClick = {navController.navigate("seance?section=data")},
                                 drawableTop =  R.drawable.icon_step
 
@@ -220,7 +217,7 @@ fun HomePage(
                             ObjectifBox(
                                 value = calories.toString(),
                                 objectif = if (objectifCal==0) "NaN" else objectifCal.toString(),
-                                unit = "Cal",
+                                unit = "kcal",
                                 onClick = {navController.navigate("seance?section=data")},
                                 onClickObjectif = {navController.navigate("objectif")},
                                 drawableTop =  R.drawable.icon_cal
@@ -295,42 +292,43 @@ fun HomePage(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
-                        Text("Scéances précédentes", Modifier.padding(bottom = 12.dp))
+                        Text(stringResource(R.string.previous_workouts), Modifier.padding(bottom = 12.dp))
                     }
-                    for (i in state.mapSeance.size - 1 downTo (state.mapSeance.size - 5).coerceAtLeast(
-                        0
-                    )) {
-                        val dayKey = state.mapSeance.keys.elementAt(i)
-                        val setGroupMuscu: MutableSet<String> = mutableSetOf()
 
-                        state.muscleRateOfEachDay[dayKey]?.keys?.forEach { muscleId ->
-                            val muscle =
-                                homeViewModel.masterData?.muscles?.find { it.id == muscleId }
-                            val groupeMusculaire =
-                                homeViewModel.masterData?.musclesGroup?.find { it.id == muscle?.idMuscularGroup }
-                            groupeMusculaire?.nameFR?.let { setGroupMuscu.add(it) }
-                        }
+
+                    state.last5DaysKeys.forEachIndexed { index, day ->
+                        val groupMuscles = state.muscleRateOfEachDay[day]
+                            ?.keys
+                            ?.mapNotNull { muscleId ->
+                                val muscle = state.masterDataMaps?.muscleMap?.get(muscleId)
+                                state.masterDataMaps?.musclesGroupMap?.get(muscle?.idMuscularGroup)
+                            }
+                            ?.toSet()
+                            ?: emptySet()
 
                         CardWithContent(
                             modifier = Modifier.padding(8.dp, 2.dp),
-                            text = setGroupMuscu.joinToString(", "),
-                            dayKey,
+                            text = groupMuscles.joinToString(", "),
+                            day,
                             onExpandChange = { expanded ->
-                                homeViewModel.expandSeance(if (expanded) i else null)
+                                homeViewModel.expandSeance(if (expanded) index  else null)
                             },
                             canExtend = true,
-                            expanded = state.expandedSeance == i,
+                            expanded = state.expandedSeance == index ,
 
                             componentRight = {
                                 Icon(
-                                    if (state.expandedSeance == i) {
+                                    if (state.expandedSeance == index ) {
                                         Icons.Default.ArrowDropUp
                                     } else {
                                         Icons.Default.ArrowDropDown
-                                    }, ""
+                                    },
+                                    contentDescription = stringResource(
+                                        if (state.expandedSeance == index) R.string.show_less else R.string.show_more
+                                    )
                                 )
                             },
-                            leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[dayKey]),
+                            leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[day]),
                             hasLineShadowBetweenMainAndChildren = true,
                             childrenForExtend = {
                                 Column(
@@ -345,14 +343,14 @@ fun HomePage(
                                             .padding(top = 12.dp, bottom = 8.dp)
                                     ) {
                                         Text(
-                                            "Muscles",
+                                            pluralStringResource(R.plurals.muscle,2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .weight(1f)
                                         )
                                         Text(
-                                            "Exercice",
+                                            pluralStringResource(R.plurals.exercise,2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -360,7 +358,7 @@ fun HomePage(
                                             textAlign = TextAlign.Center
                                         )
                                         Text(
-                                            "Série",
+                                            pluralStringResource(R.plurals.set,2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -370,9 +368,9 @@ fun HomePage(
                                         Spacer(modifier = Modifier.width(24.dp))
                                     }
 
-                                    state.muscleRateOfEachDay[dayKey]?.entries?.forEachIndexed { index, (key, value) ->
+                                    state.muscleRateOfEachDay[day]?.entries?.forEachIndexed { index, (key, value) ->
                                         val isLast =
-                                            index == state.muscleRateOfEachDay[dayKey]!!.size - 1
+                                            index == state.muscleRateOfEachDay[day]!!.size - 1
                                         Row(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically,
@@ -381,7 +379,7 @@ fun HomePage(
                                                 .height(30.dp)
                                         ) {
                                             Text(
-                                                muscleName[key] ?: "Not found",
+                                                state.masterDataMaps?.muscleMap?.get(key)?.getName(language) ?: "Not found",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -403,7 +401,7 @@ fun HomePage(
                                             )
                                             if (isLast) {
                                                 IconButton(
-                                                    onClick = {navController.navigate("seance?dayKey=$dayKey")},
+                                                    onClick = {navController.navigate("seance?dayKey=$day")},
                                                     modifier = Modifier.size(24.dp)
                                                 ) { Icon(Icons.Default.Fullscreen, "go to seance") }
                                             } else {
@@ -425,7 +423,7 @@ fun HomePage(
             }
             item {
                 CustomButton(
-                    "Voir les séances",
+                    stringResource(R.string.view_workouts),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp, start = 10.dp, end = 10.dp),
@@ -442,16 +440,16 @@ fun HomePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Analyse", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.analysis), style = MaterialTheme.typography.titleSmall)
                         Box(Modifier.clickable(onClick = {navController.navigate("analyse")})){
 
                             Text(
-                                "Voir plus",
+                                stringResource(R.string.see_more),
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
                             ) }
                     }
                     Text(
-                        ""+ state.mapSeance.count() + " / 14 jours",
+                        ""+ state.mapSeance.count() + " / 14 "+pluralStringResource(R.plurals.days,2),
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
                 }
@@ -468,7 +466,7 @@ fun HomePage(
                         )
                 ) {
 
-                    RadarChartSample(state.graphData, homeViewModel.masterData)
+                    RadarChartSample(state.graphData, state.masterDataMaps?.musclesGroupMap)
                 }
 
             }
@@ -477,17 +475,17 @@ fun HomePage(
 }
 
 @Composable
-fun RadarChartSample(graphData:Map<Long, MuscleRate>, masterData: MasterDataStatic?) {
-
-    val radarData = remember(graphData) {
+fun RadarChartSample(
+    graphData: Map<Long, MuscleRate>,
+    musclesGroupMap:Map<Long, String>?
+) {
+    val radarData = remember(graphData, musclesGroupMap) {
         val radarLabels = mutableListOf<String>()
         val values2 = mutableListOf<Float>()
         val values3 = mutableListOf<Float>()
 
         graphData.forEach { (muscleGroupId, stats) ->
-            val groupName =
-                masterData?.musclesGroup?.find { it.id == muscleGroupId }?.nameFR
-                    ?: "N/A"
+            val groupName = musclesGroupMap?.get(muscleGroupId) ?: "N/A"
             radarLabels.add(groupName)
             values2.add(stats.numberExercise.toFloat())
             values3.add(stats.numberSet.toFloat())
@@ -501,11 +499,11 @@ fun RadarChartSample(graphData:Map<Long, MuscleRate>, masterData: MasterDataStat
         Text("Pas assez de données pour le radar")
         return
     }
+
     RadarChartMP(
         Modifier.fillMaxSize(),
         radarLabels,
         values1 = radarData.second,
         values2 = radarData.third
     )
-
 }

@@ -28,9 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
@@ -104,17 +106,9 @@ fun NutritionBox(
                                 strokeWidth = strokeWidth
                             )
                         },
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.Top
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                            )
-                        )
-                    }
                     Column(
                         Modifier.padding(end = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -143,14 +137,14 @@ fun NutritionBox(
                             val carbsValue = carbs.value.text.toFloatOrNull() ?: 0f
                             val fatsValue = fats.value.text.toFloatOrNull() ?: 0f
                             Text(
-                                text = "Calculé : ${(protsValue * 4 + carbsValue * 4 + fatsValue * 9).toInt()} kcal",
+                                text = stringResource(R.string.calculated)+" ${(protsValue * 4 + carbsValue * 4 + fatsValue * 9).toInt()} kcal",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = secondaryTextColor.copy(alpha = 0.5f)
                                 )
                             )
                             Icon(
                                 Icons.Default.Info,
-                                "Afficher Calcul",
+                                stringResource(R.string.show_calculation),
                                 modifier = Modifier.size(20.dp),
                                 tint = secondaryTextColor.copy(alpha = 0.5f)
                             )
@@ -173,7 +167,7 @@ fun NutritionBox(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         NutrientRow(
-                            label = "Protéines",
+                            label = stringResource(R.string.proteins),
                             valueState = prots,
                             isEditable = !lockInput,
                             onValueChange = { newValue ->
@@ -184,7 +178,7 @@ fun NutritionBox(
                             autoSync = isAutoSync
                         )
                         NutrientRow(
-                            label = "Glucides",
+                            label = stringResource(R.string.carbohydrates),
                             valueState = carbs,
                             isEditable = !lockInput,
                             onValueChange = { newValue ->
@@ -195,7 +189,7 @@ fun NutritionBox(
                             autoSync = isAutoSync
                         )
                         NutrientRow(
-                            label = "Lipides",
+                            label = stringResource(R.string.lipids),
                             valueState = fats,
                             isEditable = !lockInput,
                             onValueChange = { newValue ->
@@ -222,7 +216,7 @@ fun NutritionBox(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         NutrientRow(
-                            label = "Fibres",
+                            label = stringResource(R.string.fiber),
                             valueState = fiber,
                             isEditable = !lockInput,
                             onValueChange = { newValue ->
@@ -233,7 +227,7 @@ fun NutritionBox(
                             autoSync = isAutoSync
                         )
                         NutrientRow(
-                            label = "Caféine",
+                            label = stringResource(R.string.caffeine),
                             valueState = cafeine,
                             unit = "mg",
                             isEditable = !lockInput,

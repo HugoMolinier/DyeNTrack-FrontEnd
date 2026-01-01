@@ -32,9 +32,9 @@ fun CombinedChartMP(
     showValueBar:Boolean=true,
     showValueLine:Boolean=true,
 
-    barLegendLabel: String = "Somme pondérée",
+    barLegendLabel: String = "legend Bar",
     barLegendColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-    lineLegendLabel: String = "Ratio fail/set",
+    lineLegendLabel: String = "legend Line",
     lineLegendColor: Color = BlueSub
 ) {
     val colorScheme = MaterialTheme.colorScheme

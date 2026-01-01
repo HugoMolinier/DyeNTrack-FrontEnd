@@ -2,21 +2,24 @@ package com.dyentrack.app.presentation.screens.analyse.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.model.SeanceTrack
-import com.dyentrack.app.domain.usecase.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
+import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -31,7 +34,8 @@ class AnalyseViewModel @Inject constructor(
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
-    private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase
+    private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,
+    private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
 
     ) : ViewModel() {
 
@@ -42,11 +46,12 @@ class AnalyseViewModel @Inject constructor(
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
     private val allSeanceByDay = mutableMapOf<String, SeanceTrack>()
     val userUnit = getUserPreferenceUseCase.invoke().mesureUnit
-
+    val languageUser = LocaleManager.getCurrentLanguage()
     init {
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
-
+            val maps = buildMasterDataMapsUseCase.execute(languageUser)
+            _uiState.update { it.copy(masterDataMaps=maps)}
             dayDataFlow.collect { list ->
                 if (list == null) {
                     _uiState.update { it.copy(mapSeance = emptyMap()) }
@@ -177,13 +182,14 @@ class AnalyseViewModel @Inject constructor(
     }
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {
-        val master = masterData ?: return
 
         val lastScence = _uiState.value.mapSeance
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
         val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
+
         val dayRatioMap: MutableMap<String, MuscleRate> = mutableMapOf()
         val muscleRateMapExercise: MutableMap<String, MuscleRate> = mutableMapOf()
+
         lastScence.forEach { (dayKey, seanceTrack) ->
             // CHAQUE jOUR
             var daySommePond = 0.0
@@ -194,15 +200,15 @@ class AnalyseViewModel @Inject constructor(
 
             val dayMap = muscleRate.getOrPut(dayKey) { mutableMapOf() }
 
-
             seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
-                val exercise = master.officialExercise.find { it.idExercise == plannedExerciseVO.exerciseId }?: return@forEach
+                val exercise = uiState.value.masterDataMaps?.exerciseMap?.get( plannedExerciseVO.exerciseId )?: return@forEach
                 exercise.muscleInfos?.forEach { muscleInfo ->
                     if (principalOnly && !muscleInfo.principal)return@forEach
                     if(uiState.value.exerciceChose==0L){
                         _uiState.update { it.copy(exerciceChose = plannedExerciseVO.exerciseId, tempChose = plannedExerciseVO.exerciseId) }
                     }
-                    val muscle = master.muscles.find { it.id == muscleInfo.idMuscle } ?: return@forEach
+                    val muscle = uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)
+                        ?: return@forEach
                     val prevVal = dayMap[muscle.id]
                     val muscleRateComputed = computePlannedExerciseMuscleRateUseCase.execute(
                         plannedExercise = plannedExerciseVO,

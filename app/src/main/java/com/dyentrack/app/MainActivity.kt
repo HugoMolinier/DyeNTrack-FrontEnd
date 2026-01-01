@@ -1,6 +1,6 @@
 package com.dyentrack.app
 
-import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,9 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,9 +34,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dyentrack.app.core.locale.LocaleManager
+import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.NavItem
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.presentation.AppViewModel
+import com.dyentrack.app.presentation.globalViewModel.AppViewModel
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
@@ -50,22 +56,35 @@ import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.getValue
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val healthViewModel: HealthConnectViewModel by viewModels()
-    private val appViewMode: AppViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
+
+    private val appViewModel: AppViewModel by viewModels()
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(
+            LocaleManager.updateContext(newBase)
+        )
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
-        appViewMode.apply { }
+        enableEdgeToEdge()
+        lifecycleScope.launch {
+            val isConnected = authViewModel.authState.value.isConnected
+            appViewModel.syncOnStart(isConnected)
+        }
         healthViewModel.apply { }
+
         setContent {
             DyeNTrackTheme {
                 MyApp()
@@ -82,9 +101,9 @@ fun MyApp() {
     val navController = rememberNavController()
 
     val navItemsList = listOf(
-        NavItem("Home",Icons.Default.Home,route= "home"),
-        NavItem("Séance", Icons.Default.Analytics,"seance"),
-        NavItem("Analyse", Icons.Default.Settings,"analyse"),
+        NavItem(stringResource(R.string.home),Icons.Default.Home,route= "home"),
+        NavItem(stringResource(R.string.workout), Icons.Default.Analytics,"seance"),
+        NavItem(stringResource(R.string.analysis), Icons.Default.Settings,"analyse"),
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

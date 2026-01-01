@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
-import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.LeftIcon
@@ -57,7 +57,6 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
-import com.dyentrack.app.presentation.utils.convertWeight
 import kotlin.math.roundToInt
 
 
@@ -67,55 +66,25 @@ fun ExerciseCard(
     state: SeanceUiState,
     viewModel: SeanceViewModel,
     navController: NavController,
-    lateriteNameMap: List<String>,
-    equipmentNameMap: List<String>,
     userUnit: MesureUnit
 ) {
     val exerciseId = exInSeance.exerciseId
-    val exercise =
-        viewModel.masterData?.officialExercise?.find { it.idExercise == exerciseId } ?: return
-    val lateriteName =
-        viewModel.masterData?.lateralites?.find { it.id == exInSeance.laterite }?.nameFR ?: ""
-    val equipmentName =
-        viewModel.masterData?.equipment?.find { it.id == exInSeance.equipment }?.nameFR ?: ""
+    val language = viewModel.languageUser
+    val exercise = state.masterDataMaps?.exerciseMap?.get( exerciseId ) ?: return
+
+    val selectedLateriteId = exInSeance.laterite
+    val selectedEquipment = exInSeance.equipment
 
     val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]
 
     val isLock = (state.exerciseMode == ExerciseMode.LOCK)
-    val textSub = buildString {
-        var chargePres: Double? = null
-        var stop = false
-        exerciseSets?.forEach {
-            if (stop) return@forEach
-            if (it.charge != chargePres && chargePres != null) {
-                append(convertWeight(chargePres,
-                    MesureUnit.KG,userUnit)?.let { String.format("%.1f", it) }
-                    .orEmpty() + userUnit.toString().lowercase());append(" | ")
-            }
-            append(it.reps ?: " ")
-            if (it.side == SetSide.LEFT) append("/", it.linkedRightSet?.reps ?: "_")
-            append(" - ")
-            chargePres = it.charge
-            if (this.length >= 40) {
-                append("...")
-                stop = true
-            }
-        }
-
-        if (!stop && chargePres != null) {
-            append(
-                convertWeight(chargePres, MesureUnit.KG, userUnit)
-                    ?.let { String.format("%.1f", it) }
-                    .orEmpty() + userUnit.toString().lowercase()
-            )
-        }
-    }
+    val textSub =viewModel.formatExerciseSets(exerciseSets,userUnit)
 
 
 
     CardWithContent(
         modifier = Modifier.padding(10.dp, 4.dp),
-        exercise.nameFR,
+        exercise.getName(language),
         canExtend = state.exerciseMode != ExerciseMode.CHANGE_ORDER,
         subText = textSub,
         leftIcon = LeftIcon.Single(ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent),
@@ -178,7 +147,7 @@ fun ExerciseCard(
                 ) {
                     if (!isLock) {
                         IconButton(
-                            onClick = { viewModel.addSetToExercise(exerciseId, lateriteName) },
+                            onClick = { viewModel.addSetToExercise(exerciseId, selectedLateriteId) },
                             Modifier
                                 .border(
                                     1.dp,
@@ -200,24 +169,22 @@ fun ExerciseCard(
 
 
                     ChipDropDown(
-                        listOfSelectableItem = lateriteNameMap,
+                        listOfSelectableItem = state.masterDataMaps.lateraliteMap.values.toList(),
 
 
-                        defaultSelected = lateriteName,
+                        defaultSelected = state.masterDataMaps.lateraliteMap[selectedLateriteId] ?: "",
                         canChange = !isLock
 
-                    ) { selected ->
-                        val lateriteId = viewModel.masterData?.lateralites
-                            ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
+                    ) { selectedName ->
+                        val lateriteId = state.masterDataMaps.lateraliteMap.entries.firstOrNull { it.value == selectedName }?.key ?: 0L
                         viewModel.updateLaterite(exInSeance.exerciseId, lateriteId)
                     }
                     ChipDropDown(
-                        listOfSelectableItem = equipmentNameMap,
-                        defaultSelected = equipmentName,
+                        listOfSelectableItem = state.masterDataMaps.equipmentMap.values.toList(),
+                        defaultSelected = state.masterDataMaps.equipmentMap[selectedEquipment],
                         canChange = !isLock
-                    ) { selected ->
-                        val equipmentId = viewModel.masterData?.equipment
-                            ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
+                    ) { selectedName ->
+                        val equipmentId = state.masterDataMaps.equipmentMap.entries.firstOrNull { it.value == selectedName }?.key ?: 0L
                         viewModel.updateEquipment(exInSeance.exerciseId, equipmentId)
                     }
                     IconButton(
@@ -267,7 +234,7 @@ fun ExerciseCard(
 
 
                 }
-                AnalyseRow(viewModel, state,userUnit)
+                AnalyseRow(viewModel, state,userUnit,language)
 
 
                 Column {

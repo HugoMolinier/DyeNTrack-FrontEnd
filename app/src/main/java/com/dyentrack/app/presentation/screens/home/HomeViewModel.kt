@@ -3,12 +3,14 @@ package com.dyentrack.app.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
+import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
-import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
+import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.utils.ExerciseImages
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,41 +27,51 @@ import kotlin.math.ceil
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
-) : ViewModel() {
+    private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
+
+    ) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
     var masterData: MasterDataStatic? = null
-
+    val languageUser = LocaleManager.getCurrentLanguage()
 
 
     init {
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
+            val maps = buildMasterDataMapsUseCase.execute(languageUser)
+            _uiState.update { it.copy(masterDataMaps=maps)}
 
+            val formatter = DateTimeFormatter.ISO_DATE
+            val today = LocalDate.now()
+            val last15Days = (0L until 14L).map { today.minusDays(it) }
 
             dayDataFlow.collect { list ->
                 if (list == null) {
                     _uiState.update { it.copy(mapSeance = emptyMap()) }
                     return@collect
                 }
-                val formatter = DateTimeFormatter.ISO_DATE
-                val today = LocalDate.now()
 
-                val last15Days = (0L until 14L).map { today.minusDays(it) }
                 var todaySeanceTemp: DayDataRequest? = null
-                val newMap = list
-                    .mapNotNull { dayData ->
-                        val day = LocalDate.parse(dayData.dayData, formatter)
-                        if (day == today) todaySeanceTemp = dayData
-                        if (day in last15Days && dayData.seanceTrack?.plannedExercises?.isNotEmpty()==true) {
-                            dayData.dayData to dayData.seanceTrack
-                        } else null
-                    }
-                    .toMap()
+                val last5DaysSet = java.util.TreeSet<LocalDate>(compareByDescending { it })
+                val tempMap = mutableMapOf<String, SeanceTrack>()
 
-                _uiState.update { current -> current.copy(mapSeance = newMap, todaySeance = todaySeanceTemp) }
+                for (dayData in list) {
+                    val day = runCatching { LocalDate.parse(dayData.dayData, formatter) }.getOrNull() ?: continue
+
+                    if (day == today) todaySeanceTemp = dayData
+
+                    val hasExercises = dayData.seanceTrack?.plannedExercises?.isNotEmpty() == true
+                    if (day in last15Days && hasExercises) {
+                        tempMap[dayData.dayData] = dayData.seanceTrack!!
+                        last5DaysSet.add(day)
+                        if (last5DaysSet.size > 5) last5DaysSet.pollLast() // supprime le plus petit
+                    }
+                }
+
+                _uiState.update { current -> current.copy(mapSeance = tempMap, todaySeance = todaySeanceTemp,   last5DaysKeys = last5DaysSet.map { it.format(formatter) }) }
                 muscleRateOfEachDay(true)
             }
 
@@ -84,8 +96,6 @@ class HomeViewModel @Inject constructor(
 
 
     fun muscleRateOfEachDay(principalOnly:Boolean) {
-            val master = masterData ?: return
-
         val lastScence = _uiState.value.mapSeance
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
         val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
@@ -96,10 +106,11 @@ class HomeViewModel @Inject constructor(
 
 
             seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
-                val exercise = master.officialExercise.find { it.idExercise == plannedExerciseVO.exerciseId }?: return@forEach
+                val exercise = uiState.value.masterDataMaps?.exerciseMap?.get(plannedExerciseVO.exerciseId)?: return@forEach
                 exercise.muscleInfos?.forEach { muscleInfo ->
                     if (principalOnly && !muscleInfo.principal)return@forEach
-                    val muscle = master.muscles.find { it.id == muscleInfo.idMuscle } ?: return@forEach
+                    val muscle = uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)
+                        ?: return@forEach
                     val prevVal = dayMap[muscle.id]
                     var numberSet =plannedExerciseVO.sets?.count() ?: 0
                     if (plannedExerciseVO.lateraliteId ==2L)  numberSet = ceil(numberSet / 2.0).toInt()

@@ -11,18 +11,18 @@ import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.presentation.components.ChipDropDown
 
 @Composable
-fun FilterMuscleGroupRow(masterData: MasterDataStatic ?){
+fun FilterMuscleGroupRow(muscleGroupMap: Map<Long, String> ){
     FlowRow(
         modifier = Modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
 
     ) {
-        masterData?.musclesGroup?.forEach {
-            if  (it.id>6L) return@forEach
+        muscleGroupMap.forEach {
+            if  (it.key>6L) return@forEach
             ChipDropDown(
                 canChange = false,
-                listOfSelectableItem = listOf(it.nameFR),
+                listOfSelectableItem = listOf(it.value),
                 textStyle = MaterialTheme.typography.bodySmall
             ) }
     }

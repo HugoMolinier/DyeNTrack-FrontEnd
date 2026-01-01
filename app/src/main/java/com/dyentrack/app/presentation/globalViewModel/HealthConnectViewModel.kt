@@ -17,6 +17,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 enum class HealthConnectEtat {
     VERIFICATION, INSTALLER, AUTORISER, OPERATIONNEL, METTRE_A_JOUR, NON_DISPONIBLE
@@ -51,7 +52,7 @@ class HealthConnectViewModel @Inject constructor(
                     val granted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(status.client)
                     if (granted) {
                         _etat.value = HealthConnectEtat.OPERATIONNEL
-                        if(syncGranded) syncHealthData()
+                        if(syncGranded) syncHealthData();syncHealthData(LocalDate.now().minusDays(1L))
                     } else {
                         _etat.value = HealthConnectEtat.AUTORISER
                     }
@@ -89,12 +90,12 @@ class HealthConnectViewModel @Inject constructor(
     }
 
 
-    fun syncHealthData() {
+    fun syncHealthData(daySelected: LocalDate= LocalDate.now()) {
         client?.let { client ->
             viewModelScope.launch {
                 val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
                 if (permissionsGranted) {
-                    syncHealthDataUseCase(client)
+                    syncHealthDataUseCase(client,daySelected)
                 }
             }
         }

@@ -1,29 +1,33 @@
 package com.dyentrack.app.presentation.screens.exercise
 
-import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dyentrack.app.R
+import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.domain.usecase.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.model.getName
+import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
-import com.dyentrack.app.presentation.screens.home.HomeUiState
+import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
+import com.dyentrack.app.presentation.utils.convertWeight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
-import kotlin.collections.forEach
-import kotlin.collections.groupBy
-import kotlin.collections.orEmpty
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
@@ -31,10 +35,12 @@ class ExerciseViewModel @Inject constructor(
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
-    private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase
+    private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,
+    private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
+
 ) : ViewModel() {
 
-    val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
+    val infoExerciseUserFlow = getInfoExerciseUserUseCase.infoExerciseUserFlow
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState
@@ -42,9 +48,11 @@ class ExerciseViewModel @Inject constructor(
     private val _currentExercise = MutableStateFlow<Exercise?>(null)
     val currentExercise: StateFlow<Exercise?> = _currentExercise
 
+    val languageUser = LocaleManager.getCurrentLanguage()
     fun setExercise(exercise: Exercise) {
         _currentExercise.value = exercise
     }
+
     fun updateInfoExerciseUser(
         idExercise: Long,
         favorite: Boolean?,
@@ -59,6 +67,8 @@ class ExerciseViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             masterData = getMasterDataStaticUseCase()
+            val maps = buildMasterDataMapsUseCase.execute(languageUser)
+            _uiState.update { it.copy(masterDataMaps=maps)}
             launch {
                 _currentExercise.collect { exercise ->
                     dayDataFlow.value?.let { dayDataList ->
@@ -66,8 +76,6 @@ class ExerciseViewModel @Inject constructor(
                     }
                 }
             }
-
-            // Collect dayDataFlow et recalculer si currentExercise est déjà défini
             launch {
                 dayDataFlow.collect { dayDataList ->
                     _currentExercise.value?.let { exercise ->
@@ -82,19 +90,23 @@ class ExerciseViewModel @Inject constructor(
 
     }
 
-    fun changeSection(newSection :SectionChose){
+    fun changeSection(newSection: SectionChose) {
         _uiState.update { current ->
             current.copy(sectionChose = newSection)
         }
 
     }
-    fun loadRateOFDayData(){
+
+    fun loadRateOFDayData() {
         val muscleRateMap: MutableMap<String, MuscleRate> = mutableMapOf()
 
-        dayDataFlow.value?.forEach { it->
-            it.seanceTrack?.plannedExercises?.forEach {itPlannedExercise->
-                if (itPlannedExercise.exerciseId==currentExercise.value?.idExercise)
-                    muscleRateMap.put(it.dayData,computePlannedExerciseMuscleRateUseCase.execute(itPlannedExercise))
+        dayDataFlow.value?.forEach { it ->
+            it.seanceTrack?.plannedExercises?.forEach { itPlannedExercise ->
+                if (itPlannedExercise.exerciseId == currentExercise.value?.idExercise)
+                    muscleRateMap.put(
+                        it.dayData,
+                        computePlannedExerciseMuscleRateUseCase.execute(itPlannedExercise)
+                    )
             }
         }
         _uiState.update { it.copy(allDataExercise = muscleRateMap) }
@@ -116,17 +128,27 @@ class ExerciseViewModel @Inject constructor(
         val totalRep = selected.sumOf { it.rateSetSomme?.numberRep ?: 0.0 }
 
         val avg = if (totalRep > 0) totalPond / totalRep else "0.0"
-        return String.format("%.1f", avg)
+        return String.format(Locale.getDefault(),"%.1f", avg)
     }
+
+    fun getAverageWeightFormatted(top: Int = 5, skip: Int = 0, userUnit: MesureUnit): String {
+        val avg = getAveragePerSet(top, skip).toDoubleOrNull() ?: 0.0
+        return String.format(Locale.getDefault(),
+            "%.1f%s",
+            convertWeight(avg, MesureUnit.KG, userUnit) ?: 0.0,
+            userUnit.toString().lowercase()
+        )
+    }
+
     fun getLast14DaysDataDivided(): Map<String, MuscleRate> {
         val allData = _uiState.value.allDataExercise
-        val today = java.time.LocalDate.now()
+        val today = LocalDate.now()
         val fourteenDaysAgo = today.minusDays(14)
 
         val filtered = allData.filter { (dayKey, _) ->
             val dayDate = try {
-                java.time.LocalDate.parse(dayKey)
-            } catch (e: Exception) {
+                LocalDate.parse(dayKey)
+            } catch (_: Exception) {
                 null
             }
             dayDate != null && !dayDate.isBefore(fourteenDaysAgo)
@@ -147,17 +169,55 @@ class ExerciseViewModel @Inject constructor(
 
     fun getLastDoneDate(): String {
         val allData = _uiState.value.allDataExercise
-        if (allData.isEmpty()) return "Aucune"
+        if (allData.isEmpty()) return "NaN"
         val lastDate = allData.keys.maxOrNull()
-        return lastDate ?: "Aucune"
+        return lastDate ?: "NaN"
+    }
+
+    fun getMuscleUsedNames(exercise: Exercise): Set<String> {
+        return exercise.muscleInfos
+            ?.mapNotNull { muscleInfo ->
+                uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)?.getName(languageUser)
+            }?.toSet() ?: emptySet()
+    }
+    fun getPrimaryMuscleName(exercise: Exercise): String {
+        val primaryId = exercise.muscleInfos?.firstOrNull { it.principal }?.idMuscle
+        return primaryId?.let { id ->
+            uiState.value.masterDataMaps?.muscleMap?.get(primaryId)?.getName(languageUser)
+        } ?: "NaN"
+    }
+
+    fun getEquipmentNames(): String {
+        return masterData?.equipment?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+    }
+
+    fun getLateralities(): String {
+        return masterData?.lateralites?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+    }
+
+    @Composable
+    fun getExerciseCreatorName(exercise: Exercise, idUser: Long): String {
+        return when (exercise.idCreator) {
+            null -> stringResource(R.string.app_name)
+            idUser -> stringResource(R.string.you)
+            else -> stringResource(R.string.a_user)
+        }
     }
 
 
+    fun getChartBarValues(userUnit: MesureUnit): List<Float> {
+        return _uiState.value.allDataExercise.values.map {
+            convertWeight(it.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?.toFloat() ?: 0f
+        }
+    }
 
-
-
-
-
+    fun getChartLineValues(): List<Float> {
+        return _uiState.value.allDataExercise.values.map {
+            val totalSet = it.numberSet
+            val failSet = it.rateSetSomme?.numberSetFail ?: 0
+            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+        }
+    }
 
 
 }

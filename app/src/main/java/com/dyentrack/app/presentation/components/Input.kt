@@ -130,17 +130,19 @@ fun InputCustom(
                 var filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
                     KeyboardType.Decimal -> newValue.text
-                        .filter { it.isDigit() || it == '.' } // on garde les chiffres et le point
+                        .filter { it.isDigit() || it == '.' || it == ',' }
                         .let { text ->
-                            val parts = text.split('.')
+                            val normalizedText = text.replace(',', '.')
+                            val parts = normalizedText.split('.')
                             if (parts.size > 1) {
-                                parts[0] + "." + parts[1].take(1) // garde max 1 chiffre après le point
+                                parts[0] + "." + parts[1].take(1)
                             } else {
-                                text
+                                normalizedText
                             }
                         }
                     else -> newValue.text
                 }
+
 
                 if (maxCaracter != null && filteredText.length > maxCaracter) {
                     filteredText = if (keyboardType == KeyboardType.Decimal && !filteredText.contains('.')) {

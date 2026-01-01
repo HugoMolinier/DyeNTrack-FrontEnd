@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneOffset
 import javax.inject.Inject
+import com.dyentrack.app.domain.usecase.daydata.GetDayDataDayLocalUseCase
 
 data class SyncedHealthData(
     val steps: Int,
@@ -21,31 +22,37 @@ data class SyncedHealthData(
 class SyncHealthDataUseCase @Inject constructor(
     private val getDataHealthUseCase: GetDataHealthUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
-    private val updateDayDataToApiUseCase: UpdateDayDataToApiUseCase
+    private val updateDayDataToApiUseCase: UpdateDayDataToApiUseCase,
+    private val  getDayDataDayLocalUseCase: GetDayDataDayLocalUseCase
 ) {
 
-    suspend operator fun invoke(client: HealthConnectClient): SyncedHealthData {
+    suspend operator fun invoke(client: HealthConnectClient,daySelected:LocalDate): SyncedHealthData {
         return withContext(Dispatchers.IO) {
-            val today = LocalDate.now()
-            val start = today.atStartOfDay(ZoneOffset.UTC).toInstant()
-            val end = today.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()
+            val start = daySelected.atStartOfDay(ZoneOffset.UTC).toInstant()
+            val end = daySelected.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()
 
             // Récupération des données Health Connect
             val steps = getDataHealthUseCase.aggregateSteps(client, start, end).toInt()
             val nutrition = getDataHealthUseCase.nutritionData(client, start, end)
+            val currentSave = getDayDataDayLocalUseCase.invoke(daySelected.toString())
 
             if(steps !=0 ||nutrition.isNotNull) {
-                // Création ou mise à jour du DayDataRequest local
-                val dayData = DayDataRequest(
-                    idDayData = null,
-                    dayData = today.toString(),
-                    physioTrack = PhysioTrack(step = steps),
-                    seanceTrack = null,
-                    nutritionTrack = nutrition
-                )
+                val newOccuDayPhysio = if (currentSave?.physioTrack?.step == steps) null
+                else PhysioTrack(step = steps)
 
-                updateDayDataToLocalUseCase(dayData, TypeOfAction.UPDATEHEALTH)
-                updateDayDataToApiUseCase(dayData)
+                val newOccuDayNutrition = if (currentSave?.nutritionTrack?.equalsIgnoreNull(nutrition) == true) null else nutrition
+                if (newOccuDayPhysio != null || newOccuDayNutrition != null) {
+                    val dayData = DayDataRequest(
+                        idDayData = null,
+                        dayData = daySelected.toString(),
+                        physioTrack = newOccuDayPhysio,
+                        seanceTrack = null,
+                        nutritionTrack = newOccuDayNutrition
+                    )
+
+                    updateDayDataToLocalUseCase(dayData, TypeOfAction.UPDATEHEALTH)
+                    updateDayDataToApiUseCase(dayData)
+                }
             }
             SyncedHealthData(
                 steps = steps,

@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
@@ -41,7 +42,7 @@ import java.time.temporal.ChronoUnit
 
 
 @Composable
-fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,userUnit: MesureUnit) {
+fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,userUnit: MesureUnit,userLANGUAGE: LANGUAGE) {
 
     if (!state.showAnalyseData) return
 
@@ -98,7 +99,7 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,us
                                     )
                                 )
                                 Text(
-                                    ": "+dateFormat.toAbbreviatedDate() ,
+                                    ": "+dateFormat.toAbbreviatedDate(userLANGUAGE) ,
                                     style = MaterialTheme.typography.bodySmall
                                         .copy(
                                         color = secondaryTextColor,

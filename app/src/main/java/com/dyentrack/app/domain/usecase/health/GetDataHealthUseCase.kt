@@ -26,8 +26,7 @@ class GetDataHealthUseCase @Inject constructor() {
             )
             // Peut être null si pas de donnée
             response[StepsRecord.COUNT_TOTAL] ?: 0L
-        } catch (e: Exception) {
-            // Gestion d’erreur
+        } catch (_: Exception) {
             0L
         }
     }
@@ -45,7 +44,7 @@ class GetDataHealthUseCase @Inject constructor() {
             )
             val response = healthConnectClient.readRecords(request)
             response.records
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
 

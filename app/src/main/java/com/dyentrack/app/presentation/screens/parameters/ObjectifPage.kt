@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -83,13 +84,13 @@ fun ObjectifPage(
         }) {
         Column {
             TopNavigationBar(
-                "Mes Objectifs",
+                stringResource(R.string.my_goals),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("parametre") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -103,7 +104,7 @@ fun ObjectifPage(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.padding(top = 12.dp)) {
                         Text(
-                            "Définir mes objectifs",
+                            stringResource(R.string.define_goals),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
@@ -111,7 +112,7 @@ fun ObjectifPage(
                         val menu1 = listOfNotNull(
                             ParameterItem(
                                 null,
-                                "Calorie",
+                                stringResource(R.string.calories),
                                 ParameterIcon.Resource(R.drawable.icon_cal),
                                 {
                                     InputCustom(
@@ -141,7 +142,7 @@ fun ObjectifPage(
 
                             ParameterItem(
                                 null,
-                                "Nombre de pas",
+                                stringResource(R.string.number_steps),
                                 ParameterIcon.Resource(R.drawable.icon_step),
                                 {
                                     InputCustom(
@@ -170,7 +171,7 @@ fun ObjectifPage(
 
                             ParameterItem(
                                 null,
-                                "Heure de sommeil",
+                                stringResource(R.string.sleep_hours),
                                 ParameterIcon.Resource(R.drawable.icon_sleep),
                                 {
                                     InputCustom(

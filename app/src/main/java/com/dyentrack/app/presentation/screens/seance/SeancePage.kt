@@ -1,5 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance
 
+import android.widget.Toast
+import com.dyentrack.app.R
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +49,7 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.type.EmphasisType
 import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
@@ -67,7 +72,7 @@ fun SeancePage(
     daySelected: String?=null,
     section:String?=null,
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
-
+    authViewModel: AuthViewModel= hiltViewModel<AuthViewModel>(),
     healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>()
 ) {
     LaunchedEffect(Unit) {
@@ -79,21 +84,22 @@ fun SeancePage(
 
     val state by viewModel.uiState.collectAsState()
     val infoMapUser by viewModel.infoExerciseUserFlow.collectAsState()
+    val authViewModel by authViewModel.authState.collectAsState()
 
-    val lateriteNameMap = viewModel.masterData?.lateralites?.map { it.nameFR } ?: emptyList()
-    val equipmentNameMap = viewModel.masterData?.equipment?.map { it.nameFR } ?: emptyList()
+    val language = viewModel.languageUser
 
-
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val userUnit =userPreference?.mesureUnit?: MesureUnit.KG
-    Box(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+val textToast = stringResource(R.string.favorite_login_prompt)
+    Box(modifier = modifier.fillMaxSize().pointerInput(Unit) {
         detectTapGestures(onTap = {
             focusManager.clearFocus()
         })}
     ) {
         Column {
             TopNavigationBar(
-                "Séance du jour", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                stringResource(R.string.today_session), leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
                     if (viewModel.dayDataFlow.collectAsState().value == null) {
@@ -122,11 +128,11 @@ fun SeancePage(
                             variant = VariantType.OUTLINED,
                             itemSection = listOf(
                                 MenuItemData(
-                                    "Scéances",
+                                    stringResource(R.string.sessions),
                                     { viewModel.changeSection(SectionSelectType.SEANCE) }
                                 ),
                                 MenuItemData(
-                                    "Data",
+                                    stringResource(R.string.data),
                                     { viewModel.changeSection(SectionSelectType.DATA) }
                                 )
                             ),
@@ -201,9 +207,8 @@ fun SeancePage(
                                         state,
                                         viewModel,
                                         navController,
-                                        lateriteNameMap,
-                                        equipmentNameMap,
-                                        userUnit
+                                        userUnit,
+
                                     )
                                 }
                             }
@@ -220,11 +225,11 @@ fun SeancePage(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        "Aucun exercice pour le moment",
+                                        stringResource(R.string.no_workout),
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Text(
-                                        "Ajouter un exercice ou une routine",
+                                        stringResource(R.string.add_workout),
                                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                     )
 
@@ -235,7 +240,7 @@ fun SeancePage(
 
                     SectionSelectType.DATA ->
                         item {
-                            DataSection(viewModel,    state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel,userPreference?.autoSync?:true)
+                            DataSection(viewModel,    state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel,userPreference?.autoSync?:true,userUnit)
                         }
 
                     else -> null
@@ -267,7 +272,7 @@ fun SeancePage(
             ) {
                 Icon(
                     Icons.Default.Add,
-                    contentDescription = "Ajouter",
+                    contentDescription = stringResource(R.string.add_exercise),
                     tint = MaterialTheme.colorScheme.background,
                     modifier = Modifier.padding(12.dp)
                 )
@@ -286,15 +291,19 @@ fun SeancePage(
         bottomSheetVisibility = state.isBottomSheetVisible,
         selectedExerciseIds = state.exerciseToAdd,
         navController = navController,
-        title="Ajouter un exercice",
+        title=stringResource(R.string.add_exercise),
         onClose = { viewModel.toggleBottomSheet(false) },
         onClickExercise = { exerciseId ->
             viewModel.toggleExerciseSelection(exerciseId)
         },
-        masterDataStatic = viewModel.masterData,
+        officialExercise = viewModel.masterData?.officialExercise,
         infoMapUser = infoMapUser,
-        onClickFavorite = { viewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) },
-    ) {
+        onClickFavorite = { if(authViewModel.isConnected) viewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
+            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+        } },
+        userlanguage= language,
+        musclesGroupMap=state.masterDataMaps?.musclesGroupMap
+        ) {
         Row(
             Modifier
                 .fillMaxWidth()
@@ -302,13 +311,13 @@ fun SeancePage(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             CustomButton(
-                label = "Annuler",
+                label = stringResource(R.string.cancel),
                 emphasis = EmphasisType.SECONDARY,
                 modifier = Modifier.weight(1f),
                 onClick = { viewModel.toggleBottomSheet(false) }
             )
             CustomButton(
-                label = "Ajouter",
+                label = stringResource(R.string.add),
                 modifier = Modifier.weight(1f),
                 onClick = { viewModel.addExerciseToSeance() }
             )

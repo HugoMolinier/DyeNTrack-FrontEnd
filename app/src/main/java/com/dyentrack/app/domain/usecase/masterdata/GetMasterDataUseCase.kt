@@ -1,4 +1,4 @@
-package com.dyentrack.app.domain.usecase
+package com.dyentrack.app.domain.usecase.masterdata
 
 
 import com.dyentrack.app.domain.model.MasterDataStatic

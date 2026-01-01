@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.SetData
@@ -22,6 +23,7 @@ data class SeanceUiState(
 
     val sectionSelect:SectionSelectType?=SectionSelectType.SEANCE,
 
+    val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
 
     val exerciseMode: ExerciseMode = ExerciseMode.NORMAL,
     // résultats d’analyse

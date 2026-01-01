@@ -1,10 +1,10 @@
-package com.dyentrack.app.domain.usecase
+package com.dyentrack.app.domain.usecase.muscleRate
 
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.PlannedExerciseVO
 import com.dyentrack.app.domain.model.RateSetSomme
 import javax.inject.Inject
-
+import kotlin.math.ceil
 
 class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
 
@@ -15,7 +15,7 @@ class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
     fun execute(
         plannedExercise: PlannedExerciseVO,
 
-    ): MuscleRate {
+        ): MuscleRate {
         val sets = plannedExercise.sets.orEmpty()
         var sommePond = 0.0
         var numberSet = 0
@@ -33,7 +33,7 @@ class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
                 if (groupedSets.first().rir == 0) numberSetFail += 1
                 numberRep += avgReps
             }
-            numberSet = kotlin.math.ceil(numberSet / 2.0).toInt()
+            numberSet = ceil(numberSet / 2.0).toInt()
         } else {
             sets.forEach {
                 val charge = if (it.charge == 0.0) 1.0 else it.charge
@@ -51,7 +51,7 @@ class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
             numberSet = numberSet,
             rateSetSomme = RateSetSomme(
                 numberSetFail = numberSetFail,
-                sommePond = sommePond ,
+                sommePond = sommePond,
                 numberRep = numberRep
             )
         )

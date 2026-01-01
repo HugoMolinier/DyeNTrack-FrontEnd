@@ -30,7 +30,10 @@ class Converters {
 
     @TypeConverter
     fun toNutritionTrack(value: String?): NutritionTrack {
-        return gson.fromJson(value, NutritionTrack::class.java)
+
+            return  gson.fromJson(value, NutritionTrack::class.java)
+                ?: NutritionTrack()
+
     }
 
     @TypeConverter

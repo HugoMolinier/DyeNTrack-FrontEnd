@@ -34,10 +34,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.presentation.components.CustomButton
@@ -61,13 +63,13 @@ fun ParameterPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                "Paramètre",
+                stringResource(R.string.parameter),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
-                        "Retourner au menu",
+                        stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = { navController.navigate("home") })
                     )
                 })
@@ -89,7 +91,7 @@ fun ParameterPage(
                             modifier = Modifier.padding(top = 12.dp)
                         ) {
                             Text(
-                                "Inscrivez-vous pour profiter de fonctionnalité",
+                                stringResource(R.string.signup_prompt),
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                             )
@@ -102,7 +104,7 @@ fun ParameterPage(
                             ) {
                                 Icon(Icons.Outlined.Save, "saveIcon")
                                 Text(
-                                    "Garder une sauvegarde des données sur un serveur",
+                                    stringResource(R.string.save_data),
                                     style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                 )
                             }
@@ -115,7 +117,7 @@ fun ParameterPage(
                             ) {
                                 Icon(Icons.Outlined.Create, "saveIcon")
                                 Text(
-                                    "Crée des exercices, accéder au note et favorie",
+                                    stringResource(R.string.create_exercises),
                                     style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                 )
                             }
@@ -128,7 +130,7 @@ fun ParameterPage(
                             ) {
                                 Icon(Icons.Outlined.WbIncandescent, "saveIcon")
                                 Text(
-                                    "Collectionner plein d'achievement",
+                                    stringResource(R.string.collect_achievements),
                                     style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                 )
                             }
@@ -140,13 +142,13 @@ fun ParameterPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 CustomButton(
-                                    "S'inscire",
+                                    stringResource(R.string.signup),
                                     modifier = modifier.fillMaxWidth(),
                                     size = SizeType.MEDIUM,
                                     onClick = { navController.navigate("inscription") }
                                 )
                                 CustomButton(
-                                    "Se connecter",
+                                    stringResource(R.string.login),
                                     variant = VariantType.OUTLINED,
                                     emphasis = EmphasisType.SECONDARY,
                                     modifier = modifier.fillMaxWidth(),
@@ -173,24 +175,24 @@ fun ParameterPage(
 
 
                         Text(
-                            "Profile",
+                            stringResource(R.string.profile),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         val menu1 = listOfNotNull(
                             if (authState.isConnected) ParameterItem(
                                 { navController.navigate("information") },
-                                "Informations",
+                                stringResource(R.string.information),
                                 icon = ParameterIcon.Vector(Icons.Outlined.Person)
                             ) else null,
                             ParameterItem(
                                 { navController.navigate("connectedApp") },
-                                "App Connectée",
+                                stringResource(R.string.connected_app),
                                 ParameterIcon.Vector(Icons.Outlined.DatasetLinked)
                             ),
                             ParameterItem(
                                 { navController.navigate("objectif") },
-                                "Mes Objectifs",
+                                stringResource(R.string.my_goals),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Rule)
                             ),
                         )
@@ -205,25 +207,25 @@ fun ParameterPage(
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
                         Text(
-                            "Préférence et données",
+                            stringResource(R.string.preferences_and_data),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         val menu1 = listOfNotNull(
                             ParameterItem(
                                 { navController.navigate("mesureUnit") },
-                                "Unité de mesures",
+                                stringResource(R.string.measurement_unit),
                                 ParameterIcon.Vector(Icons.Outlined.Straighten)
                             ),
                             ParameterItem(
                                 {navController.navigate("language") },
-                                "Langue",
+                                stringResource(R.string.language),
                                 ParameterIcon.Vector(Icons.Default.Translate)
                             ),
                             if (authState.isConnected)
                                 ParameterItem(
                                     { },
-                                    "Export des données",
+                                    stringResource(R.string.export_data),
                                     ParameterIcon.Vector(Icons.Outlined.Download)
                                 )
                             else null
@@ -240,23 +242,23 @@ fun ParameterPage(
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
                         Text(
-                            "Autre",
+                            stringResource(R.string.other),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         val menu1 = listOf(
                             ParameterItem(
-                                { }, "Accessibilité",
+                                { }, stringResource(R.string.accessibility),
                                 ParameterIcon.Vector(Icons.Outlined.Accessibility)
                             ),
                             ParameterItem(
                                 { },
-                                "Confidentialité",
+                                stringResource(R.string.privacy),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
                             ParameterItem(
                                 { },
-                                "Mention Légales",
+                                stringResource(R.string.legal_notices),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
                         )
@@ -274,7 +276,7 @@ fun ParameterPage(
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = secondaryTextColor
                             )
-                        ) { Text("Déconnection", style = MaterialTheme.typography.bodySmall) }
+                        ) { Text(stringResource(R.string.logout), style = MaterialTheme.typography.bodySmall) }
                     }
                 }
             }

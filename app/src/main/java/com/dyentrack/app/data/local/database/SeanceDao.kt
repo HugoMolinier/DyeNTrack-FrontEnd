@@ -49,7 +49,6 @@ interface SeanceDao {
         val epoch = Instant.EPOCH.toString()
         Log.d("Type de SaveLocal","${typeOfAction}")
 
-
         val isSeanceUpdate =
             typeOfAction == TypeOfAction.UPDATESEANCE ||
                     typeOfAction == TypeOfAction.FORCESEANCEUPDATE||

@@ -19,7 +19,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.R
 
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 
@@ -37,7 +39,7 @@ fun ModeMenu(
         ) {
             Icon(
                 Icons.Default.Menu,
-                contentDescription = "Menu",
+                contentDescription = stringResource(R.string.mode_menu),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(4.dp)
             )
@@ -50,7 +52,7 @@ fun ModeMenu(
         ) {
             // Lock Mode
             DropdownMenuItem(
-                text = { Text("Lock Mode") },
+                text = { Text(stringResource(R.string.mode_lock)) },
                 onClick = {
                     val newMode = if (currentMode == ExerciseMode.LOCK) ExerciseMode.NORMAL else ExerciseMode.LOCK
                     onToggleMode(newMode)
@@ -63,7 +65,7 @@ fun ModeMenu(
 
             // Change Order Mode
             DropdownMenuItem(
-                text = { Text("Change Order Mode") },
+                text = { Text(stringResource(R.string.mode_change_order)) },
                 onClick = {
                     val newMode = if (currentMode == ExerciseMode.CHANGE_ORDER) ExerciseMode.NORMAL else ExerciseMode.CHANGE_ORDER
                     onToggleMode(newMode)
