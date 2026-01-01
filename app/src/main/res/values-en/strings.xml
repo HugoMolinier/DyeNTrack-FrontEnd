@@ -21,6 +21,7 @@
 
     <string name="performance_indicator">Performance indicator</string>
     <string name="weighted_sum">Weighted sum</string>
+    <string name="not_editable">Not editable : Auto-Sync </string>
     <string name="fail_set_ratio">Fail / set ratio</string>
 
     <string name="you">You</string>
@@ -224,4 +225,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="auto_sync_desc">Sync at every startup if operational and authorized</string>
+    <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+
 </resources>

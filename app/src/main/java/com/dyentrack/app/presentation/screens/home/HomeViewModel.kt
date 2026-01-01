@@ -67,7 +67,7 @@ class HomeViewModel @Inject constructor(
                     if (day in last15Days && hasExercises) {
                         tempMap[dayData.dayData] = dayData.seanceTrack!!
                         last5DaysSet.add(day)
-                        if (last5DaysSet.size > 5) last5DaysSet.pollLast() // supprime le plus petit
+                        if (last5DaysSet.size > 5) last5DaysSet.pollLast()
                     }
                 }
 
@@ -90,7 +90,7 @@ class HomeViewModel @Inject constructor(
         return if (first3Icons.isNotEmpty()) {
             LeftIcon.Multiple(first3Icons)
         } else {
-            LeftIcon.Single(R.drawable.logotransparent) // fallback si aucun drawable trouvé
+            LeftIcon.Single(R.drawable.logotransparent)
         }
     }
 

@@ -22,9 +22,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.components.type.SizeType
-import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.theme.addColor
 
 

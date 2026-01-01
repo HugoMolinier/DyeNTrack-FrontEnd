@@ -2,6 +2,7 @@ package com.dyentrack.app
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -55,6 +56,7 @@ import com.dyentrack.app.presentation.screens.parameters.ParameterPage
 import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -74,6 +76,10 @@ class MainActivity : ComponentActivity() {
         )
     }
     override fun onCreate(savedInstanceState: Bundle?) {
+        MobileAds.initialize(this) { initializationStatus ->
+            Log.d("Ads", "AdMob initialized: $initializationStatus")
+        }
+
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)

@@ -50,7 +50,7 @@ import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
-import com.dyentrack.app.presentation.components.type.EmphasisType
+import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel

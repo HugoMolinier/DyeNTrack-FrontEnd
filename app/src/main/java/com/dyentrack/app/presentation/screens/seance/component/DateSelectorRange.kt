@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dyentrack.app.presentation.screens.seance.viewModel.SaveType
+import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -63,7 +63,7 @@ fun DateSelectorRange(
         reverseLayout = true,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
-            .padding(end = 8.dp, bottom = 24.dp)
+            .padding(end = 8.dp, bottom = 12.dp)
             .height(72.dp)
     ) {
         items(days.size) { index ->

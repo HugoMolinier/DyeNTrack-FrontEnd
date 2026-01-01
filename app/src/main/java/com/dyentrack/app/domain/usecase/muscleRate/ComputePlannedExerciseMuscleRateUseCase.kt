@@ -4,8 +4,10 @@ import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.PlannedExerciseVO
 import com.dyentrack.app.domain.model.RateSetSomme
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.ceil
 
+@Singleton
 class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
 
     /**

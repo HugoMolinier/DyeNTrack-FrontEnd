@@ -8,7 +8,9 @@ import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class GetDaysRangeUseCase @Inject constructor() {
 
     fun getLast30Days(userLangue: LANGUAGE): List<DayInfo> {

@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.enum.NutritionField
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
-import com.dyentrack.app.presentation.screens.seance.viewModel.NutritionField
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.theme.secondaryTextColor

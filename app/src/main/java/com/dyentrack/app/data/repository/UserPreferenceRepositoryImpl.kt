@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.repository
 
-import android.util.Log
 import com.dyentrack.app.data.local.datasource.LocalDataSource
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MesureUnit

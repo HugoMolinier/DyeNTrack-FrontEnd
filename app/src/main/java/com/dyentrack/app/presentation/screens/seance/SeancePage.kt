@@ -1,7 +1,6 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.widget.Toast
-import com.dyentrack.app.R
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -41,14 +40,18 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.presentation.components.AdaptiveAdBanner
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.SectionSelectType
+import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.presentation.globalViewModel.AdViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
@@ -59,7 +62,6 @@ import com.dyentrack.app.presentation.screens.seance.seanceSection.component.Exe
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
-import com.dyentrack.app.presentation.screens.seance.viewModel.SectionSelectType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import kotlin.math.roundToInt
 
@@ -73,7 +75,8 @@ fun SeancePage(
     section:String?=null,
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel= hiltViewModel<AuthViewModel>(),
-    healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>()
+    healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>(),
+    adViewModel: AdViewModel=hiltViewModel<AdViewModel>()
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
@@ -92,6 +95,7 @@ fun SeancePage(
     val focusManager = LocalFocusManager.current
     val userUnit =userPreference?.mesureUnit?: MesureUnit.KG
 val textToast = stringResource(R.string.favorite_login_prompt)
+
     Box(modifier = modifier.fillMaxSize().pointerInput(Unit) {
         detectTapGestures(onTap = {
             focusManager.clearFocus()
@@ -122,8 +126,13 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
             LazyColumn {
                 item { DateSelectorRange(uiState = state, viewModel = viewModel) }
+                item{
+                    AdaptiveAdBanner(adViewModel=adViewModel
+
+                    )
+                }
                 item {
-                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 20.dp)) {
+                    Box (modifier= Modifier.padding(top = 14.dp, bottom = 20.dp)) {
                         SectionSelector(
                             variant = VariantType.OUTLINED,
                             itemSection = listOf(

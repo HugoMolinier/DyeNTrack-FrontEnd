@@ -13,9 +13,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.R
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -33,6 +35,7 @@ fun NutrientRow(
     autoSync: Boolean
 ) {
     val context = LocalContext.current
+    val toastText =  stringResource(R.string.not_editable)
     Row(
         modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -51,7 +54,7 @@ fun NutrientRow(
                         if (autoSync) {
                             Toast.makeText(
                                 context,
-                                "Non modifiable car AutoSync",
+                               toastText,
                                 Toast.LENGTH_SHORT
                             ).show()
                         }

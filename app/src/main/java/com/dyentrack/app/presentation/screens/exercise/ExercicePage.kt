@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.exercise
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -44,7 +46,7 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
-import com.dyentrack.app.presentation.components.type.VariantType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -56,7 +58,8 @@ fun ExercisePage(
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
 ) {
-
+    val context = LocalContext.current
+    val textToast = stringResource(R.string.favorite_login_prompt)
     val userPref by userPreferenceViewModel.userPreference.collectAsState()
     val userUnit = userPref?.mesureUnit ?: MesureUnit.KG
     LaunchedEffect(exercise) {
@@ -127,13 +130,15 @@ fun ExercisePage(
                                     isFavorite = infoMapState[exercise.idExercise]?.favorite
                                         ?: false,
                                     onClick = {
-                                        val currentFavorite =
+                                        if(userConnected.isConnected) { val currentFavorite =
                                             infoMapState[exercise.idExercise]?.favorite ?: false
                                         exerciseViewModel.updateInfoExerciseUser(
                                             exercise.idExercise,
                                             !currentFavorite,
                                             null
-                                        )
+                                        )}else {
+                                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 )
                             }

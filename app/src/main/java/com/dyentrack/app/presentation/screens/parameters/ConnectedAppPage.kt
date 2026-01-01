@@ -33,8 +33,8 @@ import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.components.type.SizeType
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectEtat
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel

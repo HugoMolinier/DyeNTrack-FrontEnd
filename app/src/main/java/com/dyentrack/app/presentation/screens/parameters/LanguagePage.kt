@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.parameters
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -35,11 +34,10 @@ import com.dyentrack.app.core.utils.findActivity
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
-import com.dyentrack.app.presentation.screens.parameters.component.ParameterBox
-import kotlinx.coroutines.NonCancellable.key
 
 @Composable
 fun LanguagePage(

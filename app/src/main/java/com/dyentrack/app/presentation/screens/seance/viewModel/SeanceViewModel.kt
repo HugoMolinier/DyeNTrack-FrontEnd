@@ -36,6 +36,11 @@ import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseC
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.model.enum.PhysioField
+import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enum.NutritionField
+import com.dyentrack.app.presentation.components.SeanceSummary
+import com.dyentrack.app.domain.model.enum.SectionSelectType
 import com.dyentrack.app.presentation.mapper.toDayDataRequest
 import com.dyentrack.app.presentation.mapper.toSeanceDuJour
 import com.dyentrack.app.presentation.utils.convertWeight

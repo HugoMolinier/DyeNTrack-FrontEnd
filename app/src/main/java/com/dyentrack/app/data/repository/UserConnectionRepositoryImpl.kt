@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.repository
 
-import android.util.Log
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
 import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
@@ -58,7 +57,6 @@ class UserConnectionRepositoryImpl @Inject constructor(
             val response = api.updateUser(UserUpdate(pseudo, date, height, sexe))
 
             val user = response.data
-                ?: return RequestState.Error(AuthError.ERROR_API)
 
             secureSessionDataSource.updateUserInfo(
                 user.pseudo,

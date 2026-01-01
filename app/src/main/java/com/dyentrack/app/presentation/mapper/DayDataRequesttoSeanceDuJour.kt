@@ -9,8 +9,8 @@ import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetSide
+import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
-import com.dyentrack.app.presentation.screens.seance.viewModel.SaveType
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 
 

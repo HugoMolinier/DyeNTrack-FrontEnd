@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneOffset
 import javax.inject.Inject
+import javax.inject.Singleton
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataDayLocalUseCase
 
 data class SyncedHealthData(
@@ -19,6 +20,7 @@ data class SyncedHealthData(
     val nutritionTrack: NutritionTrack
 )
 
+@Singleton
 class SyncHealthDataUseCase @Inject constructor(
     private val getDataHealthUseCase: GetDataHealthUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,

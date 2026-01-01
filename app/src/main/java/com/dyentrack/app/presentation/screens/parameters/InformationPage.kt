@@ -44,7 +44,7 @@ import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.type.EmphasisType
+import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
 @Composable

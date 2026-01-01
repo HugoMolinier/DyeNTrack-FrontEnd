@@ -1,8 +1,5 @@
 package com.dyentrack.app.presentation.screens.seance.dataSection
 
-import com.dyentrack.app.R
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,16 +23,16 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.enum.PhysioField
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
-import com.dyentrack.app.presentation.screens.seance.viewModel.PhysioField
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.convertWeight
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun PhysioBox(
     viewModel: SeanceViewModel = viewModel(),

@@ -9,23 +9,22 @@ import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.model.SeanceTrack
-import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
 import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import kotlin.collections.get
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class AnalyseViewModel @Inject constructor(
@@ -119,6 +118,40 @@ class AnalyseViewModel @Inject constructor(
         _uiState.update { it.copy(allDataExercise = muscleRateMap) }
     }
 
+    fun computeGlobalMuscleRate(): MuscleRate {
+        var sommeEx = 0
+        var sommeSet = 0
+        var sommeSetFail = 0
+        var sommePond = 0.0
+
+        _uiState.value.muscleRateOfEachDay.values.forEach { innerMap ->
+            innerMap.values.forEach { mr ->
+                sommeSet += mr.numberSet
+                sommeEx += mr.numberExercise
+                sommeSetFail += mr.rateSetSomme?.numberSetFail ?: 0
+                sommePond += mr.rateSetSomme?.sommePond ?: 0.0
+            }
+        }
+
+        return MuscleRate(
+            numberExercise = sommeEx,
+            numberSet = sommeSet,
+            rateSetSomme = RateSetSomme(
+                numberSetFail = sommeSetFail,
+                sommePond = sommePond
+            )
+        )
+    }
+
+    fun moyenneSetParEx(global: MuscleRate): Double =
+        if (global.numberExercise > 0)
+            ((global.numberSet.toDouble() / global.numberExercise) * 100).roundToInt() / 100.0
+        else 0.0
+
+    fun proportionSetFail(global: MuscleRate): Double =
+        if (global.numberSet > 0)
+            (global.rateSetSomme?.numberSetFail ?: 0).toDouble() / global.numberSet * 100
+        else 0.0
 
     fun applyDateRange(rangeInDays: Long) {
         val formatter = DateTimeFormatter.ISO_DATE
@@ -265,7 +298,9 @@ class AnalyseViewModel @Inject constructor(
                 dayRatio = dayRatioMap,
                 allDataExercise=muscleRateMapExercise
             )
-        }    }
+        }
+    }
+
 
 
 }

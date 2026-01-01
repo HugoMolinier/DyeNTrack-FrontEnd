@@ -37,9 +37,9 @@ import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.type.SizeType
+import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
-import com.dyentrack.app.presentation.screens.parameters.component.ParameterBox
+import com.dyentrack.app.presentation.components.ParameterBox
 
 @Composable
 fun ObjectifPage(

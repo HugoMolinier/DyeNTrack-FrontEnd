@@ -45,17 +45,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
+import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
-import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.components.type.VariantType
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
-import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @SuppressLint("FrequentlyChangingValue")
@@ -77,15 +76,15 @@ fun HomePage(
     val objectifsommeil = userPreference?.objHourSleep ?:0.0
 
     val language = homeViewModel.languageUser
-    var pourcentage = 0f
-    state.todaySeance?.let { seance ->
-        var pourcentage = 0f
-        if (seance.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
-            pourcentage += 0.25f
+    val pourcentage = remember(state.todaySeance, objectifCal, objectifStep, objectifsommeil) {
+        var p = 0f
+        state.todaySeance?.let { seance ->
+            if (seance.seanceTrack?.plannedExercises?.isNotEmpty() == true) p += 0.25f
+            if ((seance.nutritionTrack?.calories ?: 0) > objectifCal) p += 0.25f
+            if ((seance.physioTrack?.step ?: 0) > objectifStep) p += 0.25f
+            if ((seance.physioTrack?.hourOfSleep ?: 0.0) > objectifsommeil) p += 0.25f
         }
-        seance.nutritionTrack?.calories?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
-        seance.physioTrack?.step?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
-        seance.physioTrack?.hourOfSleep?.takeIf { it > objectifCal }?.let { pourcentage += 0.25f }
+        p
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -122,7 +121,9 @@ fun HomePage(
                     }
                 }
             }
-            item { Column(Modifier.fillMaxWidth().padding(start = 24.dp,end= 24.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
+            item { Column(Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
                     Text(
                         stringResource(R.string.daily_data),
@@ -143,7 +144,9 @@ fun HomePage(
 
                     LazyRow(
                         state = listState,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -152,8 +155,13 @@ fun HomePage(
 
                                 Box(
                                     modifier = Modifier
-                                        .size(88.dp).clip(MaterialTheme.shapes.medium)
-                                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
+                                        .size(88.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(
+                                                alpha = 1f
+                                            )
+                                        )
                                         .clickable(onClick = { navController.navigate("seance") }),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -291,7 +299,9 @@ fun HomePage(
                     modifier = Modifier.padding(top = 32.dp, start = 10.dp, end = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+                    Row(Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)) {
                         Text(stringResource(R.string.previous_workouts), Modifier.padding(bottom = 12.dp))
                     }
 
@@ -456,7 +466,8 @@ fun HomePage(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(340.dp).padding(horizontal = 10.dp)
+                        .height(340.dp)
+                        .padding(horizontal = 10.dp)
 
 
                         .wrapContentHeight()
@@ -465,8 +476,15 @@ fun HomePage(
                             shape = MaterialTheme.shapes.medium
                         )
                 ) {
+                    val radarData = remember(state.graphData, state.masterDataMaps?.musclesGroupMap) {
+                        val radarLabels = state.graphData.keys.map { state.masterDataMaps?.musclesGroupMap?.get(it) ?: "N/A" }
+                        val values2 = state.graphData.values.map { it.numberExercise.toFloat() }
+                        val values3 = state.graphData.values.map { it.numberSet.toFloat() }
+                        Triple(radarLabels, values2, values3)
+                    }
 
-                    RadarChartSample(state.graphData, state.masterDataMaps?.musclesGroupMap)
+                    RadarChartMP(modifier=  Modifier.fillMaxSize(),radarData.first,radarData.second,radarData.third)
+
                 }
 
             }
@@ -474,36 +492,3 @@ fun HomePage(
     }
 }
 
-@Composable
-fun RadarChartSample(
-    graphData: Map<Long, MuscleRate>,
-    musclesGroupMap:Map<Long, String>?
-) {
-    val radarData = remember(graphData, musclesGroupMap) {
-        val radarLabels = mutableListOf<String>()
-        val values2 = mutableListOf<Float>()
-        val values3 = mutableListOf<Float>()
-
-        graphData.forEach { (muscleGroupId, stats) ->
-            val groupName = musclesGroupMap?.get(muscleGroupId) ?: "N/A"
-            radarLabels.add(groupName)
-            values2.add(stats.numberExercise.toFloat())
-            values3.add(stats.numberSet.toFloat())
-        }
-
-        Triple(radarLabels, values2, values3)
-    }
-
-    val radarLabels = radarData.first
-    if (radarLabels.size < 3) {
-        Text("Pas assez de données pour le radar")
-        return
-    }
-
-    RadarChartMP(
-        Modifier.fillMaxSize(),
-        radarLabels,
-        values1 = radarData.second,
-        values2 = radarData.third
-    )
-}

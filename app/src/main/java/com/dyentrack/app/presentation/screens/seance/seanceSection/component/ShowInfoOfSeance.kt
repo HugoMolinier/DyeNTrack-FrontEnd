@@ -38,7 +38,9 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel, userUnit: MesureUnit) {
     }
 
 
-    val exerciseSummary = viewModel.getSeanceSummary(state.daySelected)
+    val exerciseSummary by remember(state.daySelected) {
+        mutableStateOf(viewModel.getSeanceSummary(state.daySelected))
+    }
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
         Text(

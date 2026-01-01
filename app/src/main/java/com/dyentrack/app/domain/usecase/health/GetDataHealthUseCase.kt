@@ -9,7 +9,9 @@ import com.dyentrack.app.domain.model.NutritionTrack
 import java.time.Instant
 import javax.inject.Inject
 import androidx.health.connect.client.request.ReadRecordsRequest
+import javax.inject.Singleton
 
+@Singleton
 class GetDataHealthUseCase @Inject constructor() {
 
     suspend fun aggregateSteps(
@@ -24,7 +26,6 @@ class GetDataHealthUseCase @Inject constructor() {
                     timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                 )
             )
-            // Peut être null si pas de donnée
             response[StepsRecord.COUNT_TOTAL] ?: 0L
         } catch (_: Exception) {
             0L

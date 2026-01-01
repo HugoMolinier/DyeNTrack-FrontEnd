@@ -35,7 +35,7 @@ import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.exercise.ExerciseTypeFilter
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.type.EmphasisType
+import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 

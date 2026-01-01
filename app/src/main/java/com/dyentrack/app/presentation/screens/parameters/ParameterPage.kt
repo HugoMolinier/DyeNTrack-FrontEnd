@@ -44,10 +44,10 @@ import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.presentation.components.type.EmphasisType
-import com.dyentrack.app.presentation.components.type.SizeType
-import com.dyentrack.app.presentation.components.type.VariantType
-import com.dyentrack.app.presentation.screens.parameters.component.ParameterBox
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 

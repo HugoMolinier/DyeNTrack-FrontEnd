@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
+import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

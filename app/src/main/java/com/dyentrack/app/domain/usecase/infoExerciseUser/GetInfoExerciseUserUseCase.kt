@@ -5,7 +5,9 @@ import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.repository.InfoExerciseUserRepository
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class GetInfoExerciseUserUseCase @Inject constructor(
     private val repository: InfoExerciseUserRepository
 ) {

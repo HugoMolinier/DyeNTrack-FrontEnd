@@ -15,6 +15,8 @@
     <string name="explanation">Explication</string>
     <string name="statistics">Statistique</string>
 
+    <string name="not_editable">Non modifiable car Auto-Sync</string>
+
     <string name="exercise_per_week">Exercice/semaine</string>
     <string name="sets_per_week">Set/semaine</string>
     <string name="last_occurrence">Dernière occurrence</string>
@@ -226,5 +228,5 @@
     <string name="auto_sync_desc">Synchronisation à chaque démarrage si opérationnel et autorisé</string>
     <string name="home">Accueil</string>
     <string name="workout">Séance</string>
-
+    <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
 </resources>

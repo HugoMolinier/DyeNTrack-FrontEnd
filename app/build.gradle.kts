@@ -95,6 +95,11 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation)
 
+    //Ad
+
+    implementation(libs.play.services.ads.api)
+
+
     // Navigation
     val nav_version = "2.9.5"
     implementation("androidx.navigation:navigation-compose:$nav_version")

@@ -20,7 +20,9 @@ data class AnalyseUiState(
     val exerciceChose: Long=0L,
     val tempChose:Long=0L,
     val isBottomSheetVisible: Boolean=false,
-    val allDataExercise: Map<String, MuscleRate> =emptyMap()
+    val allDataExercise: Map<String, MuscleRate> =emptyMap(),
+
+
 
 
 

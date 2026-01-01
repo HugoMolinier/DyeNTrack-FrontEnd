@@ -8,5 +8,5 @@ interface HasLocalizedName {
 fun HasLocalizedName.getName(lang: LANGUAGE): String =
     when (lang) {
         LANGUAGE.FR -> nameFR.ifBlank { "NomFR" }
-        LANGUAGE.EN -> nameEN?.ifBlank { nameFR } ?: nameFR
+        LANGUAGE.EN -> nameEN.ifBlank { nameFR }
     }
