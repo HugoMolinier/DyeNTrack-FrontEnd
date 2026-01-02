@@ -15,10 +15,8 @@ import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.DatasetLinked
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Straighten
@@ -42,12 +40,12 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
-import com.dyentrack.app.presentation.components.CustomButton
-import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ParameterBox
+import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -221,14 +219,15 @@ fun ParameterPage(
                                 {navController.navigate("language") },
                                 stringResource(R.string.language),
                                 ParameterIcon.Vector(Icons.Default.Translate)
-                            ),
+                            )
+                            /*,
                             if (authState.isConnected)
                                 ParameterItem(
                                     { },
                                     stringResource(R.string.export_data),
                                     ParameterIcon.Vector(Icons.Outlined.Download)
                                 )
-                            else null
+                            else null*/
                         )
                         ParameterBox(menu1)
                     }
@@ -247,17 +246,17 @@ fun ParameterPage(
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         val menu1 = listOf(
-                            ParameterItem(
+                           /* ParameterItem(
                                 { }, stringResource(R.string.accessibility),
                                 ParameterIcon.Vector(Icons.Outlined.Accessibility)
-                            ),
+                            ),*/
                             ParameterItem(
-                                { },
+                                { navController.navigate("privacy") },
                                 stringResource(R.string.privacy),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
                             ParameterItem(
-                                { },
+                                {navController.navigate("legal") },
                                 stringResource(R.string.legal_notices),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
@@ -271,7 +270,7 @@ fun ParameterPage(
                     item {
                         Button(
                             onClick = { authViewModel.logout();navController.navigate("parametre") },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = secondaryTextColor

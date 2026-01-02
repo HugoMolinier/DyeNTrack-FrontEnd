@@ -226,5 +226,82 @@
     <string name="no">No</string>
     <string name="auto_sync_desc">Sync at every startup if operational and authorized</string>
     <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="privacy_title">Privacy Policy</string>
+
+    <!-- Point 1 -->
+    <string name="privacy_heading_1">1. Data Controller</string>
+    <string name="privacy_text_1_1">Personal data collected through the application is processed by the app publisher, acting as the data controller under the General Data Protection Regulation (GDPR).</string>
+
+    <!-- Point 2 -->
+    <string name="privacy_heading_2">2. Data Collected</string>
+    <string name="privacy_text_2_1">We collect only the data strictly necessary for the functioning of the application:</string>
+    <string name="privacy_text_2_2">This includes email address, profile information (height, gender, date of birth), user preferences, as well as data related to activity, nutrition, weight, and sleep.</string>
+    <string name="privacy_text_2_3">Health data is collected only after obtaining the user\'s explicit consent, notably when activating synchronization services with third-party applications such as Health Connect.</string>
+
+    <!-- Point 3 -->
+    <string name="privacy_heading_3">3. Data Usage</string>
+    <string name="privacy_text_3_1">Data is used to allow creation and management of the user account.</string>
+    <string name="privacy_text_3_2">It is also used to track your physical activity, nutrition, and sleep, and to personalize your experience within the app.</string>
+    <string name="privacy_text_3_3">No data is used for advertising or commercial purposes.</string>
+
+    <!-- Point 4 -->
+    <string name="privacy_heading_4">4. Offline Usage</string>
+    <string name="privacy_text_4_1">When the user is not logged into an account, no data is transmitted to a remote server.</string>
+    <string name="privacy_text_4_2">In this case, all data is stored exclusively locally on the user\'s device to allow offline use of the app.</string>
+    <string name="privacy_text_4_3">No synchronization, transmission, or server processing occurs without prior authentication.</string>
+
+    <!-- Point 5 -->
+    <string name="privacy_heading_5">5. Email Address</string>
+    <string name="privacy_text_5_1">The email address is collected only for identification and account security purposes.</string>
+    <string name="privacy_text_5_2">No email, promotional notification, or commercial communication will be sent to the provided address.</string>
+    <string name="privacy_text_5_3">The email address is never shared with third parties.</string>
+
+    <!-- Point 6 -->
+    <string name="privacy_heading_6">6. Data Sharing</string>
+    <string name="privacy_text_6_1">Personal data is neither sold, rented, nor transferred to third parties.</string>
+    <string name="privacy_text_6_2">No data sharing is carried out for commercial or advertising purposes.</string>
+    <string name="privacy_text_6_3">Third-party services integrated into the app access data only after the user\'s explicit authorization.</string>
+
+    <!-- Point 7 -->
+    <string name="privacy_heading_7">7. Data Security</string>
+    <string name="privacy_text_7_1">Appropriate technical and organizational measures are in place to ensure data security.</string>
+    <string name="privacy_text_7_2">Access to data is strictly limited to what is necessary for the functioning of the application.</string>
+    <string name="privacy_text_7_3">Any unauthorized access attempt is prevented by appropriate security mechanisms.</string>
+
+    <!-- Point 8 -->
+    <string name="privacy_heading_8">8. Data Retention</string>
+    <string name="privacy_text_8_1">Personal data is retained only for the duration of the user account\'s use.</string>
+    <string name="privacy_text_8_2">If the account is deleted, all associated data is permanently removed.</string>
+    <string name="privacy_text_8_3">Data stored locally is deleted when the application is uninstalled.</string>
+
+    <!-- Point 9 -->
+    <string name="privacy_heading_9">9. User Rights</string>
+    <string name="privacy_text_9_1">In accordance with GDPR, users have the right to access, correct, and delete their data.</string>
+    <string name="privacy_text_9_2">Users may also request restriction or objection to the processing of their data.</string>
+    <string name="privacy_text_9_3">These rights can be exercised directly within the application.</string>
+
+    <!-- Point 10 -->
+    <string name="privacy_heading_10">10. Policy Updates</string>
+    <string name="privacy_text_10_1">This privacy policy may be updated at any time.</string>
+    <string name="privacy_text_10_2">Any substantial changes will be communicated within the app.</string>
+    <string name="privacy_text_10_3">Continuing to use the app constitutes acceptance of the updated policy.</string>
+
+
+    <string name="legal_title">Legal Notices</string>
+
+    <string name="legal_heading_1">1. Publisher</string>
+    <string name="legal_text_1_1">This application is published by Dyentrack App, responsible for the content and maintenance of the software.</string>
+
+    <string name="legal_heading_2">2. Intellectual Property</string>
+    <string name="legal_text_2_1">All content, graphics, logos, and code included in this application are protected by copyright and intellectual property laws.</string>
+    <string name="legal_text_2_2">Any reproduction or distribution without prior authorization is prohibited.</string>
+
+    <string name="legal_heading_3">3. Liability</string>
+    <string name="legal_text_3_1">The publisher cannot be held responsible for any direct or indirect damage resulting from the use of this application.</string>
+
+    <string name="legal_heading_4">4. Updates</string>
+    <string name="legal_text_4_1">The application may be updated periodically to improve functionality or security.</string>
+    <string name="legal_text_4_2">Users are encouraged to use the latest version for optimal performance.</string>
+    <string name="legal_text_4_3">Continuing to use the application implies acceptance of these legal notices.</string>
 
 </resources>

@@ -46,10 +46,12 @@ import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
+import com.dyentrack.app.presentation.screens.parameters.ConfidentialPage
 import com.dyentrack.app.presentation.screens.parameters.ConnectedAppPage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
 import com.dyentrack.app.presentation.screens.parameters.InformationPage
 import com.dyentrack.app.presentation.screens.parameters.LanguagePage
+import com.dyentrack.app.presentation.screens.parameters.LegalNoticesPage
 import com.dyentrack.app.presentation.screens.parameters.MesureUnitPage
 import com.dyentrack.app.presentation.screens.parameters.ObjectifPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
@@ -174,6 +176,8 @@ fun MyApp() {
             composable("objectif") { ObjectifPage(navController=navController) }
             composable("mesureUnit") { MesureUnitPage(navController=navController) }
             composable("language") { LanguagePage(navController=navController) }
+            composable("privacy") { ConfidentialPage(navController=navController) }
+            composable("legal") { LegalNoticesPage(navController=navController) }
 
             composable("inscription") { RegisterPage(navController=navController) }
                 composable("exercise") { backStackEntry ->
