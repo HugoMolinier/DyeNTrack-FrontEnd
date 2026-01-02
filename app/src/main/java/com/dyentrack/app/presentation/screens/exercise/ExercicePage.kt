@@ -47,6 +47,7 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.getDescription
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -155,10 +156,10 @@ fun ExercisePage(
                     }
 
 
-                    if (exercise.description?.isNotBlank() == true) {
+                    if (exercise.getDescription(language).isNotBlank()) {
                         item {
                             Text(
-                                exercise.description,
+                                exercise.getDescription(language),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

@@ -1,6 +1,7 @@
 package com.dyentrack.app.domain.model.exercise
 
 import android.os.Parcelable
+import com.dyentrack.app.domain.model.HasLocalizedDescription
 import com.dyentrack.app.domain.model.HasLocalizedName
 import kotlinx.parcelize.Parcelize
 
@@ -10,8 +11,9 @@ data class Exercise(
     override val nameFR : String,
     override val nameEN : String,
     val mainFocusGroup: Long?=null,
-    val description: String?="",
+    override val descriptionFR: String?="",
+    override val descriptionEN: String?="",
     val muscleInfos : List<MuscleInfos>?=listOf(),
     val linkVideo:String?=null,
     val idCreator: Long?=null
-): HasLocalizedName,Parcelable
+): HasLocalizedName, HasLocalizedDescription,Parcelable
