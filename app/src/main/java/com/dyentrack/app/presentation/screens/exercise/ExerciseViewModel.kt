@@ -40,7 +40,6 @@ class ExerciseViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    val infoExerciseUserFlow = getInfoExerciseUserUseCase.infoExerciseUserFlow
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState
@@ -51,17 +50,6 @@ class ExerciseViewModel @Inject constructor(
     val languageUser = LocaleManager.getCurrentLanguage()
     fun setExercise(exercise: Exercise) {
         _currentExercise.value = exercise
-    }
-
-    fun updateInfoExerciseUser(
-        idExercise: Long,
-        favorite: Boolean?,
-        note: String?
-    ) {
-        viewModelScope.launch {
-            val info = InfoExerciseUser(idExercise = idExercise, favorite = favorite, note = note)
-            updateInfoExerciseUserUseCase(info)
-        }
     }
 
     init {

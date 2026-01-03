@@ -8,8 +8,10 @@ import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
+import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.utils.ExerciseImages
@@ -24,6 +26,7 @@ import javax.inject.Inject
 import kotlin.math.ceil
 
 @HiltViewModel
+
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
@@ -36,6 +39,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState
     var masterData: MasterDataStatic? = null
     val languageUser = LocaleManager.getCurrentLanguage()
+
 
 
     init {
@@ -94,7 +98,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
+    fun toggleBottomSheet(show: BottomSheetVisibleType) {
+        _uiState.update { it.copy(isBottomSheetVisible = show) }
+    }
     fun muscleRateOfEachDay(principalOnly:Boolean) {
         val lastScence = _uiState.value.mapSeance
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()

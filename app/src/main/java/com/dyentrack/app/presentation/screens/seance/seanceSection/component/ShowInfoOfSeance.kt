@@ -49,11 +49,11 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel, userUnit: MesureUnit) {
             style = MaterialTheme.typography.bodyLarge
         )
 
-        InfoRow(label = stringResource(R.string.muscle_use), value = exerciseSummary.mainFocus.joinToString(", "))
+        InfoRow(label = stringResource(R.string.muscle_use), value = exerciseSummary.principalMuscle.joinToString(", "))
+        InfoRow(label = stringResource(R.string.filter_muscle_groups), value = exerciseSummary.mainFocus.joinToString(", "), border = true)
         InfoRow(
             label = stringResource(R.string.number_of_sets),
-            value = exerciseSummary.totalSets.toString(),
-            border = true
+            value = exerciseSummary.totalSets.toString()
         )
         InfoRow(
             label = stringResource(R.string.number_of_exercises),
@@ -66,14 +66,6 @@ fun ShowInfoOfSeance(viewModel: SeanceViewModel, userUnit: MesureUnit) {
                 ?.let { String.format("%.1f", it) }
                 .orEmpty() + userUnit.toString().lowercase()
         )
-        InputCustom(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .height(70.dp),
-            inputstate,
-            placeholder = stringResource(R.string.add_note),
-            variant = InputVariant.OUTLINED,
-            singleLine = false
-        )
+
     }
 }

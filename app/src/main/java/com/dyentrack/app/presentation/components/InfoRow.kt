@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -25,7 +26,7 @@ fun InfoRow(modifier:Modifier = Modifier, label: String, value: String, border: 
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label,modifier= Modifier.padding(end = 20.dp), style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
-        Text(value, style = MaterialTheme.typography.bodyMedium)
+        Text(value, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
     }
     if (border) HorizontalDivider(color = secondaryTextColor.copy(alpha = 0.3f), thickness = 1.dp)
 }

@@ -541,7 +541,7 @@ fun AnalysePage(
                     title = stringResource(R.string.choose_exercise),
                     navController = navController,
                     onClose = { analyseViewModel.toggleBottomSheet(false) },
-                    onClickExercise = { exerciseId -> analyseViewModel.changeTempExercice(exerciseId) },
+                    onClickExercise = { exercise -> analyseViewModel.changeTempExercice(exercise.idExercise) },
                     onClickFavorite = {
                         analyseViewModel.updateInfoExerciseUser(
                             it,

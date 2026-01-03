@@ -27,20 +27,20 @@ import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.TypeOfAction
+import com.dyentrack.app.domain.model.enum.NutritionField
+import com.dyentrack.app.domain.model.enum.PhysioField
+import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enum.SectionSelectType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
 import com.dyentrack.app.domain.usecase.GetLastExercisePerfBetweenDateUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
-import com.dyentrack.app.domain.model.enum.PhysioField
-import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.domain.model.enum.NutritionField
 import com.dyentrack.app.presentation.components.SeanceSummary
-import com.dyentrack.app.domain.model.enum.SectionSelectType
 import com.dyentrack.app.presentation.mapper.toDayDataRequest
 import com.dyentrack.app.presentation.mapper.toSeanceDuJour
 import com.dyentrack.app.presentation.utils.convertWeight
@@ -66,7 +66,6 @@ class SeanceViewModel @Inject constructor(
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
-    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
 ) : ViewModel() {
 
@@ -76,7 +75,6 @@ class SeanceViewModel @Inject constructor(
     var masterData: MasterDataStatic? = null
     val languageUser = LocaleManager.getCurrentLanguage()
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
-    val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     init {
         days.addAll(getDaysRangeUseCase.getLast30Days(languageUser))
@@ -168,17 +166,6 @@ class SeanceViewModel @Inject constructor(
                     current.copy(exerciseMode = newMode)
                 }
             }
-        }
-    }
-
-    fun updateInfoExerciseUser(
-        idExercise: Long,
-        favorite: Boolean?,
-        note: String?
-    ) {
-        viewModelScope.launch {
-            val info = InfoExerciseUser(idExercise = idExercise, favorite = favorite, note = note)
-            updateInfoExerciseUserUseCase(info)
         }
     }
 
@@ -570,13 +557,20 @@ class SeanceViewModel @Inject constructor(
     fun getSeanceSummary(day: String): SeanceSummary {
         val state = uiState.value
         val maps = state.masterDataMaps
-            ?: return SeanceSummary(emptyList(), emptySet(), 0, 0)
+            ?: return SeanceSummary(emptyList(), emptySet(),emptySet(), 0, 0)
 
         val daySeance = state.seancesParJour[day]
-            ?: return SeanceSummary(emptyList(), emptySet(), 0, 0)
+            ?: return SeanceSummary(emptyList(), emptySet(),emptySet(), 0, 0)
 
         val exercisesList = daySeance.exercisesInSceance
             .mapNotNull { maps.exerciseMap[it.exerciseId] }
+
+        val principalMuscle = exercisesList
+            .mapNotNull { ex ->
+                ex.muscleInfos?.find { it.principal }?.idMuscle
+            }
+            .mapNotNull { maps.muscleMap[it]?.getName(languageUser) }
+            .toSet()
 
         val mainFocus = exercisesList
             .mapNotNull { it.mainFocusGroup?.let { id -> maps.musclesGroupMap[id] } }
@@ -595,6 +589,7 @@ class SeanceViewModel @Inject constructor(
         return SeanceSummary(
             exercisesList = exercisesList,
             mainFocus = mainFocus,
+            principalMuscle=principalMuscle,
             totalSets = totalSets,
             sommePond = totalVolume.fastRoundToInt()
         )

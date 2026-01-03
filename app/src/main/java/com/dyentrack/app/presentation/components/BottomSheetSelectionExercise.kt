@@ -42,12 +42,12 @@ import com.dyentrack.app.presentation.utils.ExerciseImages
 @Composable
 fun BottomSheetSelectionExercise(
     bottomSheetVisibility: Boolean,
-    selectedExerciseIds: List<Long>,
+    selectedExerciseIds: List<Long>?=emptyList(),
     officialExercise: List<Exercise>?,
     infoMapUser :Map<Long, InfoExerciseUser>,
     navController: NavController,
     onClose: () -> Unit= {},
-    onClickExercise: (Long) -> Unit= {},
+    onClickExercise: (Exercise) -> Unit= {},
     onClickFavorite: (Long) -> Unit= {},
     onResetFilter: () -> Unit= {},
     onUpdateQuery:(String) ->Unit= {},
@@ -171,8 +171,8 @@ fun BottomSheetSelectionExercise(
 
 
                 //exercise
-                items(filteredExercises ?: listOf()) { exercise ->
-                    val isSelected = exercise.idExercise in selectedExerciseIds
+                items(filteredExercises ?: listOf(), key = { it.idExercise }) { exercise ->
+                    val isSelected = selectedExerciseIds?.contains(exercise.idExercise) == true
                     Box(Modifier.padding(12.dp, 4.dp)){
                     CardWithContent(
                         modifier = Modifier.padding(10.dp, 4.dp),
@@ -199,8 +199,8 @@ fun BottomSheetSelectionExercise(
                                 )
                             ),
                         subTextEmphasis = EmphasisType.PRIMARY,
-                        onClick = { onClickExercise(exercise.idExercise) },
-                        badgeText = if (isSelected) (selectedExerciseIds.indexOf(exercise.idExercise) + 1).toString() else null
+                        onClick = { onClickExercise(exercise) },
+                        badgeText = if (isSelected) (selectedExerciseIds!!.indexOf(exercise.idExercise) + 1).toString() else null
                     )}
                 }
             }

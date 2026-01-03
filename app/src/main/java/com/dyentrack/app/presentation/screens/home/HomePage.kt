@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -37,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,15 +49,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.domain.model.getName
+import com.dyentrack.app.presentation.components.BottomSheetPreset
+import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -65,6 +74,7 @@ fun HomePage(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
+    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
 ) {
 
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
@@ -75,6 +85,10 @@ fun HomePage(
     val objectifCal = userPreference?.objCalorie ?:0
     val objectifsommeil = userPreference?.objHourSleep ?:0.0
 
+    val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
+
+    val context = LocalContext.current
+    val textToast = stringResource(R.string.favorite_login_prompt)
     val language = homeViewModel.languageUser
     val pourcentage = remember(state.todaySeance, objectifCal, objectifStep, objectifsommeil) {
         var p = 0f
@@ -487,8 +501,65 @@ fun HomePage(
 
                 }
 
+
+
+            }
+
+            item{
+                Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
+                    Text("Collection", style = MaterialTheme.typography.titleSmall)
+
+                    Row(modifier= Modifier.fillMaxWidth().padding(top=8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box (modifier= Modifier.weight(1f)){
+                            CardWithContent(
+                                modifier= Modifier.padding(8.dp,4.dp),
+                                text = "Exercices",
+                                subText = state.masterDataMaps?.exerciseMap?.size.toString(),
+                                componentRight = {Icon(Icons.Default.Bookmarks,"", tint = secondaryTextColor.copy(0.1f))},
+                                onClick = {homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE)}
+                            )
+                        }
+                        Box (modifier= Modifier.weight(1f)) {
+                            CardWithContent(
+                                modifier= Modifier.padding(8.dp,4.dp),
+                                text = "Voir mes Presets",
+                                onClick = {homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)},
+                                subText = "2"
+                            )
+                        }
+                    }
+                    }
             }
         }
     }
+
+    BottomSheetSelectionExercise(
+        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYEXERCICE,
+        navController = navController,
+        title=stringResource(R.string.see_info),
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        officialExercise = homeViewModel.masterData?.officialExercise,
+        infoMapUser = infoMapUser,
+        onClickExercise = {  exercice ->
+            navController.currentBackStackEntry?.savedStateHandle?.set(
+            "exercise",
+                exercice
+        )
+            navController.navigate("exercise")},
+        onClickFavorite = { if(authState.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
+            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+        } },
+        userlanguage= language,
+        musclesGroupMap=state.masterDataMaps?.musclesGroupMap
+    )
+    BottomSheetPreset(
+        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYPRESET,
+        navController = navController,
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        userlanguage= language,
+        title="Preset",
+
+    )
+
 }
 

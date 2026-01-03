@@ -127,44 +127,46 @@ fun CardWithContent(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
 
-                            Box(
-                                modifier = Modifier
-                                    .height(58.dp)
-                                    .width(58.dp)
-                                    .background(
-                                        color = if (leftIcon == null) TertiaOne else TertiaOne.copy(
-                                            alpha = 0.5f
-                                        ),
-                                        shape = RoundedCornerShape(5.dp)
-                                    )
+                            if(leftIcon!=null) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(58.dp)
+                                        .width(58.dp)
+                                        .background(
+                                            color = TertiaOne.copy(
+                                                alpha = 0.5f
+                                            ),
+                                            shape = RoundedCornerShape(5.dp)
+                                        )
 
 
-                            ) {
-                                when(leftIcon) {
-                                    is LeftIcon.Single ->        Image(
-                                        painter = painterResource(id = leftIcon.icon),
-                                        contentDescription = "Image de l'exercise",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Fit
-                                    )
-                                    is LeftIcon.Multiple -> {
-                                        FlowRow(
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp), // espace horizontal
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)    // espace vertical
-                                        ) {
-                                            leftIcon.icons.forEach { iconRes ->
-                                                Image(
-                                                    painter = painterResource(id = iconRes),
-                                                    contentDescription = "Image de l'exercice",
-                                                    modifier = Modifier.size(24.dp), // adapter la taille selon besoin
-                                                    contentScale = ContentScale.Fit
-                                                )
+                                ) {
+                                    when (leftIcon) {
+                                        is LeftIcon.Single -> Image(
+                                            painter = painterResource(id = leftIcon.icon),
+                                            contentDescription = "Image de l'exercise",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit
+                                        )
+
+                                        is LeftIcon.Multiple -> {
+                                            FlowRow(
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp), // espace horizontal
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)    // espace vertical
+                                            ) {
+                                                leftIcon.icons.forEach { iconRes ->
+                                                    Image(
+                                                        painter = painterResource(id = iconRes),
+                                                        contentDescription = "Image de l'exercice",
+                                                        modifier = Modifier.size(24.dp), // adapter la taille selon besoin
+                                                        contentScale = ContentScale.Fit
+                                                    )
+                                                }
                                             }
                                         }
                                     }
-                                    null -> {}
-                                }
 
+                                }
                             }
                             Column(
                                 verticalArrangement = Arrangement.SpaceBetween,

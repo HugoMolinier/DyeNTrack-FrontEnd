@@ -49,6 +49,7 @@ import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.domain.model.getDescription
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -58,6 +59,7 @@ fun ExercisePage(
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
 ) {
     val context = LocalContext.current
     val textToast = stringResource(R.string.favorite_login_prompt)
@@ -69,7 +71,7 @@ fun ExercisePage(
     val userConnected by authViewModel.authState.collectAsState()
     val idUser = userConnected.user?.id ?: 0L
     val state by exerciseViewModel.uiState.collectAsState()
-    val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
+    val infoMapState by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     val language = exerciseViewModel.languageUser
 
     val focusManager = LocalFocusManager.current
@@ -133,7 +135,7 @@ fun ExercisePage(
                                     onClick = {
                                         if(userConnected.isConnected) { val currentFavorite =
                                             infoMapState[exercise.idExercise]?.favorite ?: false
-                                        exerciseViewModel.updateInfoExerciseUser(
+                                            infoUserViewModel.updateInfoExerciseUser(
                                             exercise.idExercise,
                                             !currentFavorite,
                                             null
@@ -234,7 +236,7 @@ fun ExercisePage(
                                 variant = InputVariant.OUTLINED,
                                 singleLine = false,
                                 onFocusLost = { finalText ->
-                                    exerciseViewModel.updateInfoExerciseUser(
+                                    infoUserViewModel.updateInfoExerciseUser(
                                         exercise.idExercise,
                                         null,
                                         finalText

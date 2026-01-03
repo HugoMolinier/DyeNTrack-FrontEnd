@@ -54,6 +54,7 @@ import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.globalViewModel.AdViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
@@ -76,7 +77,8 @@ fun SeancePage(
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel= hiltViewModel<AuthViewModel>(),
     healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>(),
-    adViewModel: AdViewModel=hiltViewModel<AdViewModel>()
+    adViewModel: AdViewModel=hiltViewModel<AdViewModel>(),
+    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
@@ -86,7 +88,7 @@ fun SeancePage(
 
 
     val state by viewModel.uiState.collectAsState()
-    val infoMapUser by viewModel.infoExerciseUserFlow.collectAsState()
+    val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     val authViewModel by authViewModel.authState.collectAsState()
 
     val language = viewModel.languageUser
@@ -302,12 +304,12 @@ val textToast = stringResource(R.string.favorite_login_prompt)
         navController = navController,
         title=stringResource(R.string.add_exercise),
         onClose = { viewModel.toggleBottomSheet(false) },
-        onClickExercise = { exerciseId ->
-            viewModel.toggleExerciseSelection(exerciseId)
+        onClickExercise = { exercise ->
+            viewModel.toggleExerciseSelection(exercise.idExercise)
         },
         officialExercise = viewModel.masterData?.officialExercise,
         infoMapUser = infoMapUser,
-        onClickFavorite = { if(authViewModel.isConnected) viewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
+        onClickFavorite = { if(authViewModel.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
             Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
         } },
         userlanguage= language,

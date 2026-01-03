@@ -35,7 +35,6 @@ fun BottomSheetContent(
     closeButtonTitle: Boolean = true,
     childrenForExtend: @Composable (() -> Unit)? = null,
     footerComponent: @Composable (() -> Unit)? = null,
-    scrollable: Boolean = true,
     showBottomSheet: Boolean = false,
     onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -52,7 +51,6 @@ fun BottomSheetContent(
         sheetState = sheetState,
                 modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
 ,
         containerColor = colorScheme.background,
         shape = MaterialTheme.shapes.large
@@ -76,7 +74,7 @@ fun BottomSheetContent(
             }
         }
     ) {
-        Column( modifier = modifier .fillMaxWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.85f) ) {
+        Column( modifier = modifier .fillMaxWidth().heightIn(    min = 0.dp,max = LocalConfiguration.current.screenHeightDp.dp * 0.85f) ) {
             if (title.isNotBlank() || closeButtonTitle) {
                 Row(
                     modifier = Modifier
@@ -104,24 +102,11 @@ fun BottomSheetContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
             ) {
-                if (scrollable) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                Column(modifier = Modifier.fillMaxWidth()) {
+                        childrenForExtend?.invoke()
+                    }
 
-                    ) {
-                        childrenForExtend?.invoke()
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        childrenForExtend?.invoke()
-                    }
-                }
             }
 
 
