@@ -90,8 +90,11 @@ class HomeViewModel @Inject constructor(
     fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
         if (seance == null) return LeftIcon.Single(R.drawable.logotransparent)
         val first3Icons = seance.plannedExercises
+            .asSequence()                     // lazy
+            .sortedBy { it.exerciseOrder }
+            .map { ExerciseImages.map[it.exerciseId] ?: R.drawable.logotransparent } // map
             .take(3)
-            .map { ExerciseImages.map[it.exerciseId]?:R.drawable.logotransparent }.toMutableList()
+            .toMutableList()
 
         if (seance.plannedExercises.size>3){
         first3Icons.add(R.drawable.point)}

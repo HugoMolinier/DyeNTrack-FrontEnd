@@ -15,11 +15,12 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
 
 
 fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
-    val exercises = this.seanceTrack?.plannedExercises?.map { plannedExercise ->
+    val exercises = this.seanceTrack?.plannedExercises?.sortedBy { it.exerciseOrder }?.map { plannedExercise ->
         ExerciseInSeance(
             exerciseId = plannedExercise.exerciseId,
             laterite = plannedExercise.lateraliteId,
-            equipment = plannedExercise.equipmentId
+            equipment = plannedExercise.equipmentId,
+
         )
     }?.toMutableStateList() ?: mutableStateListOf()
 

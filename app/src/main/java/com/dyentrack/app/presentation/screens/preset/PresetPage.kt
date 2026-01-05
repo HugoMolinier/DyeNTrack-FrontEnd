@@ -23,10 +23,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,10 +56,12 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
 import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
+import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.LeftIcon
@@ -66,6 +71,7 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
+import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 import kotlinx.coroutines.launch
@@ -315,8 +321,35 @@ fun PresetPage(
                                                 .fillMaxWidth()
                                                 .padding(start = 20.dp, end = 20.dp, bottom = 16.dp)
                                         ) {
+                                            Row(
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .height(32.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
 
-                                                ParameterBox(list, PaddingValues(top=16.dp))
+                                            ) {
+                                                ChipDropDown(
+                                                    listOfSelectableItem = state.masterDataMaps?.lateraliteMap?.values?.toList()?:emptyList(),
+                                                    defaultSelected = state.masterDataMaps?.lateraliteMap[exInPreset.idLateralite] ?: "",
+
+                                                ) { selectedName ->
+                                                    val lateriteId = state.masterDataMaps?.lateraliteMap?.entries?.firstOrNull { it.value == selectedName }?.key ?: 1L
+                                                    presetPageViewModel.updatePresetProperty(exInPreset.idExercise,
+                                                        ExerciceInPropertyType.LATERALITE, lateriteId)
+                                                }
+                                                ChipDropDown(
+                                                    listOfSelectableItem = state.masterDataMaps?.equipmentMap?.values?.toList()?:emptyList(),
+                                                    defaultSelected = state.masterDataMaps?.equipmentMap[exInPreset.idEquipment],
+                                                ) { selectedName ->
+                                                    val equipmentId = state.masterDataMaps?.equipmentMap?.entries?.firstOrNull { it.value == selectedName }?.key ?: 1L
+                                                    presetPageViewModel.updatePresetProperty(exInPreset.idExercise,
+                                                        ExerciceInPropertyType.EQUIPMENT, equipmentId)                                    }
+
+
+                                            }
+
+                                                ParameterBox(list, PaddingValues(top=16.dp), hasBorder = false)
 
                                         }
                                     }

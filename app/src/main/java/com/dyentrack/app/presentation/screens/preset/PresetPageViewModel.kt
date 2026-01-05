@@ -7,6 +7,7 @@ import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
 import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
@@ -156,6 +157,19 @@ class PresetPageViewModel @Inject constructor(
                     ?.map { it.idExercise }
                     .orEmpty()
             )
+        }
+    }
+
+    fun updatePresetProperty(
+        exerciseId: Long,
+        property: ExerciceInPropertyType,
+        valueId: Long
+    ) {
+        updateExercise(exerciseId) { ex ->
+            when (property) {
+                ExerciceInPropertyType.LATERALITE -> ex.copy(idLateralite = valueId)
+                ExerciceInPropertyType.EQUIPMENT -> ex.copy(idEquipment = valueId)
+            }
         }
     }
     fun expandExercise(exerciseId: Long?) {

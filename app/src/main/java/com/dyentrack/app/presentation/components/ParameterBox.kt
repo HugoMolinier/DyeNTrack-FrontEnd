@@ -29,7 +29,8 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ParameterBox(items: List<ParameterItem>,
-                 paddingValues: PaddingValues=PaddingValues(horizontal = 8.dp, vertical = 20.dp)
+                 paddingValues: PaddingValues=PaddingValues(horizontal = 8.dp, vertical = 20.dp),
+                 hasBorder:Boolean=true
 ) {
 
 
@@ -47,7 +48,7 @@ fun ParameterBox(items: List<ParameterItem>,
                             } else Modifier
                         )
                         .then(
-                            if (index != items.lastIndex) {
+                            if (index != items.lastIndex && hasBorder) {
 
                                 Modifier.drawBehind {
                                     val yBottom = size.height - 0.5f

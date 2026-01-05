@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -106,48 +107,6 @@ class SeanceViewModel @Inject constructor(
 
     }
 
-
-
-    fun formatExerciseSets(
-        exerciseSets: List<SetData>?,
-        userUnit: MesureUnit
-    ): String {
-        if (exerciseSets.isNullOrEmpty()) return ""
-        val sb = StringBuilder()
-        var previousCharge: Double? = null
-        var stop = false
-        for (set in exerciseSets) {
-            if (stop) break
-            if (previousCharge != null && set.charge != previousCharge) {
-                sb.append(
-                    convertWeight(previousCharge, MesureUnit.KG, userUnit)
-                        ?.let { String.format("%.1f", it) }.orEmpty()
-                )
-                sb.append(userUnit.toString().lowercase())
-                sb.append(" | ")
-            }
-            sb.append(set.reps ?: " ")
-            if (set.side == SetSide.LEFT) {
-                sb.append("/")
-                sb.append(set.linkedRightSet?.reps ?: "_")
-            }
-            sb.append(" - ")
-            previousCharge = set.charge
-            if (sb.length >= 40) {
-                sb.append("...")
-                stop = true
-            }
-        }
-        if (!stop && previousCharge != null) {
-            sb.append(
-                convertWeight(previousCharge, MesureUnit.KG, userUnit)
-                    ?.let { String.format("%.1f", it) }.orEmpty()
-            )
-            sb.append(userUnit.toString().lowercase())
-        }
-        return sb.toString()
-    }
-
     fun setDaySelected(daySelected:String){
         _uiState.update { current-> current.copy(daySelected=daySelected) }
     }
@@ -173,120 +132,96 @@ class SeanceViewModel @Inject constructor(
 
     fun swapExercise(day: String, fromIndex: Int, toIndex: Int) {
         val seance = _uiState.value.seancesParJour[day] ?: return
-        val exercises = seance.exercisesInSceance
+        val exercises = seance.exercisesInSceance.toMutableList()
         if (fromIndex !in exercises.indices || toIndex !in exercises.indices) return
-        exercises.apply {
-            val temp = this[fromIndex]
-            this[fromIndex] = this[toIndex]
-            this[toIndex] = temp
-        }
+        val temp = exercises[fromIndex]
+        exercises[fromIndex] = exercises[toIndex]
+        exercises[toIndex] = temp
+
         _uiState.value.seancesParJour[day] = seance.copy(
-            exercisesInSceance = exercises
+            exercisesInSceance = exercises.toMutableStateList()
         )
 
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
     fun updateSet(exerciseId: Long,index: Int,newValue : SetField,rightSet: Boolean,unilateral: Boolean){
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
-        val sets = seance.setsMap[exerciseId] ?: return
-        if (index !in sets.indices) return
-        val left = sets[index]
-        val right = left.linkedRightSet
+        updateExercise(
+            exerciseId,
+            propertyUpdater = { it },
+            setsUpdater = { sets ->
+                if (index !in sets.indices) return@updateExercise
+                val left = sets[index]
+                val right = left.linkedRightSet
 
-        val updatedSet = when (newValue) {
-            // ---------- REPS ----------
-            is SetField.Reps -> {
-                if (unilateral && rightSet && right != null) {
-                    left.copy(
-                        linkedRightSet = right.copy(reps = newValue.value)
-                    )
-                } else {
-                    left.copy(reps = newValue.value)
+                sets[index] = when (newValue) {
+                    // ---------- REPS ----------
+                    is SetField.Reps -> if (unilateral && rightSet && right != null) {
+                        left.copy(linkedRightSet = right.copy(reps = newValue.value))
+                    } else left.copy(reps = newValue.value)
+                    // ---------- CHARGE (sync L + R) ----------
+                    is SetField.Charge -> if (unilateral) {
+                        left.copy(
+                            charge = newValue.value,
+                            linkedRightSet = right?.copy(charge = newValue.value)
+                        )
+                    } else left.copy(charge = newValue.value)
+                    // ---------- RIR (sync L + R) ----------
+                    is SetField.Rir -> if (unilateral) {
+                        left.copy(
+                            rir = newValue.value,
+                            linkedRightSet = right?.copy(rir = newValue.value)
+                        )
+                    } else left.copy(rir = newValue.value)
                 }
             }
-            // ---------- CHARGE (sync L + R) ----------
-            is SetField.Charge -> {
-                if (unilateral) {
-                    left.copy(
-                        charge = newValue.value,
-                        linkedRightSet = right?.copy(charge = newValue.value)
-                    )
-                } else {
-                    left.copy(charge = newValue.value)
-                }
-            }
-
-            // ---------- RIR (sync L + R) ----------
-            is SetField.Rir -> {
-                if (unilateral) {
-                    left.copy(
-                        rir = newValue.value,
-                        linkedRightSet = right?.copy(rir = newValue.value)
-                    )
-                } else {
-                    left.copy(rir = newValue.value)
-                }
-            }
-        }
-        sets[index] = updatedSet
-        changeSaveStatus(SaveType.NOTSAVE)
+        )
     }
 
+
+
     fun updateLaterite(exerciseId: Long, lateriteId: Long) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
-
-        val index = seance.exercisesInSceance.indexOfFirst { it.exerciseId == exerciseId }
-        if (index != -1) {
-            seance.exercisesInSceance[index] =
-                seance.exercisesInSceance[index].copy(laterite = lateriteId)
-        }
-
-        val sets = seance.setsMap[exerciseId] ?: return
-        if (lateriteId == 2L) { // unilatéral
-            for (i in sets.indices) {
-                val set = sets[i]
-                val updatedRightSet = set.linkedRightSet?.copy(
-                    reps = set.linkedRightSet?.reps ?: set.reps,
-                    charge = set.linkedRightSet?.charge ?: set.charge,
-                    rir = set.linkedRightSet?.rir ?: set.rir,
-                    type = set.linkedRightSet?.type ?: set.type
-                ) ?: SetData(
-                    type = set.type,
-                    charge = set.charge,
-                    reps = set.reps,
-                    rir = set.rir,
-                    side = SetSide.RIGHT
-                )
-                sets[i] = set.copy(
-                    side = SetSide.LEFT,
-                    linkedRightSet = updatedRightSet
-                )
+        updateExercise(
+            exerciseId,
+            propertyUpdater = { it.copy(laterite = lateriteId) },
+            setsUpdater = { sets ->
+                if (lateriteId == 2L) { // unilatéral
+                    for (i in sets.indices) {
+                        val set = sets[i]
+                        val updatedRightSet = set.linkedRightSet?.copy(
+                            reps = set.linkedRightSet?.reps ?: set.reps,
+                            charge = set.linkedRightSet?.charge ?: set.charge,
+                            rir = set.linkedRightSet?.rir ?: set.rir,
+                            type = set.linkedRightSet?.type ?: set.type
+                        ) ?: SetData(
+                            type = set.type,
+                            charge = set.charge,
+                            reps = set.reps,
+                            rir = set.rir,
+                            side = SetSide.RIGHT
+                        )
+                        sets[i] = set.copy(
+                            side = SetSide.LEFT,
+                            linkedRightSet = updatedRightSet
+                        )
+                    }
+                } else { // bilatéral ou autre
+                    for (i in sets.indices) {
+                        val set = sets[i]
+                        sets[i] = set.copy(
+                            side = SetSide.BOTH,
+                            linkedRightSet = null
+                        )
+                    }
+                }
             }
-        } else { // bilatéral ou autre
-            for (i in sets.indices) {
-                val set = sets[i]
-                sets[i] = set.copy(
-                    side = SetSide.BOTH,
-                    linkedRightSet = null
-                )
-            }
-        }
-        changeSaveStatus(SaveType.NOTSAVE)
+        )
     }
 
     fun updateEquipment(exerciseId: Long, equipmentId: Long) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
-
-        val index = seance.exercisesInSceance.indexOfFirst { it.exerciseId == exerciseId }
-        if (index != -1) {
-            seance.exercisesInSceance[index] =
-                seance.exercisesInSceance[index].copy(equipment = equipmentId)
-        }
-        changeSaveStatus(SaveType.NOTSAVE)
+        updateExercise(exerciseId,
+            propertyUpdater = { it.copy(equipment = equipmentId) }
+        )
     }
 
     fun changeDaySelected(dateFormat: String) {
@@ -321,12 +256,6 @@ class SeanceViewModel @Inject constructor(
             state.copy(exerciseToAdd = updatedList)
         }
     }
-
-
-    private fun getOrCreateSeanceOfADay(): SeanceDuJour {
-        return _uiState.value.seancesParJour.getOrPut(_uiState.value.daySelected) { SeanceDuJour() }
-    }
-
 
     fun addExerciseToSeance() {
         val day = _uiState.value.daySelected
@@ -365,43 +294,22 @@ class SeanceViewModel @Inject constructor(
     }
 
     fun addSetToExercise(exerciseId: Long, lateriteId: Long) {
-        val seance = getOrCreateSeanceOfADay()
-
-        val sets = seance.setsMap.getOrPut(exerciseId) { mutableStateListOf() }
-
-        val lastCharge = sets.lastOrNull()?.charge
-        val lastRir = sets.lastOrNull()?.rir?:1
-        val newSet = if (lateriteId == 2L) {
-            val rightSet = SetData(
-                type = SetType.EFFECTIVE,
-                charge = lastCharge,
-                reps = null,
-                rir = null,
-                side = SetSide.RIGHT,
-                linkedRightSet = null
-            )
-            SetData(
-                type = SetType.EFFECTIVE,
-                charge = lastCharge,
-                reps = null,
-                rir = lastRir,
-                side = SetSide.LEFT,
-                linkedRightSet = rightSet
-            )
-        } else {
-            SetData(
-                type = SetType.EFFECTIVE,
-                charge = lastCharge,
-                reps = null,
-                rir = lastRir,
-                side = SetSide.BOTH,
-                linkedRightSet = null
-            )
-        }
-        sets.add(newSet)
-
-
-        changeSaveStatus(SaveType.NOTSAVE)
+        Log.d("addSetTo","${exerciseId}")
+        updateExercise(
+            exerciseId,
+            propertyUpdater = { it },
+            setsUpdater = { sets ->
+                val lastCharge = sets.lastOrNull()?.charge
+                val lastRir = sets.lastOrNull()?.rir ?: 1
+                val newSet = if (lateriteId == 2L) {
+                    val rightSet = SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = null, side = SetSide.RIGHT)
+                    SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = lastRir, side = SetSide.LEFT, linkedRightSet = rightSet)
+                } else {
+                    SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = lastRir, side = SetSide.BOTH)
+                }
+                sets.add(newSet)
+            }
+        )
     }
 
     fun getLastExercicePerfBetweenDate(dateRecent: String, dateBefore: String) {
@@ -420,21 +328,25 @@ class SeanceViewModel @Inject constructor(
     }
 
     fun swapSet(exerciseId: Long, fromIndex: Int, toIndex: Int) {
-        val seance = _uiState.value.seancesParJour[_uiState.value.daySelected] ?: return
-        val sets = seance.setsMap[exerciseId] ?: return
-
-        if (fromIndex !in sets.indices || toIndex !in sets.indices) return
-
-        sets[fromIndex] = sets.set(toIndex, sets[fromIndex])
-        changeSaveStatus(SaveType.NOTSAVE)
+        updateExercise(
+            exerciseId,
+            propertyUpdater = { it },
+            setsUpdater = { sets ->
+                if (fromIndex in sets.indices && toIndex in sets.indices) {
+                    sets[fromIndex] = sets.set(toIndex, sets[fromIndex])
+                }
+            }
+        )
     }
 
     fun deleteSet(exerciseId: Long, setId: String) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
-        val sets = seance.setsMap[exerciseId] ?: return
-        seance.setsMap[exerciseId] = sets.filter { it.id != setId }.toMutableStateList()
-        changeSaveStatus(SaveType.NOTSAVE)
+        updateExercise(
+            exerciseId,
+            propertyUpdater = { it },
+            setsUpdater = { sets ->
+                sets.removeAll { it.id == setId }
+            }
+        )
     }
 
     fun expandExercise(exerciseId: Long?) {
@@ -447,28 +359,19 @@ class SeanceViewModel @Inject constructor(
 
 
     // +++++++++++ Nutrition
-    fun updateNutrition(
-        field: NutritionField,
-        value: Int
-    ) {
-        val day = _uiState.value.daySelected
-        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
-        val currentTrack = todaySeance.nutritionTrack
-
-        val newNutritionTrack = when (field) {
-            NutritionField.CALORIES -> currentTrack.copy(calories = value)
-            NutritionField.PROTEINS -> currentTrack.copy(proteins = value)
-            NutritionField.LIPIDS -> currentTrack.copy(lipids = value)
-            NutritionField.CARBOHYDRATES -> currentTrack.copy(carbohydrates = value)
-            NutritionField.FIBER -> currentTrack.copy(fiber = value)
-            NutritionField.CAFEINS -> currentTrack.copy(cafeins = value)
+    fun updateNutrition(field: NutritionField, value: Int) {
+        updateSeance(save = true, exerciseSave=false,updater =  { seance ->
+            val newTrack = when(field) {
+                NutritionField.CALORIES -> seance.nutritionTrack.copy(calories = value)
+                NutritionField.PROTEINS -> seance.nutritionTrack.copy(proteins = value)
+                NutritionField.LIPIDS -> seance.nutritionTrack.copy(lipids = value)
+                NutritionField.CARBOHYDRATES -> seance.nutritionTrack.copy(carbohydrates = value)
+                NutritionField.FIBER -> seance.nutritionTrack.copy(fiber = value)
+                NutritionField.CAFEINS -> seance.nutritionTrack.copy(cafeins = value)
+            }
+            seance.copy(nutritionTrack = newTrack)
         }
-
-        _uiState.value.seancesParJour[day] = todaySeance.copy(
-            nutritionTrack = newNutritionTrack
         )
-
-        changeSaveStatus(SaveType.NOTSAVE,false)
     }
     // +++++++++++ Physio
 
@@ -476,22 +379,15 @@ class SeanceViewModel @Inject constructor(
         field: PhysioField,
         value: Any
     ) {
-        val day = _uiState.value.daySelected
-        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
-        val currentTrack = todaySeance.physioTrack
-
-        val newPhysioTrack = when (field) {
-            PhysioField.WEIGHT -> currentTrack.copy(weight = value as? Double ?: currentTrack.weight)
-            PhysioField.STEP -> currentTrack.copy(step = value as? Int ?: currentTrack.step)
-            PhysioField.HOUR_OF_SLEEP -> currentTrack.copy(hourOfSleep = value as? Double ?: currentTrack.hourOfSleep)
-            PhysioField.MOOD -> currentTrack.copy(mood = value as? String ?: currentTrack.mood)
-        }
-
-        _uiState.value.seancesParJour[day] = todaySeance.copy(
-            physioTrack = newPhysioTrack
-        )
-
-        changeSaveStatus(SaveType.NOTSAVE,false)
+        updateSeance(save = true, exerciseSave=false,updater = { seance ->
+            val newTrack = when (field) {
+                PhysioField.WEIGHT -> seance.physioTrack.copy(weight = value as? Double ?: seance.physioTrack.weight)
+                PhysioField.STEP -> seance.physioTrack.copy(step = value as? Int ?: seance.physioTrack.step)
+                PhysioField.HOUR_OF_SLEEP -> seance.physioTrack.copy(hourOfSleep = value as? Double ?: seance.physioTrack.hourOfSleep)
+                PhysioField.MOOD -> seance.physioTrack.copy(mood = value as? String ?: seance.physioTrack.mood)
+            }
+            seance.copy(physioTrack = newTrack)
+        })
     }
 
 
@@ -521,8 +417,6 @@ class SeanceViewModel @Inject constructor(
 
     fun autoSaveSeanceIfNeeded(day: String, seance: SeanceDuJour) {
         val currentDayData = seance.toDayDataRequest(day)
-
-
         val json = Json.Default.encodeToString(DayDataRequest.serializer(), currentDayData)
 
         val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
@@ -587,6 +481,28 @@ class SeanceViewModel @Inject constructor(
             totalSets = totalSets,
             sommePond = totalVolume.fastRoundToInt()
         )
+
+
+    }
+    private fun updateSeance(day: String = _uiState.value.daySelected, updater: (SeanceDuJour) -> SeanceDuJour, save: Boolean = true,exerciseSave: Boolean=true) {
+        val seance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
+        _uiState.value.seancesParJour[day] = updater(seance)
+        if (save) changeSaveStatus(SaveType.NOTSAVE,exerciseSave)
+    }
+
+    private fun updateExercise(
+        exerciseId: Long,
+        propertyUpdater: (ExerciseInSeance) -> ExerciseInSeance,
+        setsUpdater: ((MutableList<SetData>) -> Unit)? = null
+    ) {
+        val day = _uiState.value.daySelected
+        val seance = _uiState.value.seancesParJour[day] ?: return
+        val index = seance.exercisesInSceance.indexOfFirst { it.exerciseId == exerciseId }
+        if (index != -1) {
+            seance.exercisesInSceance[index] = propertyUpdater(seance.exercisesInSceance[index])
+        }
+        setsUpdater?.invoke(seance.setsMap.getOrPut(exerciseId) { mutableStateListOf() })
+        changeSaveStatus(SaveType.NOTSAVE)
     }
 
 

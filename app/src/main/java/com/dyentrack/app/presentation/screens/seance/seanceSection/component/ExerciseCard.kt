@@ -57,6 +57,7 @@ import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.formatForDisplay
 import kotlin.math.roundToInt
 
 
@@ -78,9 +79,7 @@ fun ExerciseCard(
     val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]
 
     val isLock = (state.exerciseMode == ExerciseMode.LOCK)
-    val textSub =viewModel.formatExerciseSets(exerciseSets,userUnit)
-
-
+    val textSub= exerciseSets.formatForDisplay(userUnit)
 
     CardWithContent(
         modifier = Modifier.padding(10.dp, 4.dp),
