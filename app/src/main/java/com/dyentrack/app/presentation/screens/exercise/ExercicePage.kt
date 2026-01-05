@@ -35,19 +35,17 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MesureUnit
-import com.dyentrack.app.domain.model.exercise.Exercise
+import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.getDescription
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.FavoriteIconButton
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
-import com.dyentrack.app.domain.model.enum.VariantType
-import com.dyentrack.app.domain.model.getDescription
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
@@ -55,7 +53,8 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ExercisePage(
-    modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
+    modifier: Modifier = Modifier, navController: NavController,
+    exerciseId : Long,
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
@@ -65,15 +64,16 @@ fun ExercisePage(
     val textToast = stringResource(R.string.favorite_login_prompt)
     val userPref by userPreferenceViewModel.userPreference.collectAsState()
     val userUnit = userPref?.mesureUnit ?: MesureUnit.KG
-    LaunchedEffect(exercise) {
-        exerciseViewModel.setExercise(exercise)
+    LaunchedEffect(exerciseId) {
+        exerciseViewModel.setExercise(exerciseId)
     }
     val userConnected by authViewModel.authState.collectAsState()
     val idUser = userConnected.user?.id ?: 0L
     val state by exerciseViewModel.uiState.collectAsState()
     val infoMapState by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     val language = exerciseViewModel.languageUser
-
+    val currentExercise by exerciseViewModel.currentExercise.collectAsState()
+    val exercise = currentExercise
     val focusManager = LocalFocusManager.current
     Box(modifier = Modifier
         .fillMaxSize()
@@ -117,7 +117,7 @@ fun ExercisePage(
                         )
                     }
                 }
-                if (state.sectionChose == SectionChose.EXPLAIN) {
+                if (state.sectionChose == SectionChose.EXPLAIN && exercise!=null) {
                     item {
                         Column {
                             Row(
@@ -233,7 +233,7 @@ fun ExercisePage(
                                     .height(70.dp),
                                 noteState,
                                 placeholder = stringResource(R.string.add_note),
-                                variant = InputVariant.OUTLINED,
+                                variant = VariantType.OUTLINED,
                                 singleLine = false,
                                 onFocusLost = { finalText ->
                                     infoUserViewModel.updateInfoExerciseUser(

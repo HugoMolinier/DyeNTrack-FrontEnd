@@ -4,6 +4,8 @@ import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.repository.MasterDataRepository
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +26,9 @@ class BuildMasterDataMapsUseCase @Inject constructor(
             return cachedMaps!!
         }
 
-        val data = repository.getMasterDataStatic()
+        val data = repository.masterDataFlow
+            .filterNotNull()
+            .first()
 
         val maps = MasterDataMaps(
             exerciseMap = data.officialExercise.associateBy { it.idExercise },
@@ -34,6 +38,7 @@ class BuildMasterDataMapsUseCase @Inject constructor(
             equipmentMap = data.equipment.associate { it.id to it.getName(language) }
         )
         cachedMaps = maps
+        cachedLanguage = language
         return maps
     }
 }

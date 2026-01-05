@@ -1,8 +1,20 @@
 package com.dyentrack.app.domain.model.preset
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.dyentrack.app.data.local.database.Converters
+import java.time.Instant
+
+@Entity(tableName = "preset")
+@TypeConverters(Converters::class)
 data class Preset(
-    val id_preset_seance: Long?,
+    @PrimaryKey(autoGenerate = true)
+    val idLocal:Long=0,//local only
+    val idPreset: Long?=null,
     val name :String,
-    val id_creator:Long?, //futur voir les preset Public
-    val presetSeanceExerciseVOs: List<ExerciceInPreset>
+    val lastUpdate: String= Instant.now().toString(),
+    val presetSeanceExerciseVO: List<ExerciceInPreset>?=emptyList(),
+    val isDelete: Boolean = false,//Local only
+
 )

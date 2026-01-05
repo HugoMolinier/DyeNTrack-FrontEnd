@@ -7,10 +7,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.TypeConverters
 import androidx.room.Update
-import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
+import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.TypeOfAction
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 //données métier persistantes
 @Dao
@@ -18,36 +19,37 @@ import java.time.Instant
 interface SeanceDao {
 
     @Query("SELECT * FROM seanceOfDay")
-    suspend fun getAllSeances(): List<SeanceOfDayLocal>
+    suspend fun getAllSeances(): List<DayDataRequest>
 
-    @Query("SELECT * FROM seanceOfDay WHERE day = :day")
-    suspend fun getSeanceByDay(day: String): SeanceOfDayLocal?
+    @Query("SELECT * FROM seanceOfDay WHERE dayData = :day")
+    suspend fun getSeanceByDay(day: String): DayDataRequest?
 
     @Query("SELECT * FROM seanceOfDay")
-    fun observeAllSeances(): Flow<List<SeanceOfDayLocal>>
+    fun observeAllSeances(): Flow<List<DayDataRequest>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSeance(seance: SeanceOfDayLocal)
+    suspend fun insertSeance(seance: DayDataRequest)
 
 
 
     @Update
-    suspend fun updateSeance(seance: SeanceOfDayLocal)
+    suspend fun updateSeance(seance: DayDataRequest)
 
-    suspend fun saveOrUpdateSeance(seanceDao: SeanceDao, seance: SeanceOfDayLocal) {
-        val updatedSeance = seance.copy(lastUpdateSeance = Instant.now().toString() , lastUpdateHealth =Instant.now().toString() )
-        if (seanceDao.getSeanceByDay(seance.day) == null) {
+    suspend fun saveOrUpdateSeance(seanceDao: SeanceDao, seance: DayDataRequest) {
+        val updatedSeance = seance.copy(lastUpdate = Instant.now().toString() , lastUpdateHealthLocal =Instant.now().toString() )
+        if (seanceDao.getSeanceByDay(seance.dayData) == null) {
             seanceDao.insertSeance(updatedSeance)
         } else {
             seanceDao.updateSeance(updatedSeance)
         }
     }
 
-    suspend fun saveOrUpdateSeanceWithoutReplaceNull(seanceDao: SeanceDao, seance: SeanceOfDayLocal,  dateSave: String? = null,typeOfAction: TypeOfAction) {
-        val existing = seanceDao.getSeanceByDay(seance.day)
-        val saveDate = dateSave ?: Instant.now().toString()
+    suspend fun saveOrUpdateSeanceWithoutReplaceNull( seance: DayDataRequest,  dateSave: String? = null,typeOfAction: TypeOfAction) {
+        val existing = getSeanceByDay(seance.dayData)
+        val saveDate = dateSave ?: Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
         val epoch = Instant.EPOCH.toString()
         Log.d("Type de SaveLocal","${typeOfAction}")
+        Log.d("DateSave", saveDate)
 
         val isSeanceUpdate =
             typeOfAction == TypeOfAction.UPDATESEANCE ||
@@ -60,19 +62,23 @@ interface SeanceDao {
         val mergedSeance = existing?.copy(
             nutritionTrack = seance.nutritionTrack ?: existing.nutritionTrack,
             physioTrack = seance.physioTrack ?: existing.physioTrack,
-            plannedExercises = if (typeOfAction == TypeOfAction.FORCESEANCEUPDATE) seance.plannedExercises else seance.plannedExercises.ifEmpty { existing.plannedExercises } ,
-            lastUpdateSeance = if (isSeanceUpdate) saveDate else existing.lastUpdateSeance ,
-            lastUpdateHealth = if (isHealthUpdate) saveDate else existing.lastUpdateHealth
+            seanceTrack = when (typeOfAction) {
+                TypeOfAction.FORCESEANCEUPDATE -> seance.seanceTrack
+                else -> seance.seanceTrack ?: existing.seanceTrack
+            },
+            lastUpdate = if (isSeanceUpdate) saveDate else existing.lastUpdate ,
+            lastUpdateHealthLocal = if (isHealthUpdate) saveDate else existing.lastUpdateHealthLocal
         )?: seance.copy(
-            lastUpdateSeance =  if (isSeanceUpdate) saveDate else epoch,
-            lastUpdateHealth = if (isHealthUpdate) saveDate else epoch
+            lastUpdate = if (isSeanceUpdate) saveDate else epoch,
+            lastUpdateHealthLocal = if (isHealthUpdate) saveDate else epoch
 
         )
+        Log.d("mergeSeance","${mergedSeance}")
 
         if (existing == null) {
-            seanceDao.insertSeance(mergedSeance)
+            insertSeance(mergedSeance)
         } else {
-            seanceDao.updateSeance(mergedSeance)
+            updateSeance(mergedSeance)
         }
     }
 

@@ -5,11 +5,13 @@ import com.dyentrack.app.data.network.dto.InfoExerciseUserContentRequest
 import com.dyentrack.app.data.network.dto.UserUpdate
 import com.dyentrack.app.domain.model.ApiResponse
 import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.InfoExerciseUser
+import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.ResponseAuth
 import com.dyentrack.app.domain.model.User
+import com.dyentrack.app.domain.model.preset.Preset
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -54,6 +56,27 @@ interface ApiInterface  {
     suspend fun updateUser(
         @Body request: UserUpdate
     ): ApiResponse<User>
+
+
+
+
+    @DELETE("preset-seances/delete/{id}")
+    suspend fun deletePreset(
+        @Path("id") id: Long,
+    ): ApiResponse<Unit>
+
+
+    @POST("preset-seances/save")
+    suspend fun savePreset(
+        @Body preset: Preset,
+    ): ApiResponse<Preset>
+
+
+    @GET("preset-seances/getAll")
+    suspend fun getAllPreset(): ApiResponse<List<Preset>>
+
+
+
 
 
 }

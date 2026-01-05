@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,10 +43,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-
-enum class InputVariant { FILLED, OUTLINED ,EMPTY }
 
 @Composable
 fun InputCustom(
@@ -55,26 +57,34 @@ fun InputCustom(
     enabled: Boolean = true,
     leadingIcon:   ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    variant : InputVariant ?= InputVariant.FILLED,
+    variant : VariantType ?= VariantType.FILLED,
     singleLine:Boolean = true,
     replaceZeroToNull:Boolean=false,
     size:  SizeType= SizeType.LARGE,
     maxCaracter: Int? = null,
     hideContent: Boolean = false,
-    centerText: Boolean = false
+    centerText: Boolean = false,
+    autoFocus: Boolean = false,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     var contentVisible by remember { mutableStateOf(!hideContent) }
 
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .height(if (variant == InputVariant.EMPTY)32.dp else 44.dp)
-            .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == InputVariant.OUTLINED) 12.dp else 5.dp))
+            .height(if (variant == VariantType.EMPTY)32.dp else 44.dp)
+            .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp))
 
             .then(
-                if (variant == InputVariant.OUTLINED) Modifier.border(
+                if (variant == VariantType.OUTLINED) Modifier.border(
                     width = 1.dp,
                     color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
@@ -83,12 +93,14 @@ fun InputCustom(
                 start = when (size) {
                     SizeType.LARGE -> 16.dp
                     SizeType.MEDIUM -> 8.dp
-                    else -> 4.dp
+                    SizeType.NO -> 0.dp
+                    SizeType.SMALL ->4.dp
                 },
                 end = when (size) {
                     SizeType.LARGE -> if (hideContent) 8.dp else 16.dp
                     SizeType.MEDIUM -> 8.dp
-                    else -> 4.dp
+                    SizeType.NO -> 0.dp
+                    SizeType.SMALL ->4.dp
                 },
                 top = if (singleLine) 0.dp else 10.dp,
                 bottom = if (singleLine) 0.dp else 10.dp
@@ -114,7 +126,7 @@ fun InputCustom(
                 }
             ),
             visualTransformation = if (contentVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            modifier=Modifier.weight(1f).onFocusChanged { focusState ->
+            modifier=Modifier.weight(1f).focusRequester(focusRequester).onFocusChanged { focusState ->
                 // FOCUS OUT
                 if (isFocused && !focusState.isFocused) {
                     onFocusLost?.invoke(text.value.text)
@@ -167,13 +179,13 @@ fun InputCustom(
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
                 color = if (enabled) MaterialTheme .colorScheme.onSurface else secondaryTextColor.copy(alpha= 0.8f),
-                textAlign = if (centerText) TextAlign.Center else if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
+                textAlign = if (centerText) TextAlign.Center else if (variant == VariantType.EMPTY) TextAlign.End else TextAlign.Start
 
             ),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = if (singleLine) if (centerText) Alignment.Center else if (variant == InputVariant.EMPTY) Alignment.CenterEnd else Alignment.CenterStart else Alignment.TopStart
+                    contentAlignment = if (singleLine) if (centerText) Alignment.Center else if (variant == VariantType.EMPTY) Alignment.CenterEnd else Alignment.CenterStart else Alignment.TopStart
 
                 ) {
                     if (text.value.text.isEmpty()) {
@@ -183,7 +195,7 @@ fun InputCustom(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = secondaryTextColor.copy(alpha = 0.5f),
 
-                                textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
+                                textAlign = if (variant == VariantType.EMPTY) TextAlign.End else TextAlign.Start
                             ),
                         )
                     }

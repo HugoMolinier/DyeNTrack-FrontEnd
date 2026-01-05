@@ -36,6 +36,7 @@ import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.exercise.ExerciseTypeFilter
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
 
@@ -109,7 +110,7 @@ fun BottomSheetSelectionExercise(
                 placeholder = stringResource(R.string.filter_search),
                 leadingIcon = Icons.Default.Search,
                 modifier = Modifier.padding(12.dp, 20.dp),
-                variant = InputVariant.OUTLINED
+                variant = VariantType.OUTLINED
             )
 
 
@@ -189,18 +190,14 @@ fun BottomSheetSelectionExercise(
                                 MenuItemData(
                                     stringResource(R.string.exercise_view),
                                     {
-                                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                                            "exercise",
-                                            exercise
-                                        )
-                                        navController.navigate("exercise")
+                                        navController.navigate("exercise/${exercise.idExercise}")
                                     }
 
                                 )
                             ),
                         subTextEmphasis = EmphasisType.PRIMARY,
                         onClick = { onClickExercise(exercise) },
-                        badgeText = if (isSelected) (selectedExerciseIds!!.indexOf(exercise.idExercise) + 1).toString() else null
+                        badgeText = if (isSelected) (selectedExerciseIds.indexOf(exercise.idExercise) + 1).toString() else null
                     )}
                 }
             }

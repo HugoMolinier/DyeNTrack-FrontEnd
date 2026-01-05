@@ -22,7 +22,9 @@ import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.presentation.utils.convertWeight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -43,18 +45,17 @@ class ExerciseViewModel @Inject constructor(
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState
-    var masterData: MasterDataStatic? = null
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
     private val _currentExercise = MutableStateFlow<Exercise?>(null)
     val currentExercise: StateFlow<Exercise?> = _currentExercise
 
     val languageUser = LocaleManager.getCurrentLanguage()
-    fun setExercise(exercise: Exercise) {
-        _currentExercise.value = exercise
+    fun setExercise(exerciseId: Long) {
+        _currentExercise.value = _uiState.value.masterDataMaps?.exerciseMap?.get(exerciseId)
     }
 
     init {
         viewModelScope.launch {
-            masterData = getMasterDataStaticUseCase()
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             _uiState.update { it.copy(masterDataMaps=maps)}
             launch {
@@ -176,11 +177,11 @@ class ExerciseViewModel @Inject constructor(
     }
 
     fun getEquipmentNames(): String {
-        return masterData?.equipment?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+        return masterData.value?.equipment?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
     }
 
     fun getLateralities(): String {
-        return masterData?.lateralites?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+        return masterData.value?.lateralites?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
     }
 
     @Composable

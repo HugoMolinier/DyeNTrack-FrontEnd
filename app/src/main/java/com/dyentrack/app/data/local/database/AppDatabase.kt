@@ -3,10 +3,13 @@ package com.dyentrack.app.data.local.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
+import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.preset.Preset
 
-@Database(entities = [SeanceOfDayLocal::class], version = 10)
+@Database(entities = [DayDataRequest::class, Preset::class], version = 14)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun seanceDao(): SeanceDao
+
+    abstract fun presetDao(): PresetDao
 }

@@ -36,13 +36,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.NavItem
-import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.presentation.globalViewModel.AppViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
-import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
@@ -56,12 +53,12 @@ import com.dyentrack.app.presentation.screens.parameters.MesureUnitPage
 import com.dyentrack.app.presentation.screens.parameters.ObjectifPage
 import com.dyentrack.app.presentation.screens.parameters.ParameterPage
 import com.dyentrack.app.presentation.screens.parameters.RegisterPage
+import com.dyentrack.app.presentation.screens.preset.PresetPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
 import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 @AndroidEntryPoint
@@ -152,7 +149,7 @@ fun MyApp() {
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            composable("home") { HomePage(navController=navController) }
+            composable("home") { HomePage(navController = navController) }
             composable(
                 route = "seance?dayKey={dayKey}&section={section}",
                 arguments = listOf(
@@ -161,32 +158,41 @@ fun MyApp() {
                         nullable = true
                         defaultValue = null
                     },
-                    navArgument("section") { type = NavType.StringType; nullable = true; defaultValue = null }
+                    navArgument("section") {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    }
                 )
             ) { backStackEntry ->
                 val dayKey = backStackEntry.arguments?.getString("dayKey") // null si non fourni
                 val section = backStackEntry.arguments?.getString("section")
-                SeancePage(navController = navController, daySelected = dayKey,section=section)
+                SeancePage(navController = navController, daySelected = dayKey, section = section)
             }
-            composable("analyse") { AnalysePage(navController=navController) }
-            composable("parametre") { ParameterPage(navController=navController) }
-            composable("information") { InformationPage(navController=navController) }
-            composable("connexion") { ConnexionPage(navController=navController)}
-            composable("connectedApp") { ConnectedAppPage(navController=navController) }
-            composable("objectif") { ObjectifPage(navController=navController) }
-            composable("mesureUnit") { MesureUnitPage(navController=navController) }
-            composable("language") { LanguagePage(navController=navController) }
-            composable("privacy") { ConfidentialPage(navController=navController) }
-            composable("legal") { LegalNoticesPage(navController=navController) }
+            composable("analyse") { AnalysePage(navController = navController) }
+            composable("parametre") { ParameterPage(navController = navController) }
+            composable("information") { InformationPage(navController = navController) }
+            composable("connexion") { ConnexionPage(navController = navController) }
+            composable("connectedApp") { ConnectedAppPage(navController = navController) }
+            composable("objectif") { ObjectifPage(navController = navController) }
+            composable("mesureUnit") { MesureUnitPage(navController = navController) }
+            composable("language") { LanguagePage(navController = navController) }
+            composable("privacy") { ConfidentialPage(navController = navController) }
+            composable("legal") { LegalNoticesPage(navController = navController) }
 
-            composable("inscription") { RegisterPage(navController=navController) }
-                composable("exercise") { backStackEntry ->
-                val exercise = navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.get<Exercise>("exercise")
-                if (exercise != null) {
-                    ExercisePage(navController = navController, exercise = exercise )
-                }
+            composable("inscription") { RegisterPage(navController = navController) }
+            composable("exercise/{exerciseId}",
+                arguments = listOf(
+                    navArgument("exerciseId") { type = NavType.LongType; nullable = false }
+                )) { backStackEntry ->
+                val exerciseId = backStackEntry.arguments!!.getLong("exerciseId")
+                ExercisePage(navController = navController, exerciseId = exerciseId)
+            }
+
+            composable("preset/{presetId}",
+                arguments = listOf(
+                    navArgument("presetId") { type = NavType.LongType; nullable = false }
+                )) { backStackEntry ->
+                val presetId = backStackEntry.arguments!!.getLong("presetId")
+                PresetPage(navController = navController, idLocal = presetId)
             }
 
         }

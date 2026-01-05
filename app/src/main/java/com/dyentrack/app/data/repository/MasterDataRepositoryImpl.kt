@@ -4,6 +4,8 @@ import com.dyentrack.app.data.local.datasource.LocalDataSource
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.repository.MasterDataRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -16,23 +18,23 @@ class MasterDataRepositoryImpl @Inject constructor(
     private val localDataSource: LocalDataSource
 ) : MasterDataRepository {
     private var cachedMasterData: MasterDataStatic? = null
-    override suspend fun getMasterDataStatic(): MasterDataStatic {
-        //cache
+    private val _masterDataFlow = MutableStateFlow<MasterDataStatic?>(null)
+    override val masterDataFlow: StateFlow<MasterDataStatic?> = _masterDataFlow
 
-        cachedMasterData?.let { return it }
+    override suspend fun refreshMasterDataIfNeeded() {
+        //cache
+        cachedMasterData?.let {
+            _masterDataFlow.value = it
+            return
+        }
+
         //local
         localDataSource.getMasterData()?.let {
-            it.dateEnregistement?.let { dateStr ->
-                val savedDate = Instant.parse(dateStr)
-                val now = Instant.now()
-                val diffDays = Duration.between(savedDate, now).toDays()
+            cachedMasterData = it
+            _masterDataFlow.value = it
 
-
-                cachedMasterData = it
-                if (diffDays < 2) {
-                    return it
-                }
-            }
+            val diffDays = Duration.between(Instant.parse(it.dateEnregistement), Instant.now()).toDays()
+            if (diffDays < 2) return
         }
         //api
 
@@ -53,15 +55,10 @@ class MasterDataRepositoryImpl @Inject constructor(
                 }
 
                 cachedMasterData = masterData
-                return masterData
-            } else {
-                throw Exception(response.message)
+                _masterDataFlow.value = masterData
             }
+        } catch (_: Exception) {
 
-        } catch (e: Exception) {
-            localDataSource.getMasterData()?.let { return it }
-
-            throw e // ou exception métier
         }
     }
 

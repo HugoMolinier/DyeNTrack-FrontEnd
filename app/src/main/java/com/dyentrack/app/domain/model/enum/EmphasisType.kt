@@ -1,3 +1,3 @@
 package com.dyentrack.app.domain.model.enum
 
-enum class EmphasisType { PRIMARY, SECONDARY }
+enum class EmphasisType { PRIMARY, SECONDARY,TERTIA }

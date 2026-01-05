@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.presentation.components.AdaptiveAdBanner
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CustomButton
@@ -92,6 +93,7 @@ fun SeancePage(
     val authViewModel by authViewModel.authState.collectAsState()
 
     val language = viewModel.languageUser
+    val masterData by viewModel.masterData.collectAsState()
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -272,7 +274,7 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                             ?.toList()
                             ?: listOf()
                     )
-                    viewModel.toggleBottomSheet(true)
+                    viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE)
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -299,15 +301,15 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
 
     BottomSheetSelectionExercise(
-        bottomSheetVisibility = state.isBottomSheetVisible,
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
         selectedExerciseIds = state.exerciseToAdd,
         navController = navController,
         title=stringResource(R.string.add_exercise),
-        onClose = { viewModel.toggleBottomSheet(false) },
+        onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onClickExercise = { exercise ->
             viewModel.toggleExerciseSelection(exercise.idExercise)
         },
-        officialExercise = viewModel.masterData?.officialExercise,
+        officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
         onClickFavorite = { if(authViewModel.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
             Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
@@ -325,7 +327,7 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                 label = stringResource(R.string.cancel),
                 emphasis = EmphasisType.SECONDARY,
                 modifier = Modifier.weight(1f),
-                onClick = { viewModel.toggleBottomSheet(false) }
+                onClick = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) }
             )
             CustomButton(
                 label = stringResource(R.string.add),

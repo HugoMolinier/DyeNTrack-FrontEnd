@@ -37,7 +37,9 @@ fun BottomSheetContent(
     footerComponent: @Composable (() -> Unit)? = null,
     showBottomSheet: Boolean = false,
     onDismiss: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isfullScreen:Boolean=true,
+    dragZoneComponent: @Composable (() -> Unit)? = null,
 ) {
     if (!showBottomSheet) return
     val colorScheme = MaterialTheme.colorScheme
@@ -48,13 +50,11 @@ fun BottomSheetContent(
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss?.invoke() },
-        sheetState = sheetState,
-                modifier = Modifier
-            .fillMaxWidth()
-,
+        sheetState = sheetState          ,
+        modifier = Modifier
+            .fillMaxWidth(),
         containerColor = colorScheme.background,
-        shape = MaterialTheme.shapes.large
-        ,
+        shape = MaterialTheme.shapes.large,
 
 
         dragHandle = {
@@ -74,52 +74,58 @@ fun BottomSheetContent(
             }
         }
     ) {
-        Column( modifier = modifier .fillMaxWidth().heightIn(    min = 0.dp,max = LocalConfiguration.current.screenHeightDp.dp * 0.85f) ) {
-            if (title.isNotBlank() || closeButtonTitle) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, top = 4.dp, bottom = 4.dp,end=4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = title, style = MaterialTheme.typography.titleSmall)
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn( max = LocalConfiguration.current.screenHeightDp.dp * 0.85f)
+        ) {
+            if (dragZoneComponent != null) {
+                dragZoneComponent.invoke()
+            } else {
+                if (title.isNotBlank() || closeButtonTitle) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, top = 4.dp, bottom = 4.dp, end = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = title, style = MaterialTheme.typography.titleSmall)
 
-                    if (closeButtonTitle) {
-                        IconButton(onClick = { onDismiss?.invoke() }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Fermer"
-                            )
+                        if (closeButtonTitle) {
+                            IconButton(onClick = { onDismiss?.invoke() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Fermer"
+                                )
+                            }
                         }
                     }
                 }
 
-                HorizontalDivider(color = Color(0xFF292929), thickness = 1.dp)
             }
+            HorizontalDivider(color = Color(0xFF292929), thickness = 1.dp)
 
             // --- CONTENU SCROLLABLE ---
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().then(if (isfullScreen)
+                        Modifier.weight(1f)
+                        else Modifier)
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                        childrenForExtend?.invoke()
-                    }
+                childrenForExtend?.invoke()
+
 
             }
-
-
             footerComponent?.let {
                 HorizontalDivider(color = Color(0xFF292929), thickness = 1.dp)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorScheme.background)
-                ) {
+                Box(modifier = Modifier.fillMaxWidth().background(colorScheme.background)) {
                     it()
                 }
             }
+
+
+
         }
     }
 }

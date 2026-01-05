@@ -2,13 +2,9 @@ package com.dyentrack.app.data.repository
 
 import android.util.Log
 import com.dyentrack.app.data.local.database.SeanceDao
-import com.dyentrack.app.data.local.entities.SeanceOfDayLocal
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.AuthStatus
 import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.NutritionTrack
-import com.dyentrack.app.domain.model.PhysioTrack
-import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,23 +25,27 @@ class DayDataRepositoryImpl @Inject constructor(
     override suspend fun fetchDayData() {
         // 1. récupère le local
 
-        val localDayDataBrut = seanceDao.getAllSeances()
-        val localDayData = localDayDataBrut.map { it.toDayDataRequest() }
+        val localDayData = seanceDao.getAllSeances()
         //1.5 update le flow car api peut delay
         _dayDataFlow.value = localDayData
 
 
         // 2. récupère l'API
         if(userConnectionRepositoryImpl.isValideToken()==AuthStatus.CONNECTED) {
-            val apiDayData = try {
+            try {
                 val apiResponse = api.getAllDayDataByDay()
-                if (apiResponse.status == 200) apiResponse.data else emptyList()
-            } catch (_: Exception) {
-                emptyList()
+                if (apiResponse.status == 200) {
+                    apiResponse.data
+                    //Merge
+                    val merged = mergeLocalAndApiByTimestamp(localDayData, apiResponse.data)
+                    _dayDataFlow.value = merged
+                }
+
+            } catch (e: Exception) {
+                Log.e("DayDataRepository", "Erreur fetchDayData: ${e.message}")
+                return
             }
-            // 4. merge local et API
-            val merged = mergeLocalAndApiByTimestamp(localDayData, apiDayData)
-            _dayDataFlow.value = merged
+
         }
     }
 
@@ -64,52 +64,60 @@ class DayDataRepositoryImpl @Inject constructor(
         local.forEach { localDay ->
 
             val apiDay = apiMap[localDay.dayData]
-            if (apiDay != null) {
-                val localTimeSeance = Instant.parse(localDay.lastUpdate)
-                val localTimeHealth = Instant.parse(localDay.lastUpdateHealthLocal)
-                val apiTime =  Instant.parse(apiDay.lastUpdate)
-
-                val updateSeance = apiTime >= localTimeSeance // api + recent que seance
-                val updateHealth = apiTime >= localTimeHealth // api + recent que health
-
-                if (updateHealth || updateSeance ) { //api + recent que seance ou api + recent que health
-                    result.add(apiDay)
-                    if (apiTime !=localTimeSeance || apiTime !=localTimeHealth ) { //si egal alors donnée importer de l'api et sync en date
-                        updateToLocal(
-                            apiDay.copy(
-                                nutritionTrack = if (updateHealth) apiDay.nutritionTrack else null,
-                                physioTrack = if (updateHealth) apiDay.physioTrack else null,
-                                seanceTrack = if (updateSeance) apiDay.seanceTrack else null
-                            ), apiDay.lastUpdate,
-                            TypeOfAction.UPDATEBOTH
-                        )
-                    }
-                }
-
-
-                else {// sinon garder local et mettre a jour api
-                    result.add(localDay)
-                     updateToApi(localDay)
-                }
-
-            }else {// API n'a pas ce jour → on envoie le local
+            if (apiDay == null) {
+                // API n’a pas le jour → push local
                 result.add(localDay)
                 updateToApi(localDay)
+                return@forEach
             }
+
+            val apiTime = Instant.parse(apiDay.lastUpdate)
+            val localSeanceTime = Instant.parse(localDay.lastUpdate)
+            val localHealthTime = Instant.parse(localDay.lastUpdateHealthLocal)
+
+
+            Log.d("time","${localDay.lastUpdate}__${apiDay.lastUpdate}")
+            val seanceFromLocal = localSeanceTime > apiTime
+            val healthFromLocal = localHealthTime > apiTime
+            val merged = apiDay.copy(
+                seanceTrack = if (seanceFromLocal) localDay.seanceTrack else apiDay.seanceTrack,
+                nutritionTrack = if (healthFromLocal) localDay.nutritionTrack else apiDay.nutritionTrack,
+                physioTrack = if (healthFromLocal) localDay.physioTrack else apiDay.physioTrack
+            )
+            result.add(merged)
+
+            // ---- SYNC API ---- si le local a un element plus récent , n'envoie que l'élément plus récent
+            if (seanceFromLocal || healthFromLocal) {//null = ingnoré
+                updateToApi(
+                    apiDay.copy(
+                        seanceTrack = if (seanceFromLocal) localDay.seanceTrack else null,
+                        nutritionTrack = if (healthFromLocal) localDay.nutritionTrack else null,
+                        physioTrack = if (healthFromLocal) localDay.physioTrack else null
+                    )
+                )
+            }
+            // ---- SYNC LOCAL ---- si l'api a un élémênt plus récent
+            if (localHealthTime < apiTime || localSeanceTime < apiTime) {
+                updateToLocal(
+                    merged,
+                    apiDay.lastUpdate,
+                    TypeOfAction.UPDATEBOTH
+                )
+            }
+
+
         }
         //ajouter au local les jour api pas dans le local
         val localDays = local.map { it.dayData }.toSet()
-        api.filter { it.dayData !in localDays }.forEach { apiOnlyDay ->
-            result.add(apiOnlyDay)
-            updateToLocal(apiOnlyDay,apiOnlyDay.lastUpdate, TypeOfAction.UPDATEBOTH)
+        api.filter { it.dayData !in localDays }.forEach {
+            result.add(it)
+            updateToLocal(it,it.lastUpdate, TypeOfAction.UPDATEBOTH)
         }
         return result
     }
 
     override suspend fun getDayLocal(day:String): DayDataRequest? {
-        return seanceDao
-            .getSeanceByDay(day)
-            ?.toDayDataRequest()
+        return seanceDao.getSeanceByDay(day)
     }
 
     override suspend fun updateToApi(dayData: DayDataRequest): Int {
@@ -130,38 +138,12 @@ class DayDataRepositoryImpl @Inject constructor(
 
 
     override suspend fun updateToLocal(dayData: DayDataRequest, dateSave: String?,typeOfAction: TypeOfAction ) {
-        seanceDao.getSeanceByDay(dayData.dayData)
-        val seanceLocal = dayData.toSeanceOfDayLocal()
-        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(seanceDao, seanceLocal,dateSave,typeOfAction)
-        val updatedLocal = seanceDao.getAllSeances().map { it.toDayDataRequest() }
-        _dayDataFlow.value = updatedLocal.map { it.copy() }
+        seanceDao.saveOrUpdateSeanceWithoutReplaceNull( dayData,dateSave,typeOfAction)
+        seanceDao.getSeanceByDay(dayData.dayData)?.let { day ->
+            _dayDataFlow.value = (_dayDataFlow.value.orEmpty().filter { it.dayData != day.dayData } + day.copy())
+        }
     }
 
 
-    fun DayDataRequest.toSeanceOfDayLocal(): SeanceOfDayLocal {
-        return SeanceOfDayLocal(
-            day = dayData,
-            nutritionTrack = nutritionTrack ,
-            physioTrack = physioTrack ,
-            plannedExercises = seanceTrack?.plannedExercises?:emptyList()
 
-        )
-    }
-
-     fun SeanceOfDayLocal.toDayDataRequest(): DayDataRequest {
-        return DayDataRequest(
-            null,
-            day,
-
-            seanceTrack = SeanceTrack(
-                startHour = null,
-                presetSeanceId = null,
-                plannedExercises = plannedExercises
-            ),
-            nutritionTrack?: NutritionTrack(),
-            physioTrack?: PhysioTrack(),
-            lastUpdate= lastUpdateSeance,
-            lastUpdateHealth
-        )
-    }
 }

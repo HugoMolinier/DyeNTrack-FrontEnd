@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -40,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,11 +50,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.domain.model.getName
+import com.dyentrack.app.presentation.components.BottomSheetInput
 import com.dyentrack.app.presentation.components.BottomSheetPreset
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
@@ -63,6 +64,7 @@ import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
+import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -75,15 +77,25 @@ fun HomePage(
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
-) {
+    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>()
+    ) {
 
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
+    val presetList by presetViewModel.presetFlow.collectAsState()
+    LaunchedEffect(Unit) {
+        presetViewModel.navigateToPreset.collect { preset ->
+            Log.d("presetNav","${preset}")
+            if(preset!=null) navController.navigate("preset/${preset.idLocal}")
+        }
+    }
 
     val authState by authViewModel.authState.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
     val objectifStep = userPreference?.objStep ?:0
     val objectifCal = userPreference?.objCalorie ?:0
     val objectifsommeil = userPreference?.objHourSleep ?:0.0
+
+    val masterData by homeViewModel.masterData.collectAsState()
 
     val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
 
@@ -538,14 +550,12 @@ fun HomePage(
         navController = navController,
         title=stringResource(R.string.see_info),
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        officialExercise = homeViewModel.masterData?.officialExercise,
+        officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
         onClickExercise = {  exercice ->
-            navController.currentBackStackEntry?.savedStateHandle?.set(
-            "exercise",
-                exercice
-        )
-            navController.navigate("exercise")},
+            Log.d("aa","${exercice.idExercise}")
+            navController.navigate("exercise/${exercice.idExercise}")
+        },
         onClickFavorite = { if(authState.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
             Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
         } },
@@ -554,12 +564,25 @@ fun HomePage(
     )
     BottomSheetPreset(
         bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYPRESET,
-        navController = navController,
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        userlanguage= language,
+        onNew ={homeViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET)},
         title="Preset",
+        presetList = presetList,
+        onClickPreset={
+            navController.navigate("preset/${it.idLocal}")
+        }
 
     )
+
+    BottomSheetInput(
+        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.INPUTPRESET,
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onNew = {value->
+            presetViewModel.createPreset(value);
+        },
+        title="Preset",
+
+        )
 
 }
 

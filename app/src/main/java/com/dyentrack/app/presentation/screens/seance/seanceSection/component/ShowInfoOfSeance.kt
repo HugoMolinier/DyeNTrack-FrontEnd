@@ -17,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.components.InfoRow
-import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.utils.convertWeight
 

@@ -1,11 +1,17 @@
 package com.dyentrack.app.domain.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.dyentrack.app.data.local.database.Converters
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Entity(tableName = "seanceOfDay")
+@TypeConverters(Converters::class)
 data class DayDataRequest(
-    val idDayData:Long?,
-    val dayData: String,
+    val idDayData:Long?,//idAPI
+    @PrimaryKey val dayData: String,
     val seanceTrack: SeanceTrack?=null,
     val nutritionTrack: NutritionTrack?=null,
     val physioTrack: PhysioTrack?=null,

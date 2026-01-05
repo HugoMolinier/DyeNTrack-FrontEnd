@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 
 @Composable
@@ -48,6 +50,9 @@ fun CustomButton(
         SizeType.SMALL -> PaddingValues(
             vertical = 2.dp
         )
+        SizeType.NO -> PaddingValues(
+            vertical = 0.dp
+        )
         SizeType.MEDIUM -> PaddingValues(
             vertical = 4.dp
         )
@@ -58,12 +63,16 @@ fun CustomButton(
 
     when (emphasis) {
         EmphasisType.PRIMARY -> {
-            backgroundColor = MaterialTheme.colorScheme.primary // Bleu primaire
+            backgroundColor = MaterialTheme.colorScheme.primary
             contentColor = MaterialTheme.colorScheme.background
         }
         EmphasisType.SECONDARY -> {
             backgroundColor = addColor.TertiaOne
             contentColor = MaterialTheme.colorScheme.primary
+        }
+        EmphasisType.TERTIA -> {
+            backgroundColor = addColor.TertiaOne
+            contentColor = MaterialTheme.colorScheme.onSurface
         }
     }
 
@@ -73,6 +82,7 @@ fun CustomButton(
             onClick = { onClick?.invoke() },
             enabled = enable,
             shape = RoundedCornerShape(5.dp),
+            contentPadding = PaddingValues(0.dp),
             border = BorderStroke(1.dp, contentColor),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = finalBackground,
@@ -104,10 +114,11 @@ fun CustomButton(
                 contentColor = contentColor
             ),
             enabled = enable,
+            contentPadding = PaddingValues(0.dp),
             shape = RoundedCornerShape(5.dp),
             modifier = modifier.semantics { contentDescription = accessibilityLabel } .alpha(if (enable) 1f else 0.8f)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically ,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+            Row(modifier=Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically ,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -119,8 +130,7 @@ fun CustomButton(
                 }
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    modifier = Modifier.padding(contentPadding)
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                 )
             }
         }

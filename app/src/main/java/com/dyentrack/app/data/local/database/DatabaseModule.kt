@@ -19,14 +19,21 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "dyentrack_db"
-        ).fallbackToDestructiveMigration() .build()
+                context,
+                AppDatabase::class.java,
+                "dyentrack_db"
+            ).fallbackToDestructiveMigration(false).build()
     }
 
     @Provides
+    @Singleton
     fun provideSeanceDao(database: AppDatabase): SeanceDao {
         return database.seanceDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePresetDao(database: AppDatabase): PresetDao {
+        return database.presetDao()
     }
 }

@@ -22,8 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -31,12 +29,10 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun BottomSheetPreset(
     bottomSheetVisibility: Boolean,
     presetList: List<Preset>?=emptyList(),
-    navController: NavController,
-
+    onNew: () -> Unit= {},
     onClose: () -> Unit= {},
     onClickPreset: (Preset) -> Unit= {},
     title:String="",
-    userlanguage: LANGUAGE,
 
     ) {
 
@@ -45,6 +41,7 @@ fun BottomSheetPreset(
         title = title,
         showBottomSheet = bottomSheetVisibility,
         onDismiss = { onClose()},
+        isfullScreen = false,
         childrenForExtend = {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(modifier= Modifier.fillMaxWidth().padding(bottom = 12.dp),horizontalArrangement = Arrangement.Absolute.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -95,7 +92,7 @@ fun BottomSheetPreset(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.clickable {
-                            navController.navigate("add_preset")
+                            onNew()
                         }
                     ) {
                         Box(

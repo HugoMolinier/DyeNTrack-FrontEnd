@@ -41,9 +41,9 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AppViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
@@ -116,7 +116,7 @@ fun ConnexionPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = email, variant = InputVariant.OUTLINED,
+                            text = email, variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.email_placeholder)
                         )
                     }
@@ -135,7 +135,7 @@ fun ConnexionPage(
                         InputCustom(
                             text = password,
                             placeholder = stringResource(R.string.password_placeholder),
-                            variant = InputVariant.OUTLINED,
+                            variant = VariantType.OUTLINED,
                             hideContent = true
                         )
                     }

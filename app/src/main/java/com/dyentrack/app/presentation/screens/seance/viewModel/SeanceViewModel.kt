@@ -27,6 +27,7 @@ import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.TypeOfAction
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.NutritionField
 import com.dyentrack.app.domain.model.enum.PhysioField
 import com.dyentrack.app.domain.model.enum.SaveType
@@ -49,7 +50,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -65,21 +68,20 @@ class SeanceViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
-    getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
     val uiState: StateFlow<SeanceUiState> = _uiState
     val days: SnapshotStateSet<DayInfo> = mutableStateSetOf()
-    var masterData: MasterDataStatic? = null
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+
     val languageUser = LocaleManager.getCurrentLanguage()
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
 
     init {
         days.addAll(getDaysRangeUseCase.getLast30Days(languageUser))
         viewModelScope.launch {
-            masterData = getMasterDataStaticUseCase()
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             dayDataFlow.collect { dayDataList ->
                 if (dayDataList == null) {
@@ -297,7 +299,7 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun toggleBottomSheet(show: Boolean) {
+    fun toggleBottomSheet(show: BottomSheetVisibleType) {
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
 
@@ -310,18 +312,14 @@ class SeanceViewModel @Inject constructor(
     }
 
     fun toggleExerciseSelection(exerciseId: Long) {
-        val exercise = getExerciseToAdd()
-        val exerciseList = if (exerciseId in exercise) {
-            exercise - exerciseId
-        } else {
-            exercise + exerciseId
-        }
-        _uiState.update {
-            it.copy(
-                exerciseToAdd = exerciseList
-            )
-        }
+        _uiState.update { state ->
+            val updatedList = if (exerciseId in state.exerciseToAdd)
+                state.exerciseToAdd - exerciseId
+            else
+                state.exerciseToAdd + exerciseId
 
+            state.copy(exerciseToAdd = updatedList)
+        }
     }
 
 
@@ -345,7 +343,7 @@ class SeanceViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 exerciseToAdd = emptyList(),
-                isBottomSheetVisible = false
+                isBottomSheetVisible = BottomSheetVisibleType.NO
             )
         }
         changeSaveStatus(SaveType.NOTSAVE)
@@ -441,10 +439,6 @@ class SeanceViewModel @Inject constructor(
 
     fun expandExercise(exerciseId: Long?) {
         _uiState.update { it.copy(expandedExerciseId = exerciseId, showAnalyseData = false) }
-    }
-
-    fun getExerciseToAdd(): List<Long> {
-        return _uiState.value.exerciseToAdd
     }
 
     fun changeSection(sectionSelectType: SectionSelectType){

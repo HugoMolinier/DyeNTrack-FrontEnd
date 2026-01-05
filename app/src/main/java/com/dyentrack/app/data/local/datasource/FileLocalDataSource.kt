@@ -15,24 +15,25 @@ class FileLocalDataSource @Inject constructor(
     @ApplicationContext private val context: Context
 ) : LocalDataSource {
     private val prefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+    private val gson = Gson()
 
     override fun getMasterData(): MasterDataStatic? {
         val json = prefs.getString("master_data_static", null)
-        return json?.let { Gson().fromJson(it, MasterDataStatic::class.java) }
+        return json?.let { gson.fromJson(it, MasterDataStatic::class.java) }
     }
 
     override fun saveMasterData(masterDataStatic: MasterDataStatic) {
-        val json = Gson().toJson(masterDataStatic)
+        val json = gson.toJson(masterDataStatic)
         prefs.edit { putString("master_data_static", json) }
     }
 
     override fun getUserPreference(): UserPreference? {
         val json = prefs.getString("user_preference", null)
-        return json?.let { Gson().fromJson(it, UserPreference::class.java) }
+        return json?.let { gson.fromJson(it, UserPreference::class.java) }
     }
 
     override fun saveUserPreference(userPreference: UserPreference) {
-        val json = Gson().toJson(userPreference)
+        val json = gson.toJson(userPreference)
         prefs.edit { putString("user_preference", json) }
     }
 

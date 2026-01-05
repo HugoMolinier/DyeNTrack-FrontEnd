@@ -18,8 +18,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -66,7 +66,7 @@ fun NutrientRow(
                 onValueChange = onValueChange,
                 onFocusLost = onFocusLost,
                 keyboardType = KeyboardType.Decimal,
-                variant = InputVariant.EMPTY,
+                variant = VariantType.EMPTY,
                 singleLine = true
             )
             Text(

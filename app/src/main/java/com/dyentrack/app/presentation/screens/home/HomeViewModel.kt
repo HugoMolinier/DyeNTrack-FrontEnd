@@ -5,19 +5,19 @@ import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.utils.ExerciseImages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -37,20 +37,19 @@ class HomeViewModel @Inject constructor(
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
-    var masterData: MasterDataStatic? = null
+    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
     val languageUser = LocaleManager.getCurrentLanguage()
 
 
 
     init {
         viewModelScope.launch {
-            masterData = getMasterDataStaticUseCase()
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             _uiState.update { it.copy(masterDataMaps=maps)}
 
             val formatter = DateTimeFormatter.ISO_DATE
             val today = LocalDate.now()
-            val last15Days = (0L until 14L).map { today.minusDays(it) }
+            val last15DaysSet = (0L until 15L).map { today.minusDays(it) }.toSet()
 
             dayDataFlow.collect { list ->
                 if (list == null) {
@@ -58,24 +57,29 @@ class HomeViewModel @Inject constructor(
                     return@collect
                 }
 
-                var todaySeanceTemp: DayDataRequest? = null
-                val last5DaysSet = java.util.TreeSet<LocalDate>(compareByDescending { it })
+                var todaySeance: DayDataRequest? = null
+                val last5DaysSorted  = java.util.TreeSet<LocalDate>(compareByDescending { it })
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
-                for (dayData in list) {
-                    val day = runCatching { LocalDate.parse(dayData.dayData, formatter) }.getOrNull() ?: continue
+                list.forEach { dayData ->
+                    val day = runCatching { LocalDate.parse(dayData.dayData, formatter) }.getOrNull() ?: return@forEach
+                    if (day == today) todaySeance = dayData
 
-                    if (day == today) todaySeanceTemp = dayData
-
-                    val hasExercises = dayData.seanceTrack?.plannedExercises?.isNotEmpty() == true
-                    if (day in last15Days && hasExercises) {
+                    val exercises = dayData.seanceTrack?.plannedExercises
+                    if (day in last15DaysSet && !exercises.isNullOrEmpty()) {
                         tempMap[dayData.dayData] = dayData.seanceTrack!!
-                        last5DaysSet.add(day)
-                        if (last5DaysSet.size > 5) last5DaysSet.pollLast()
+                        last5DaysSorted.add(day)
+                        if (last5DaysSorted.size > 5) last5DaysSorted.pollLast()
                     }
                 }
 
-                _uiState.update { current -> current.copy(mapSeance = tempMap, todaySeance = todaySeanceTemp,   last5DaysKeys = last5DaysSet.map { it.format(formatter) }) }
+                _uiState.update { current ->
+                    current.copy(
+                        mapSeance = tempMap,
+                        todaySeance = todaySeance,
+                        last5DaysKeys = last5DaysSorted.map { it.format(formatter) }
+                    )
+                }
                 muscleRateOfEachDay(true)
             }
 
@@ -103,6 +107,7 @@ class HomeViewModel @Inject constructor(
     }
     fun muscleRateOfEachDay(principalOnly:Boolean) {
         val lastScence = _uiState.value.mapSeance
+
         val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
         val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
         lastScence.forEach { (dayKey, seanceTrack) ->
@@ -113,34 +118,36 @@ class HomeViewModel @Inject constructor(
 
             seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
                 val exercise = uiState.value.masterDataMaps?.exerciseMap?.get(plannedExerciseVO.exerciseId)?: return@forEach
-                exercise.muscleInfos?.forEach { muscleInfo ->
-                    if (principalOnly && !muscleInfo.principal)return@forEach
-                    val muscle = uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)
-                        ?: return@forEach
-                    val prevVal = dayMap[muscle.id]
-                    var numberSet =plannedExerciseVO.sets?.count() ?: 0
-                    if (plannedExerciseVO.lateraliteId ==2L)  numberSet = ceil(numberSet / 2.0).toInt()
-                    val exerciseCount =  1
-                    //pour muscle
-                    val updatedValue = prevVal?.copy(
-                        numberExercise = prevVal.numberExercise + exerciseCount,
-                                numberSet = prevVal.numberSet + numberSet
-                    ) ?: MuscleRate(exerciseCount, numberSet)
-                    dayMap[muscle.id] = updatedValue
+                val setsCount = plannedExerciseVO.sets?.count() ?: 0
+                val adjustedSets = if (plannedExerciseVO.lateraliteId == 2L) ceil(setsCount / 2.0).toInt() else setsCount
 
-                    //pour groupe musculmaire sur 15j:
-                    val prevValgroup = futurGraphData[muscle.idMuscularGroup]
-                    val updatedValuegroup = prevValgroup?.copy(
-                        numberExercise = prevValgroup.numberExercise + exerciseCount,
-                        numberSet = prevValgroup.numberSet + numberSet
-                    ) ?: MuscleRate(exerciseCount, numberSet)
-                    futurGraphData[muscle.idMuscularGroup as Long] =updatedValuegroup
+                exercise.muscleInfos
+                    ?.filter { !principalOnly || it.principal }
+                    ?.forEach { muscleInfo ->
+                        val muscleId = muscleInfo.idMuscle
+                        val groupId = _uiState.value.masterDataMaps?.muscleMap?.get(muscleId)?.idMuscularGroup?:0L
+
+
+                        val prev = dayMap[muscleId]
+                        dayMap[muscleId] = prev?.copy(
+                            numberExercise = prev.numberExercise + 1,
+                            numberSet = prev.numberSet + adjustedSets
+                        ) ?: MuscleRate(1, adjustedSets)
+
+
+                        //pour groupe musculmaire sur 15j:
+                        val prevGroup = futurGraphData[groupId]
+                        futurGraphData[groupId] = prevGroup?.copy(
+                            numberExercise = prevGroup.numberExercise + 1,
+                            numberSet = prevGroup.numberSet + adjustedSets
+                        ) ?: MuscleRate(1, adjustedSets)
 
 
 
 
                 }
             }
+            muscleRate[dayKey] = dayMap
         }
 
         _uiState.update { it.copy(muscleRateOfEachDay = muscleRate, graphData = futurGraphData) }

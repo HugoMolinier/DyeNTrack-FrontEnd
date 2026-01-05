@@ -85,6 +85,9 @@ fun AnalysePage(
     val globalData by remember(state.muscleRateOfEachDay) {
         mutableStateOf(analyseViewModel.computeGlobalMuscleRate())
     }
+
+    val masterData by analyseViewModel.masterData.collectAsState()
+
     val moyenneSetParEx by remember(globalData) {
         mutableStateOf(analyseViewModel.moyenneSetParEx(globalData))
     }
@@ -536,7 +539,7 @@ fun AnalysePage(
                 BottomSheetSelectionExercise(
                     bottomSheetVisibility = state.isBottomSheetVisible,
                     selectedExerciseIds = listOf(state.tempChose),
-                    officialExercise = analyseViewModel.masterData?.officialExercise,
+                    officialExercise = masterData?.officialExercise,
                     infoMapUser = infoMapUser,
                     title = stringResource(R.string.choose_exercise),
                     navController = navController,

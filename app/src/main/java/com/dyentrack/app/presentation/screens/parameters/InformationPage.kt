@@ -41,10 +41,10 @@ import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.DatePickerInput
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
 @Composable
@@ -127,7 +127,7 @@ fun InformationPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = pseudo, variant = InputVariant.OUTLINED,
+                            text = pseudo, variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.pseudo_label),
                             enabled = isEditing.value || isLoading
                         )
@@ -147,7 +147,7 @@ fun InformationPage(
                         InputCustom(
                             text = height,
                             placeholder = "170",
-                            variant = InputVariant.OUTLINED,
+                            variant = VariantType.OUTLINED,
                             maxCaracter = 3,
                             keyboardType = KeyboardType.Number,
                             enabled = isEditing.value || isLoading

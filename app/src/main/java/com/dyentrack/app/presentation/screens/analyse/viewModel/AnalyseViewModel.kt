@@ -18,7 +18,9 @@ import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleR
 import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -41,14 +43,15 @@ class AnalyseViewModel @Inject constructor(
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(AnalyseUiState())
     val uiState: StateFlow<AnalyseUiState> = _uiState
-    var masterData: MasterDataStatic? = null
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
+
     private val allSeanceByDay = mutableMapOf<String, SeanceTrack>()
     val userUnit = getUserPreferenceUseCase.invoke().mesureUnit
     val languageUser = LocaleManager.getCurrentLanguage()
     init {
         viewModelScope.launch {
-            masterData = getMasterDataStaticUseCase()
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             _uiState.update { it.copy(masterDataMaps=maps)}
             dayDataFlow.collect { list ->

@@ -35,9 +35,9 @@ import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.components.ParameterBox
 
@@ -123,7 +123,7 @@ fun ObjectifPage(
                                         centerText = true,
 
                                         keyboardType = KeyboardType.Number,
-                                        variant = InputVariant.EMPTY,
+                                        variant = VariantType.EMPTY,
                                         size = SizeType.SMALL,
                                         onValueChange = { value ->
                                             val intValue =
@@ -153,7 +153,7 @@ fun ObjectifPage(
                                         centerText = true,
 
                                         keyboardType = KeyboardType.Number,
-                                        variant = InputVariant.EMPTY,
+                                        variant = VariantType.EMPTY,
                                         size = SizeType.SMALL,
                                         onValueChange = { value ->
                                             val intValue =
@@ -182,7 +182,7 @@ fun ObjectifPage(
                                         centerText = true,
 
                                         keyboardType = KeyboardType.Decimal,
-                                        variant = InputVariant.EMPTY,
+                                        variant = VariantType.EMPTY,
                                         size = SizeType.SMALL,
                                         onValueChange = { value ->
                                             val limitedValue =

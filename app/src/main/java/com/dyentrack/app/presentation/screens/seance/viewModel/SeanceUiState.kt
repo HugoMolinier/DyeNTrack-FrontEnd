@@ -8,6 +8,7 @@ import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.PhysioTrack
 import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.enum.SectionSelectType
@@ -21,7 +22,7 @@ data class SeanceUiState(
     val daySelected: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
 
     val expandedExerciseId: Long? = null,
-    val isBottomSheetVisible: Boolean = false,
+    val isBottomSheetVisible: BottomSheetVisibleType = BottomSheetVisibleType.NO,
 
     val sectionSelect: SectionSelectType?=SectionSelectType.SEANCE,
 
