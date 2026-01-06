@@ -1,9 +1,9 @@
 package com.dyentrack.app.domain.usecase.health
 
 import androidx.health.connect.client.HealthConnectClient
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.NutritionTrack
-import com.dyentrack.app.domain.model.PhysioTrack
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.PhysioTrack
 import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToApiUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase

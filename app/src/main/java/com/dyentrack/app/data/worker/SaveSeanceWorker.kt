@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToApiUseCase
 
 import dagger.assisted.Assisted

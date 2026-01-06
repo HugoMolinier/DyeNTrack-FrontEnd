@@ -27,9 +27,9 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.enum.PhysioField
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.convertWeight
 

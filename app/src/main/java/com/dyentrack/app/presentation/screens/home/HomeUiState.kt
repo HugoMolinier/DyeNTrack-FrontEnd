@@ -1,9 +1,9 @@
 package com.dyentrack.app.presentation.screens.home
 
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.SeanceTrack
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 
 data class HomeUiState(

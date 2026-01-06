@@ -50,7 +50,8 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 data class MenuItemData(
     val label: String,
     val onClick: () -> Unit,
-    val style: TextStyle?=null
+    val style: TextStyle?=null,
+    val canBeClick :Boolean = true
 )
 
 sealed class LeftIcon {
@@ -66,7 +67,7 @@ fun CardWithContent(
     subText: String,
     leftIcon: LeftIcon ? = null,
     badgeText: String? = null,
-    componentRight: @Composable (() -> Unit)? = null,
+    componentRight: @Composable ((showMenu: () -> Unit) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     canExtend: Boolean = false,
     expanded: Boolean = false,
@@ -197,7 +198,7 @@ fun CardWithContent(
                                 }
                             }
                             if (componentRight != null) {
-                                componentRight()
+                                componentRight { showMenu = true }
                             }
                         }
 
@@ -213,7 +214,14 @@ fun CardWithContent(
                     )
                 }
                 if (canExtend && expanded) {
-                    childrenForExtend?.invoke()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.2f))
+
+                    ) {
+                        childrenForExtend?.invoke()
+                    }
 
                 }
 
@@ -232,9 +240,14 @@ fun CardWithContent(
                 DropdownMenuItem(
                     text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium ) },
                     onClick = {
-                        menuItemAction.onClick()
-                        showMenu = false
-                    })
+                        if(menuItemAction.canBeClick) {
+                            menuItemAction.onClick()
+                            showMenu = false
+                        }
+
+                    },
+                    enabled = menuItemAction.canBeClick
+                )
             }
         }
     }

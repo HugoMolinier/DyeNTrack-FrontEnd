@@ -1,7 +1,6 @@
-package com.dyentrack.app.presentation.screens.seance.viewModel
+package com.dyentrack.app.presentation.screens.seance
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -18,17 +17,16 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.data.worker.SaveSeanceWorker
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.DayInfo
-import com.dyentrack.app.domain.model.InfoExerciseUser
-import com.dyentrack.app.domain.model.MasterDataStatic
-import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.PresetId
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enum.ExerciseMode
 import com.dyentrack.app.domain.model.enum.NutritionField
 import com.dyentrack.app.domain.model.enum.PhysioField
 import com.dyentrack.app.domain.model.enum.SaveType
@@ -39,13 +37,11 @@ import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
 import com.dyentrack.app.domain.usecase.GetLastExercisePerfBetweenDateUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.presentation.components.SeanceSummary
 import com.dyentrack.app.presentation.mapper.toDayDataRequest
 import com.dyentrack.app.presentation.mapper.toSeanceDuJour
-import com.dyentrack.app.presentation.utils.convertWeight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -60,6 +56,11 @@ import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.collections.forEach
+import kotlin.collections.minOfOrNull
+import kotlin.collections.removeAll
+import kotlin.collections.set
+
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
@@ -75,7 +76,7 @@ class SeanceViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SeanceUiState())
     val uiState: StateFlow<SeanceUiState> = _uiState
     val days: SnapshotStateSet<DayInfo> = mutableStateSetOf()
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Companion.Lazily, initialValue = null)
 
     val languageUser = LocaleManager.getCurrentLanguage()
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
@@ -118,14 +119,16 @@ class SeanceViewModel @Inject constructor(
     }
     fun toggleMode(newMode: ExerciseMode) {
         _uiState.update { current ->
-            if (current.exerciseMode == newMode) {
-                current.copy(exerciseMode = ExerciseMode.NORMAL)
-            } else {
-                if (newMode == ExerciseMode.CHANGE_ORDER) {
-                    current.copy(exerciseMode = newMode, expandedExerciseId = null)
-                } else {
+            when {
+                current.exerciseMode == newMode ->
+                    current.copy(exerciseMode = ExerciseMode.NORMAL)
+                newMode == ExerciseMode.CHANGE_ORDER ->
+                    current.copy(
+                        exerciseMode = newMode,
+                        expandedExerciseId = null
+                    )
+                else ->
                     current.copy(exerciseMode = newMode)
-                }
             }
         }
     }
@@ -145,7 +148,7 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
-    fun updateSet(exerciseId: Long,index: Int,newValue : SetField,rightSet: Boolean,unilateral: Boolean){
+    fun updateSet(exerciseId: Long, index: Int, newValue : SetField, rightSet: Boolean, unilateral: Boolean){
         updateExercise(
             exerciseId,
             propertyUpdater = { it },
@@ -189,10 +192,10 @@ class SeanceViewModel @Inject constructor(
                     for (i in sets.indices) {
                         val set = sets[i]
                         val updatedRightSet = set.linkedRightSet?.copy(
-                            reps = set.linkedRightSet?.reps ?: set.reps,
-                            charge = set.linkedRightSet?.charge ?: set.charge,
-                            rir = set.linkedRightSet?.rir ?: set.rir,
-                            type = set.linkedRightSet?.type ?: set.type
+                            reps = set.linkedRightSet.reps ?: set.reps,
+                            charge = set.linkedRightSet.charge ?: set.charge,
+                            rir = set.linkedRightSet.rir ?: set.rir,
+                            type = set.linkedRightSet.type
                         ) ?: SetData(
                             type = set.type,
                             charge = set.charge,
@@ -263,7 +266,11 @@ class SeanceViewModel @Inject constructor(
 
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
             val exerciseAlreadyHave = todaySeance.exercisesInSceance.find { it.exerciseId== exerciseId}
-            ExerciseInSeance(exerciseId = exerciseId, exerciseAlreadyHave?.laterite ?:1L, exerciseAlreadyHave?.equipment ?:1L)
+            ExerciseInSeance(
+                exerciseId = exerciseId,
+                exerciseAlreadyHave?.laterite ?: 1L,
+                exerciseAlreadyHave?.equipment ?: 1L
+            )
         }
         todaySeance.exercisesInSceance.clear()
 
@@ -278,6 +285,20 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
+
+    fun setPreset(idPresetLocal: Long?, idPresetApi: Long?) {
+        updateSeance(
+            save = true,
+            exerciseSave = false
+        ) { seance ->
+            seance.copy(
+                idPreset = PresetId(
+                    apiId = idPresetApi,
+                    localId = idPresetLocal
+                )
+            )
+        }
+    }
     fun setExerciseToAdd(exercises: List<Long>) {
         _uiState.update { currentState ->
             currentState.copy(exerciseToAdd = exercises)
@@ -293,8 +314,8 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
+
     fun addSetToExercise(exerciseId: Long, lateriteId: Long) {
-        Log.d("addSetTo","${exerciseId}")
         updateExercise(
             exerciseId,
             propertyUpdater = { it },
@@ -302,10 +323,29 @@ class SeanceViewModel @Inject constructor(
                 val lastCharge = sets.lastOrNull()?.charge
                 val lastRir = sets.lastOrNull()?.rir ?: 1
                 val newSet = if (lateriteId == 2L) {
-                    val rightSet = SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = null, side = SetSide.RIGHT)
-                    SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = lastRir, side = SetSide.LEFT, linkedRightSet = rightSet)
+                    val rightSet = SetData(
+                        type = SetType.EFFECTIVE,
+                        charge = lastCharge,
+                        reps = null,
+                        rir = null,
+                        side = SetSide.RIGHT
+                    )
+                    SetData(
+                        type = SetType.EFFECTIVE,
+                        charge = lastCharge,
+                        reps = null,
+                        rir = lastRir,
+                        side = SetSide.LEFT,
+                        linkedRightSet = rightSet
+                    )
                 } else {
-                    SetData(type = SetType.EFFECTIVE, charge = lastCharge, reps = null, rir = lastRir, side = SetSide.BOTH)
+                    SetData(
+                        type = SetType.EFFECTIVE,
+                        charge = lastCharge,
+                        reps = null,
+                        rir = lastRir,
+                        side = SetSide.BOTH
+                    )
                 }
                 sets.add(newSet)
             }
@@ -317,10 +357,10 @@ class SeanceViewModel @Inject constructor(
         val exerciseId = uiState.value.expandedExerciseId ?: return
 
         val result = getLastExercisePerfBetweenDateUseCase(
-             dayDataList,
-             exerciseId,
-             dateRecent,
-             dateBefore
+            dayDataList,
+            exerciseId,
+            dateRecent,
+            dateBefore
         )
         _uiState.update { current ->
             current.copy(analyseData = result)
@@ -360,7 +400,7 @@ class SeanceViewModel @Inject constructor(
 
     // +++++++++++ Nutrition
     fun updateNutrition(field: NutritionField, value: Int) {
-        updateSeance(save = true, exerciseSave=false,updater =  { seance ->
+        updateSeance(save = true, exerciseSave=false) { seance ->
             val newTrack = when(field) {
                 NutritionField.CALORIES -> seance.nutritionTrack.copy(calories = value)
                 NutritionField.PROTEINS -> seance.nutritionTrack.copy(proteins = value)
@@ -371,7 +411,7 @@ class SeanceViewModel @Inject constructor(
             }
             seance.copy(nutritionTrack = newTrack)
         }
-        )
+
     }
     // +++++++++++ Physio
 
@@ -379,7 +419,7 @@ class SeanceViewModel @Inject constructor(
         field: PhysioField,
         value: Any
     ) {
-        updateSeance(save = true, exerciseSave=false,updater = { seance ->
+        updateSeance(save = true, exerciseSave=false){ seance ->
             val newTrack = when (field) {
                 PhysioField.WEIGHT -> seance.physioTrack.copy(weight = value as? Double ?: seance.physioTrack.weight)
                 PhysioField.STEP -> seance.physioTrack.copy(step = value as? Int ?: seance.physioTrack.step)
@@ -387,7 +427,7 @@ class SeanceViewModel @Inject constructor(
                 PhysioField.MOOD -> seance.physioTrack.copy(mood = value as? String ?: seance.physioTrack.mood)
             }
             seance.copy(physioTrack = newTrack)
-        })
+        }
     }
 
 
@@ -435,7 +475,7 @@ class SeanceViewModel @Inject constructor(
         workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever { workInfo ->
             if (workInfo != null &&   workInfo.state == WorkInfo.State.SUCCEEDED) {
 
-                    _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.APISAVE)
+                _uiState.value.seancesParJour[day] = seance.copy(saveAPI = SaveType.APISAVE)
 
             }
         }
@@ -445,10 +485,10 @@ class SeanceViewModel @Inject constructor(
     fun getSeanceSummary(day: String): SeanceSummary {
         val state = uiState.value
         val maps = state.masterDataMaps
-            ?: return SeanceSummary(emptyList(), emptySet(),emptySet(), 0, 0)
+            ?: return SeanceSummary(emptyList(), emptySet(), emptySet(), 0, 0)
 
         val daySeance = state.seancesParJour[day]
-            ?: return SeanceSummary(emptyList(), emptySet(),emptySet(), 0, 0)
+            ?: return SeanceSummary(emptyList(), emptySet(), emptySet(), 0, 0)
 
         val exercisesList = daySeance.exercisesInSceance
             .mapNotNull { maps.exerciseMap[it.exerciseId] }
@@ -469,7 +509,7 @@ class SeanceViewModel @Inject constructor(
                 val setVolume = if (set.linkedRightSet == null) {
                     (set.reps ?: 0) * (set.charge ?: 0.0)
                 } else {
-                    (((set.reps ?: 0) + (set.linkedRightSet?.reps ?: 0)) * (set.charge ?: 0.0) / 2)
+                    (((set.reps ?: 0) + (set.linkedRightSet.reps ?: 0)) * (set.charge ?: 0.0) / 2)
                 }
                 (count + 1) to (sum + setVolume)
             }
@@ -477,14 +517,14 @@ class SeanceViewModel @Inject constructor(
         return SeanceSummary(
             exercisesList = exercisesList,
             mainFocus = mainFocus,
-            principalMuscle=principalMuscle,
+            principalMuscle = principalMuscle,
             totalSets = totalSets,
             sommePond = totalVolume.fastRoundToInt()
         )
 
 
     }
-    private fun updateSeance(day: String = _uiState.value.daySelected, updater: (SeanceDuJour) -> SeanceDuJour, save: Boolean = true,exerciseSave: Boolean=true) {
+    private fun updateSeance(day: String = _uiState.value.daySelected, save: Boolean = true, exerciseSave: Boolean=true, updater: (SeanceDuJour) -> SeanceDuJour) {
         val seance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
         _uiState.value.seancesParJour[day] = updater(seance)
         if (save) changeSaveStatus(SaveType.NOTSAVE,exerciseSave)
@@ -507,3 +547,4 @@ class SeanceViewModel @Inject constructor(
 
 
 }
+

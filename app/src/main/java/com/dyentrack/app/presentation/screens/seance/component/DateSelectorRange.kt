@@ -29,9 +29,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -44,7 +45,7 @@ fun DateSelectorRange(
     val days = viewModel.days
     val todayDate = LocalDate.now()
     val colorsheme = MaterialTheme.colorScheme
-    val today = todayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val today = todayDate.toIsoDate()
     val listState = rememberLazyListState()
 
 

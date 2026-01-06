@@ -9,6 +9,7 @@ import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.preset.GetPresetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,26 +25,38 @@ private val getPresetUseCase: GetPresetUseCase
 
     fun syncOnStart(isConnected:Boolean){
 
-        viewModelScope.launch((Dispatchers.IO)) {
+        if (isConnected) {
+            viewModelScope.launch(Dispatchers.IO) {
+                getDayDataUseCase()
+            }
+        }
 
-            if (isConnected)getDayDataUseCase()
+        viewModelScope.launch(Dispatchers.IO) {
             getMasterDataUseCase()
-            if (isConnected)getInfoExerciseUser()
-            if (isConnected)getPresetUseCase()
+        }
 
+        if (isConnected) {
+            viewModelScope.launch(Dispatchers.IO) {
+                getInfoExerciseUser()
+            }
+            viewModelScope.launch(Dispatchers.IO) {
+                getPresetUseCase()
+            }
         }
 
     }
 
-    fun syncUserData(){
-        viewModelScope.launch((Dispatchers.IO)) {
-            try {
-                getDayDataUseCase()
-                getInfoExerciseUser()
-                getPresetUseCase()
-            } catch (e: Exception) {
-                println("❌ Erreur : $e")
-            }
+    fun syncUserData() {
+        if (!viewModelScope.isActive) return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            getDayDataUseCase()
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            getInfoExerciseUser()
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            getPresetUseCase()
         }
     }
 }

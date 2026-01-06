@@ -70,7 +70,8 @@ class PresetRepositoryImpl @Inject constructor(
                         // Update local avec données API
                         presetDao.saveOrUpdatePreset(
                             apiPreset.copy(
-                                idLocal = localPreset.idLocal
+                                idLocal = localPreset.idLocal,
+                                idPreset = apiPreset.idPreset
                             ),
                             dateSave = apiPreset.lastUpdate
                         )

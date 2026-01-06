@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,12 +32,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.NutritionTrack
 import com.dyentrack.app.domain.model.enum.NutritionField
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable

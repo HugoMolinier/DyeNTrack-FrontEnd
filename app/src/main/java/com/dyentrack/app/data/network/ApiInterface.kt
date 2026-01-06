@@ -4,7 +4,7 @@ import com.dyentrack.app.data.network.dto.IdentificationRequest
 import com.dyentrack.app.data.network.dto.InfoExerciseUserContentRequest
 import com.dyentrack.app.data.network.dto.UserUpdate
 import com.dyentrack.app.domain.model.ApiResponse
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.ResponseAuth

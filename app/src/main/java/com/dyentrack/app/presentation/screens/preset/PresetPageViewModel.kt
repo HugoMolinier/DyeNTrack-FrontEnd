@@ -4,25 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.MasterDataStatic
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
-import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
+import com.dyentrack.app.domain.model.enum.ExerciseMode
 import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 import com.dyentrack.app.domain.model.preset.Preset
-import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
-import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.preset.GetPresetUseCase
-import com.dyentrack.app.presentation.screens.exercise.ExerciseUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -54,8 +42,12 @@ class PresetPageViewModel @Inject constructor(
             _uiState.update { it.copy(masterDataMaps = maps) }
         }
     }
+
+
+
     fun setPreset(preset: Preset) {
-        _uiState.update { it.copy(currentPreset=preset) }
+        _uiState.update { it.copy(originalPreset = preset,
+            currentPreset = preset) }
     }
     fun addExerciseToSeance() {
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
@@ -80,6 +72,26 @@ class PresetPageViewModel @Inject constructor(
             )
         }
     }
+
+    fun swapExercise( fromIndex: Int, toIndex: Int) {
+        val currentPreset = _uiState.value.currentPreset ?: return
+        val exercises = currentPreset.presetSeanceExerciseVO?.toMutableList() ?: return
+
+        if (fromIndex !in exercises.indices || toIndex !in exercises.indices) return
+
+        val temp = exercises[fromIndex]
+        exercises[fromIndex] = exercises[toIndex]
+        exercises[toIndex] = temp
+
+        _uiState.update { state ->
+            state.copy(
+                currentPreset = currentPreset.copy(
+                    presetSeanceExerciseVO = exercises
+                )
+            )
+        }
+    }
+
 
 
     private fun updateExercise(
@@ -129,6 +141,21 @@ class PresetPageViewModel @Inject constructor(
         }
     }
 
+    fun toggleMode(newMode: ExerciseMode) {
+        _uiState.update { current ->
+            when {
+                current.exerciseMode == newMode ->
+                    current.copy(exerciseMode = ExerciseMode.LOCK)
+                newMode == ExerciseMode.CHANGE_ORDER ->
+                    current.copy(
+                        exerciseMode = newMode,
+                        expandedExerciseId = null
+                    )
+                else ->
+                    current.copy(exerciseMode = newMode)
+            }
+        }
+    }
     fun updateExerciseRange(
         exerciseId: Long,
         rangeRepInf: Int? = null,
@@ -141,7 +168,6 @@ class PresetPageViewModel @Inject constructor(
 
             val correctedMin = if (min != null && max != null && min > max) max else min
             val correctedMax = if (min != null && max != null && min > max) min else max
-
             ex.copy(
                 rangeRepInf = correctedMin,
                 rangeRepSup = correctedMax
@@ -156,6 +182,20 @@ class PresetPageViewModel @Inject constructor(
                 exerciseToAdd = state.currentPreset?.presetSeanceExerciseVO
                     ?.map { it.idExercise }
                     .orEmpty()
+            )
+        }
+    }
+
+
+    fun deleteExercice(idExercise: Long) {
+        _uiState.update { currentState ->
+            val updatedPreset = currentState.currentPreset?.copy(
+                presetSeanceExerciseVO = currentState.currentPreset.presetSeanceExerciseVO
+                    ?.filter { it.idExercise != idExercise }
+            )
+            currentState.copy(
+                currentPreset = updatedPreset,
+                expandedExerciseId = if (currentState.expandedExerciseId == idExercise) null else currentState.expandedExerciseId
             )
         }
     }

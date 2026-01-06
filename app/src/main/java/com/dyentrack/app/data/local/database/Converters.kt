@@ -1,10 +1,10 @@
 package com.dyentrack.app.data.local.database
 
 import androidx.room.TypeConverter
-import com.dyentrack.app.domain.model.NutritionTrack
-import com.dyentrack.app.domain.model.PhysioTrack
-import com.dyentrack.app.domain.model.PlannedExerciseVO
-import com.dyentrack.app.domain.model.SeanceTrack
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.PhysioTrack
+import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

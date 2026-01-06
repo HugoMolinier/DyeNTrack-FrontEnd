@@ -6,9 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.InfoExerciseUser
-import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.exercise.Exercise
@@ -16,8 +14,6 @@ import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.presentation.utils.convertWeight
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,8 +29,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
-    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,

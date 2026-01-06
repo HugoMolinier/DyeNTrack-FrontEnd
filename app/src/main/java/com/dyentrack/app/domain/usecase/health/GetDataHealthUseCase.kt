@@ -5,7 +5,7 @@ import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
-import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import java.time.Instant
 import javax.inject.Inject
 import androidx.health.connect.client.request.ReadRecordsRequest

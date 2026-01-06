@@ -1,6 +1,6 @@
 package com.dyentrack.app.domain.usecase
 
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetSide
 import java.time.LocalDate

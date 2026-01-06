@@ -1,6 +1,6 @@
 package com.dyentrack.app.domain.repository
 
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.TypeOfAction
 import kotlinx.coroutines.flow.StateFlow
 

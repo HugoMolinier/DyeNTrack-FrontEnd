@@ -1,6 +1,6 @@
 package com.dyentrack.app.domain.usecase.daydata
 
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.repository.DayDataRepository
 import javax.inject.Singleton
 import javax.inject.Inject

@@ -4,7 +4,7 @@ import android.util.Log
 import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.AuthStatus
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.TypeOfAction
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow

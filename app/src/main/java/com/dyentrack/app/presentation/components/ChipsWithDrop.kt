@@ -20,12 +20,13 @@ import androidx.compose.ui.text.TextStyle
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.TertiaThree
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ChipDropDown(
     listOfSelectableItem: List<String>,
     canChange: Boolean = true,
-    emphasys : EmphasisType ?= EmphasisType.PRIMARY,
+    emphasys : EmphasisType ?= EmphasisType.SECONDARY,
     defaultSelected: String?=null,
     textStyle : TextStyle = MaterialTheme.typography.bodySmall,
     onSelected: (String) -> Unit = {}
@@ -50,8 +51,8 @@ fun ChipDropDown(
             colors = FilterChipDefaults.filterChipColors(
                 containerColor = if (emphasys == EmphasisType.PRIMARY) TertiaThree else TertiaOne,
                 selectedContainerColor = if (emphasys == EmphasisType.PRIMARY) TertiaThree else TertiaOne,
-                labelColor = MaterialTheme.colorScheme.onSurface,
-                selectedLabelColor = MaterialTheme.colorScheme.onSurface
+                labelColor = secondaryTextColor,
+                selectedLabelColor = secondaryTextColor
             ),
             border = FilterChipDefaults.filterChipBorder(
                 true,
@@ -61,7 +62,7 @@ fun ChipDropDown(
 
         )
 
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(containerColor = TertiaOne, expanded = expanded, onDismissRequest = { expanded = false }) {
             listOfSelectableItem.forEach { item ->
                 DropdownMenuItem(
                     text = { Text(item) },

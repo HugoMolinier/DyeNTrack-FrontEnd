@@ -30,8 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetType
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -47,7 +47,7 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,us
     if (!state.showAnalyseData) return
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)    ,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp, top = 4.dp)    ,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         reverseLayout = true,
     ) {

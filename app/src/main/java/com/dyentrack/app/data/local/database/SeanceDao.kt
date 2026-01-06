@@ -7,7 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.TypeConverters
 import androidx.room.Update
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.TypeOfAction
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant

@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +19,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddLink
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,27 +54,30 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enum.ExerciseMode
+import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enum.SectionSelectType
+import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.components.AdaptiveAdBanner
+import com.dyentrack.app.presentation.components.BottomSheetPreset
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.SectionSelectType
-import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.globalViewModel.AdViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
+import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
 import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
-import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import kotlin.math.roundToInt
 
@@ -80,6 +94,7 @@ fun SeancePage(
     healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>(),
     adViewModel: AdViewModel=hiltViewModel<AdViewModel>(),
     infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
+    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>()
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
@@ -91,7 +106,7 @@ fun SeancePage(
     val state by viewModel.uiState.collectAsState()
     val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     val authViewModel by authViewModel.authState.collectAsState()
-
+    val presetList by presetViewModel.presetFlow.collectAsState()
     val language = viewModel.languageUser
     val masterData by viewModel.masterData.collectAsState()
 
@@ -99,6 +114,10 @@ fun SeancePage(
     val focusManager = LocalFocusManager.current
     val userUnit =userPreference?.mesureUnit?: MesureUnit.KG
 val textToast = stringResource(R.string.favorite_login_prompt)
+    val modeActual = state.exerciseMode
+    val todaySeance = state.seancesParJour[state.daySelected]
+
+    var showMenuPreset by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize().pointerInput(Unit) {
         detectTapGestures(onTap = {
@@ -110,19 +129,10 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                 stringResource(R.string.today_session), leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
-                    if (viewModel.dayDataFlow.collectAsState().value == null) {
+                    if (viewModel.dayDataFlow.collectAsState().value == null || todaySeance?.saveAPI== SaveType.NOTSAVE) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
-                        )
-                    } else {
-
-
-                        ModeMenu(
-                            currentMode = state.exerciseMode,
-                            onToggleMode = { mode ->
-                                viewModel.toggleMode(mode)
-                            }
                         )
                     }
                 })
@@ -136,7 +146,7 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                     )
                 }
                 item {
-                    Box (modifier= Modifier.padding(top = 14.dp, bottom = 20.dp)) {
+                    Box (modifier= Modifier.padding(top = 14.dp)) {
                         SectionSelector(
                             variant = VariantType.OUTLINED,
                             itemSection = listOf(
@@ -159,9 +169,72 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                 when (state.sectionSelect) {
                     SectionSelectType.SEANCE -> {
                         val exercises =
-                            state.seancesParJour[state.daySelected]?.exercisesInSceance ?: listOf()
+                            todaySeance?.exercisesInSceance ?: listOf()
 
                         if (exercises.isNotEmpty()) {
+                            item{
+                                Row(
+                                    modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp,end=12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                   Box{
+                                        if (modeActual.isNormal()) {
+                                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal=4.dp)
+                                                .clickable(onClick = {viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)})) {
+                                                Icon(
+                                                    Icons.Default.AddLink,
+                                                    "Associer",
+                                                    tint = MaterialTheme.colorScheme.primary.copy(
+                                                        alpha = 0.6f
+                                                    ),
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Text(
+                                                    "Associer un preset",
+                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                        color = MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.6f
+                                                        )
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp,
+                                        Alignment.End),
+                                        verticalAlignment = Alignment.CenterVertically) {
+
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.toggleMode(ExerciseMode.LOCK)
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Lock,
+                                                contentDescription = "Voir stats",
+                                                tint = if (modeActual.isLock()) MaterialTheme.colorScheme.primary else secondaryTextColor,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.toggleMode(ExerciseMode.CHANGE_ORDER)
+                                            },
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.SwapVert,
+                                                contentDescription = "Voir stats",
+                                                tint = if (modeActual.isChangeOrder()) MaterialTheme.colorScheme.primary else secondaryTextColor,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                             itemsIndexed(
                                 exercises,
                                 key = { _, ex -> ex.exerciseId }) { _, exInSeance ->
@@ -269,7 +342,7 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
                 onClick = {
                     viewModel.setExerciseToAdd(
-                        state.seancesParJour[state.daySelected]?.exercisesInSceance
+                        todaySeance?.exercisesInSceance
                             ?.map { it.exerciseId }
                             ?.toList()
                             ?: listOf()
@@ -299,6 +372,19 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
 
 
+
+    BottomSheetPreset(
+        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYPRESET,
+        onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onNew ={viewModel.toggleBottomSheet(BottomSheetVisibleType.NO)},
+        title="Preset",
+        presetList = presetList,
+        onClickPreset={preset ->
+            viewModel.setPreset(preset.idLocal,preset.idPreset)
+            showMenuPreset=true
+        }
+
+    )
 
     BottomSheetSelectionExercise(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
@@ -335,5 +421,15 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                 onClick = { viewModel.addExerciseToSeance() }
             )
         }
+
+    }
+
+
+    if (showMenuPreset) {
+        CenterMenu(
+            onDismiss = {showMenuPreset=false},
+            title="Ajouter les Exercices du preset",
+            items = listOf(MenuItemData("Non", onClick = {}),MenuItemData("Oui", onClick = {}))
+        )
     }
 }

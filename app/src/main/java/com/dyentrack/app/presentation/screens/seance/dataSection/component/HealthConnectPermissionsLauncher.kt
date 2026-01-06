@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.health.connect.client.PermissionController
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
 @Composable
 fun HealthConnectPermissionsScreen(

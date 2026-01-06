@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.theme.TertiaOne
+import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -81,8 +83,7 @@ fun InputCustom(
         modifier = modifier
             .fillMaxWidth()
             .height(if (variant == VariantType.EMPTY)32.dp else 44.dp)
-            .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp))
-
+            .background(color =  addColor.TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp)).alpha(if (enabled) 1f else 0.8f)
             .then(
                 if (variant == VariantType.OUTLINED) Modifier.border(
                     width = 1.dp,

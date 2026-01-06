@@ -1,7 +1,7 @@
 package com.dyentrack.app.domain.usecase.muscleRate
 
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.PlannedExerciseVO
+import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
 import com.dyentrack.app.domain.model.RateSetSomme
 import javax.inject.Inject
 import javax.inject.Singleton

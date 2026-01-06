@@ -4,14 +4,15 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.NutritionTrack
-import com.dyentrack.app.domain.model.PhysioTrack
+import com.dyentrack.app.domain.model.PresetId
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.PhysioTrack
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
+import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
 
 
 fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
@@ -70,7 +71,8 @@ fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
         nutritionTrack = this.nutritionTrack ?: NutritionTrack(),
         physioTrack = this.physioTrack ?: PhysioTrack(),
         setsMap = setsMap,
-        saveAPI = SaveType.APISAVE
+        saveAPI = SaveType.APISAVE,
+        idPreset = PresetId(this.seanceTrack?.presetSeanceId, this.seanceTrack?.presetLocalId)
     )
 
 }

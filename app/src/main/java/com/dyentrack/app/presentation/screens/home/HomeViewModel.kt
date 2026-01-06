@@ -4,15 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.SeanceTrack
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.toIsoDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,13 +44,12 @@ class HomeViewModel @Inject constructor(
 
 
     init {
+        val today = LocalDate.now()
+        val last15DaysSet = (0L until 15L).map { today.minusDays(it) }.toSet()
+
         viewModelScope.launch {
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             _uiState.update { it.copy(masterDataMaps=maps)}
-
-            val formatter = DateTimeFormatter.ISO_DATE
-            val today = LocalDate.now()
-            val last15DaysSet = (0L until 15L).map { today.minusDays(it) }.toSet()
 
             dayDataFlow.collect { list ->
                 if (list == null) {
@@ -62,12 +62,12 @@ class HomeViewModel @Inject constructor(
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
                 list.forEach { dayData ->
-                    val day = runCatching { LocalDate.parse(dayData.dayData, formatter) }.getOrNull() ?: return@forEach
+                    val day = runCatching { LocalDate.parse(dayData.dayData, DateTimeFormatter.ISO_DATE) }.getOrNull() ?: return@forEach
                     if (day == today) todaySeance = dayData
 
                     val exercises = dayData.seanceTrack?.plannedExercises
                     if (day in last15DaysSet && !exercises.isNullOrEmpty()) {
-                        tempMap[dayData.dayData] = dayData.seanceTrack!!
+                        tempMap[dayData.dayData] = dayData.seanceTrack
                         last5DaysSorted.add(day)
                         if (last5DaysSorted.size > 5) last5DaysSorted.pollLast()
                     }
@@ -77,7 +77,7 @@ class HomeViewModel @Inject constructor(
                     current.copy(
                         mapSeance = tempMap,
                         todaySeance = todaySeance,
-                        last5DaysKeys = last5DaysSorted.map { it.format(formatter) }
+                        last5DaysKeys = last5DaysSorted.map { it.toIsoDate() }
                     )
                 }
                 muscleRateOfEachDay(true)

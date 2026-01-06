@@ -24,8 +24,8 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.screens.seance.dataSection.component.HealthConnectPermissionsScreen
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable

@@ -1,10 +1,10 @@
 package com.dyentrack.app.presentation.mapper
 
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.PlannedExerciseVO
-import com.dyentrack.app.domain.model.SeanceTrack
-import com.dyentrack.app.domain.model.SetVO
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceDuJour
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
+import com.dyentrack.app.domain.model.dayData.SetVO
+import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
 import kotlin.collections.flatMapIndexed
 
 fun SeanceDuJour.toDayDataRequest(day: String): DayDataRequest {
@@ -30,7 +30,7 @@ fun SeanceDuJour.toDayDataRequest(day: String): DayDataRequest {
         idDayData = null,
         dayData = day,
         physioTrack = this.physioTrack,
-        seanceTrack = SeanceTrack(null, null, plannedExercises),
+        seanceTrack = SeanceTrack(null, idPreset?.apiId, idPreset?.localId,plannedExercises),
         nutritionTrack = this.nutritionTrack
     )
 }

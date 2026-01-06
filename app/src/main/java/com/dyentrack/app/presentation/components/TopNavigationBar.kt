@@ -79,10 +79,7 @@ fun TopNavigationBar(
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .align(Alignment.CenterEnd)
-                .clickable(enabled = onClickLeft != null) {
-                    onClickLeft?.invoke()
-                },
+                .align(Alignment.CenterEnd),
             contentAlignment = Alignment.Center
         ) {
         if (rightSide != null) {
