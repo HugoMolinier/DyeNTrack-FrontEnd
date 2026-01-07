@@ -10,7 +10,7 @@ import java.time.Instant
 @TypeConverters(Converters::class)
 data class Preset(
     @PrimaryKey(autoGenerate = true)
-    val idLocal:Long=0,//local only
+    val idLocal:Long?=null,//local only
     val idPreset: Long?=null,
     val name :String,
     val lastUpdate: String= Instant.now().toString(),

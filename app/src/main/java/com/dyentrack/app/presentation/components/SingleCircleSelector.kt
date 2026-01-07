@@ -19,20 +19,20 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun SingleCircleSelector(
     isSelected: Boolean,
     onClick: () -> Unit,
-    enable:Boolean = true
+    enabled:Boolean = true
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(18.dp)
-            .alpha(if (enable) 1f else 0.8f)
+            .alpha(if (enabled) 1f else 0.8f)
             .border(
                 width = 2.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else secondaryTextColor,
                 shape = CircleShape
             )
             .then(
-                if (enable && !isSelected) Modifier.clickable { onClick() }
+                if (enabled && !isSelected) Modifier.clickable { onClick() }
                 else Modifier
             )
     ) {

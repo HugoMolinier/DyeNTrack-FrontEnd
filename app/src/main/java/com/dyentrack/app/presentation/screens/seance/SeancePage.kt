@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.seance
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -20,14 +21,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLink
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.ContentPaste
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,15 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
@@ -74,12 +78,12 @@ import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.screens.seance.component.DateSelectorRange
-import com.dyentrack.app.presentation.screens.seance.component.ModeMenu
 import com.dyentrack.app.presentation.screens.seance.dataSection.DataSection
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ExerciseCard
 import com.dyentrack.app.presentation.screens.seance.seanceSection.component.ShowInfoOfSeance
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import kotlin.math.roundToInt
+
 
 @Composable
 
@@ -87,14 +91,14 @@ fun SeancePage(
     modifier: Modifier = Modifier,
     viewModel: SeanceViewModel = hiltViewModel<SeanceViewModel>(),
     navController: NavController,
-    daySelected: String?=null,
-    section:String?=null,
+    daySelected: String? = null,
+    section: String? = null,
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
-    authViewModel: AuthViewModel= hiltViewModel<AuthViewModel>(),
-    healthViewModel: HealthConnectViewModel =hiltViewModel<HealthConnectViewModel>(),
-    adViewModel: AdViewModel=hiltViewModel<AdViewModel>(),
-    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
-    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>()
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    healthViewModel: HealthConnectViewModel = hiltViewModel<HealthConnectViewModel>(),
+    adViewModel: AdViewModel = hiltViewModel<AdViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
+    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>(),
 ) {
     LaunchedEffect(Unit) {
         daySelected?.let { viewModel.setDaySelected(it) }
@@ -112,24 +116,30 @@ fun SeancePage(
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val userUnit =userPreference?.mesureUnit?: MesureUnit.KG
-val textToast = stringResource(R.string.favorite_login_prompt)
+    val userUnit = userPreference?.mesureUnit ?: MesureUnit.KG
+    val textToast = stringResource(R.string.favorite_login_prompt)
     val modeActual = state.exerciseMode
     val todaySeance = state.seancesParJour[state.daySelected]
 
-    var showMenuPreset by remember { mutableStateOf(false) }
+    var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
+    val presets by presetViewModel.presetFlow.collectAsState(emptyList())
+    var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize().pointerInput(Unit) {
-        detectTapGestures(onTap = {
-            focusManager.clearFocus()
-        })}
+    Box(modifier = modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        }
     ) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.today_session), leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                stringResource(R.string.today_session),
+                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.navigate("home") },
                 rightSide = {
-                    if (viewModel.dayDataFlow.collectAsState().value == null || todaySeance?.saveAPI== SaveType.NOTSAVE) {
+                    if (todaySeance?.saveAPI == SaveType.NOTSAVE) { //TODO( "add Flow of requestDayDataStatus")
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -140,13 +150,14 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
             LazyColumn {
                 item { DateSelectorRange(uiState = state, viewModel = viewModel) }
-                item{
-                    AdaptiveAdBanner(adViewModel=adViewModel
+                item {
+                    AdaptiveAdBanner(
+                        adViewModel = adViewModel
 
                     )
                 }
                 item {
-                    Box (modifier= Modifier.padding(top = 14.dp)) {
+                    Box(modifier = Modifier.padding(top = 14.dp)) {
                         SectionSelector(
                             variant = VariantType.OUTLINED,
                             itemSection = listOf(
@@ -172,40 +183,99 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                             todaySeance?.exercisesInSceance ?: listOf()
 
                         if (exercises.isNotEmpty()) {
-                            item{
+                            item {
                                 Row(
                                     modifier
                                         .fillMaxWidth()
-                                        .padding(start = 16.dp,end=12.dp),
+                                        .padding(start = 16.dp, end = 12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                   Box{
+                                    Box {
                                         if (modeActual.isNormal()) {
-                                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal=4.dp)
-                                                .clickable(onClick = {viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)})) {
-                                                Icon(
-                                                    Icons.Default.AddLink,
-                                                    "Associer",
-                                                    tint = MaterialTheme.colorScheme.primary.copy(
-                                                        alpha = 0.6f
-                                                    ),
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                                Text(
-                                                    "Associer un preset",
-                                                    style = MaterialTheme.typography.bodySmall.copy(
-                                                        color = MaterialTheme.colorScheme.primary.copy(
+                                            if (todaySeance?.idPreset?.localId == null && todaySeance?.idPreset?.apiId == null) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 4.dp)
+                                                        .clickable(onClick = {
+                                                            viewModel.toggleBottomSheet(
+                                                                BottomSheetVisibleType.ONLYPRESET
+                                                            )
+                                                        })
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.AddLink,
+                                                        "Associer",
+                                                        tint = MaterialTheme.colorScheme.primary.copy(
                                                             alpha = 0.6f
+                                                        ),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                    Text(
+                                                        "Associer un preset",
+                                                        style = MaterialTheme.typography.bodySmall.copy(
+                                                            color = MaterialTheme.colorScheme.primary.copy(
+                                                                alpha = 0.6f
+                                                            )
                                                         )
                                                     )
-                                                )
+                                                }
+                                            } else {
+                                                val currentPreset =
+                                                    presets.find { it.idLocal == todaySeance?.idPreset?.localId || todaySeance.idPreset.apiId == it.idPreset }
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.padding(horizontal = 4.dp).clickable(
+                                                        onClick = {
+
+
+                                                            activeMenu = ActiveMenu(
+                                                                title = "Revoquer le Préset",
+                                                                description = "Cela enlèvera juste l'association de ce preset à la scéance",
+                                                                content = listOf(
+                                                                    MenuItemData("Non", onClick = { activeMenu = null }),
+                                                                    MenuItemData("Oui", color = Color.Red, onClick = {
+                                                                        viewModel.setPreset(null, null)
+                                                                        activeMenu = null
+
+                                                                    }
+                                                                    )
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Link,
+                                                        "Associer",
+                                                        tint = MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.6f
+                                                        ),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                    Text(
+                                                        currentPreset?.name ?: "Preset Associé",
+                                                        style = MaterialTheme.typography.bodySmall.copy(
+                                                            color = MaterialTheme.colorScheme.primary.copy(
+                                                                alpha = 0.6f
+                                                            )
+                                                        )
+                                                    )
+                                                }
+
                                             }
                                         }
                                     }
-                                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp,
-                                        Alignment.End),
-                                        verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            12.dp,
+                                            Alignment.End
+                                        ),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
 
                                         IconButton(
                                             onClick = {
@@ -295,10 +365,10 @@ val textToast = stringResource(R.string.favorite_login_prompt)
                                         navController,
                                         userUnit,
 
-                                    )
+                                        )
                                 }
                             }
-                            item { ShowInfoOfSeance(viewModel,userUnit) }
+                            item { ShowInfoOfSeance(viewModel, userUnit) }
 
 
                         } else {
@@ -326,7 +396,15 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
                     SectionSelectType.DATA ->
                         item {
-                            DataSection(viewModel,    state.exerciseMode == ExerciseMode.LOCK,state.daySelected,state,healthViewModel,userPreference?.autoSync?:true,userUnit)
+                            DataSection(
+                                viewModel,
+                                state.exerciseMode == ExerciseMode.LOCK,
+                                state.daySelected,
+                                state,
+                                healthViewModel,
+                                userPreference?.autoSync ?: true,
+                                userUnit
+                            )
                         }
 
                     else -> null
@@ -374,35 +452,118 @@ val textToast = stringResource(R.string.favorite_login_prompt)
 
 
     BottomSheetPreset(
-        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYPRESET,
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        onNew ={viewModel.toggleBottomSheet(BottomSheetVisibleType.NO)},
-        title="Preset",
+        onNew = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        title = "Associer un preset",
         presetList = presetList,
-        onClickPreset={preset ->
-            viewModel.setPreset(preset.idLocal,preset.idPreset)
-            showMenuPreset=true
-        }
+        titleAction = {
+        if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
+            Box {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Menu",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { expanded = true },
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
 
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    offset = DpOffset(x = (-40).dp, y = 0.dp)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Ajouter un exercice") },
+                        onClick = {
+                            expanded = false
+                            viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE)
+                        }
+                    )
+
+                }
+            }
+        }
+                      },
+        onClickPreset = { preset ->
+            viewModel.setPreset(preset.idLocal, preset.idPreset)
+
+            viewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
+            if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
+                viewModel.addExerciseFromPresetForDaySelected(presets);
+            } else {
+                activeMenu = ActiveMenu(
+                    title = "Ajouter les Exercices du preset",
+                    description = "Cela va associer les exercices sans remplacer ceux existants",
+                    content = listOf(
+                        MenuItemData("Juste Associer", onClick = { activeMenu = null }),
+                        MenuItemData("Oui", onClick = {
+                            viewModel.addExerciseFromPresetForDaySelected(presets);
+                            activeMenu = null
+                        })
+                    )
+                )
+            }
+        }
     )
+
+
+
+
 
     BottomSheetSelectionExercise(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
         selectedExerciseIds = state.exerciseToAdd,
         navController = navController,
-        title=stringResource(R.string.add_exercise),
+        title = stringResource(R.string.add_exercise),
+        titleAction = {
+            if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
+                Box {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { expanded = true },
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        offset = DpOffset(x = (-40).dp, y = 0.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Ajouter un preset") },
+                            onClick = {
+                                expanded = false
+                                viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)
+                            }
+                        )
+
+                    }
+                }
+            }
+        },
         onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onClickExercise = { exercise ->
             viewModel.toggleExerciseSelection(exercise.idExercise)
         },
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
-        onClickFavorite = { if(authViewModel.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
-            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
-        } },
-        userlanguage= language,
-        musclesGroupMap=state.masterDataMaps?.musclesGroupMap
-        ) {
+        onClickFavorite = {
+            if (authViewModel.isConnected) infoUserViewModel.updateInfoExerciseUser(
+                it,
+                !(infoMapUser[it]?.favorite ?: false),
+                null
+            ) else {
+                Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+            }
+        },
+        userlanguage = language,
+        musclesGroupMap = state.masterDataMaps?.musclesGroupMap
+    ) {
         Row(
             Modifier
                 .fillMaxWidth()
@@ -425,11 +586,15 @@ val textToast = stringResource(R.string.favorite_login_prompt)
     }
 
 
-    if (showMenuPreset) {
+    activeMenu?.let { menu ->
         CenterMenu(
-            onDismiss = {showMenuPreset=false},
-            title="Ajouter les Exercices du preset",
-            items = listOf(MenuItemData("Non", onClick = {}),MenuItemData("Oui", onClick = {}))
+            onDismiss = { activeMenu = null },
+
+            title = menu.title,
+            descrition = menu.description,
+            items = menu.content
+
+
         )
     }
 }

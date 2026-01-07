@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,7 @@ import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -71,11 +73,12 @@ fun AnalysePage(
     modifier: Modifier = Modifier, navController: NavController,
     analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
 ) {
     val state by analyseViewModel.uiState.collectAsState()
     val userPref by userPreferenceViewModel.userPreference.collectAsState()
 
-    val infoMapUser by analyseViewModel.infoExerciseUserFlow.collectAsState()
+    val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     var inputIndex by remember { mutableIntStateOf(0) }
     var extendFilter by remember { mutableStateOf(false) }
     val userUnit by remember(userPref) { mutableStateOf(userPref?.mesureUnit ?: MesureUnit.KG) }
@@ -88,10 +91,10 @@ fun AnalysePage(
     val masterData by analyseViewModel.masterData.collectAsState()
 
     val moyenneSetParEx by remember(globalData) {
-        mutableStateOf(analyseViewModel.moyenneSetParEx(globalData))
+        mutableDoubleStateOf(analyseViewModel.moyenneSetParEx(globalData))
     }
     val proportionSetFail by remember(globalData) {
-        mutableStateOf(analyseViewModel.proportionSetFail(globalData))
+        mutableDoubleStateOf(analyseViewModel.proportionSetFail(globalData))
     }
     val sommePondUserUnit by remember(globalData, userUnit) {
         mutableStateOf(convertWeight(globalData.rateSetSomme?.sommePond, MesureUnit.KG, userUnit))

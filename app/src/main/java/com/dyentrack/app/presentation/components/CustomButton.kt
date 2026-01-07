@@ -40,7 +40,8 @@ fun CustomButton(
     modifier: Modifier = Modifier,
     enable: Boolean = true,
     size:SizeType =SizeType.LARGE,
-    isLoading:Boolean =false
+    isLoading:Boolean =false,
+    contentPadding:PaddingValues= PaddingValues(0.dp)
 ) {
 
     val backgroundColor: Color
@@ -90,7 +91,7 @@ fun CustomButton(
             ),
             modifier = modifier.semantics { contentDescription = accessibilityLabel } .alpha(if (enable) 1f else 0.8f)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally) ) {
+            Row(modifier=Modifier.padding(contentPadding),verticalAlignment = Alignment.CenterVertically,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally) ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -113,12 +114,12 @@ fun CustomButton(
                 containerColor = finalBackground,
                 contentColor = contentColor
             ),
-            enabled = enable,
             contentPadding = PaddingValues(0.dp),
+            enabled = enable,
             shape = RoundedCornerShape(5.dp),
             modifier = modifier.semantics { contentDescription = accessibilityLabel } .alpha(if (enable) 1f else 0.8f)
         ) {
-            Row(modifier=Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically ,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+            Row(modifier=Modifier.padding(contentPadding),verticalAlignment = Alignment.CenterVertically ,  horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onSurface,

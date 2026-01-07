@@ -3,18 +3,18 @@ package com.dyentrack.app.presentation.screens.analyse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.RateSetSomme
+import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.infoExerciseUser.GetInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.infoExerciseUser.UpdateInfoExerciseUserUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
+import com.dyentrack.app.domain.usecase.preference.FetchUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,10 +25,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.forEach
-import kotlin.collections.get
 import kotlin.math.roundToInt
 
 @HiltViewModel
@@ -36,8 +32,7 @@ class AnalyseViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
-    getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
-    private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
+    fetchUserPreferenceUseCase: FetchUserPreferenceUseCase,
     private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
 
@@ -48,14 +43,17 @@ class AnalyseViewModel @Inject constructor(
     val uiState: StateFlow<AnalyseUiState> = _uiState
     val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
         viewModelScope,
-        started = SharingStarted.Companion.Lazily,
+        started = SharingStarted.Eagerly,
         initialValue = null
     )
 
-    val infoExerciseUserFlow = getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     private val allSeanceByDay = mutableMapOf<String, SeanceTrack>()
-    val userUnit = getUserPreferenceUseCase.invoke().mesureUnit
+    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null
+    )
     val languageUser = LocaleManager.getCurrentLanguage()
 
     init {

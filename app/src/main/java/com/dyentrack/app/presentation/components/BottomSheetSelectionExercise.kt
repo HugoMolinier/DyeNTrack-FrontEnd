@@ -46,6 +46,7 @@ fun BottomSheetSelectionExercise(
     selectedExerciseIds: List<Long>?=emptyList(),
     officialExercise: List<Exercise>?,
     infoMapUser :Map<Long, InfoExerciseUser>,
+    titleAction: (@Composable () -> Unit)? = null,
     navController: NavController,
     onClose: () -> Unit= {},
     onClickExercise: (Exercise) -> Unit= {},
@@ -98,6 +99,7 @@ fun BottomSheetSelectionExercise(
 
     BottomSheetContent(
         title = title,
+        titleAction= titleAction,
         showBottomSheet = bottomSheetVisibility,
         onDismiss = { onClose()},
         childrenForExtend = {
@@ -109,7 +111,7 @@ fun BottomSheetSelectionExercise(
                 },
                 placeholder = stringResource(R.string.filter_search),
                 leadingIcon = Icons.Default.Search,
-                modifier = Modifier.padding(12.dp, 20.dp),
+                modifier = Modifier.padding(start=12.dp,end=12.dp,top= 20.dp, bottom = 12.dp),
                 variant = VariantType.OUTLINED
             )
 

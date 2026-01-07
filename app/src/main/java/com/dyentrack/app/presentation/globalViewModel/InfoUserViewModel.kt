@@ -15,6 +15,7 @@ class InfoUserViewModel @Inject constructor(
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
 )  : ViewModel(){
 
+    //Flow à la vue
     val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     fun updateInfoExerciseUser(

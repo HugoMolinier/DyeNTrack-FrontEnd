@@ -21,7 +21,7 @@ class AuthViewModel @Inject constructor(
     private val registerUserUseCase: RegisterUserUseCase,
     private val updateUserUseCase: UpdateUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val repository: UserConnectionRepository
+    repository: UserConnectionRepository
 
 ) : ViewModel() {
 

@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,10 +30,10 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
-import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -47,9 +45,10 @@ fun MesureUnitPage(
     val focusManager = LocalFocusManager.current
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
-
-    val selectedUnit = remember { mutableStateOf(userPreference?.mesureUnit == MesureUnit.KG) }
-
+    val unitOptions = listOf(
+        "Kilo (kg)" to MesureUnit.KG,
+        "Pound (lbs)" to MesureUnit.LBS
+    )
 
 
     Box(modifier = Modifier
@@ -87,52 +86,35 @@ fun MesureUnitPage(
                             modifier = Modifier.padding(start = 8.dp)
                         )
 
-                        val menu1 = listOfNotNull(
+                        val menu = unitOptions.map { (label, unit) ->
+                            val isSelected = userPreference?.mesureUnit == unit
+
                             ParameterItem(
                                 onClick = {
-                                    userPreferenceViewModel.updateUserPreference(
-                                        UserPreference(mesureUnit = MesureUnit.KG)
-                                    );selectedUnit.value = true
+                                    if (!isSelected) {
+                                        userPreferenceViewModel.updateUserPreference(
+                                            UserPreference(mesureUnit = unit)
+                                        )
+                                    }
                                 },
-                                "Kilo (kg)",
-                                null,
-                                {
+                                label = label,
+                                sublabel = null,
+                                composableRight = {
                                     SingleCircleSelector(
-                                        selectedUnit.value,
+                                        isSelected = isSelected,
                                         onClick = {
-                                            userPreferenceViewModel.updateUserPreference(
-                                                UserPreference(mesureUnit = MesureUnit.KG)
-                                            );selectedUnit.value = true
+                                            if (!isSelected) {
+                                                userPreferenceViewModel.updateUserPreference(
+                                                    UserPreference(mesureUnit = unit)
+                                                )
+                                            }
                                         },
-                                        enable = (!selectedUnit.value)
+                                        enabled = !isSelected
                                     )
-
                                 }
-                            ),
-
-                            ParameterItem(
-                                onClick = {
-                                    userPreferenceViewModel.updateUserPreference(
-                                        UserPreference(mesureUnit = MesureUnit.LBS)
-                                    );selectedUnit.value = false
-                                },
-                                "Pound (lbs)",
-                                null,
-                                {
-                                    SingleCircleSelector(
-                                        !selectedUnit.value,
-                                        onClick = {
-                                            userPreferenceViewModel.updateUserPreference(
-                                                UserPreference(mesureUnit = MesureUnit.LBS)
-                                            );selectedUnit.value = false
-                                        },
-                                        enable = (selectedUnit.value))
-
-                                }
-                            ),
-
                             )
-                        ParameterBox(menu1)
+                        }
+                        ParameterBox(menu)
 
                     }
 

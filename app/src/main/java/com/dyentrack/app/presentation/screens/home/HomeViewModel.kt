@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -35,17 +34,19 @@ class HomeViewModel @Inject constructor(
 
     ) : ViewModel() {
 
-    val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
+    private val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
-    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
     val languageUser = LocaleManager.getCurrentLanguage()
 
 
 
     init {
         val today = LocalDate.now()
-        val last15DaysSet = (0L until 15L).map { today.minusDays(it) }.toSet()
+        val todayIso = today.toIsoDate()
+        //Evite de parser 100date et compare juste des string
+        val last15DaysSet = (0L until 15L).map { today.minusDays(it).toIsoDate() }.toSet()
 
         viewModelScope.launch {
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
@@ -62,13 +63,14 @@ class HomeViewModel @Inject constructor(
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
                 list.forEach { dayData ->
-                    val day = runCatching { LocalDate.parse(dayData.dayData, DateTimeFormatter.ISO_DATE) }.getOrNull() ?: return@forEach
-                    if (day == today) todaySeance = dayData
+                    if (dayData.dayData !in last15DaysSet) return@forEach // seulement 15 derniers jours
+
+                    if (dayData.dayData == todayIso) todaySeance = dayData
 
                     val exercises = dayData.seanceTrack?.plannedExercises
-                    if (day in last15DaysSet && !exercises.isNullOrEmpty()) {
+                    if (!exercises.isNullOrEmpty()) {
                         tempMap[dayData.dayData] = dayData.seanceTrack
-                        last5DaysSorted.add(day)
+                        last5DaysSorted.add(LocalDate.parse(dayData.dayData))
                         if (last5DaysSorted.size > 5) last5DaysSorted.pollLast()
                     }
                 }

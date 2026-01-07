@@ -33,17 +33,19 @@ fun BottomSheetPreset(
     onClose: () -> Unit= {},
     onClickPreset: (Preset) -> Unit= {},
     title:String="",
+    titleAction: (@Composable () -> Unit)? = null,
 
     ) {
 
 
     BottomSheetContent(
         title = title,
+        titleAction=titleAction,
         showBottomSheet = bottomSheetVisibility,
         onDismiss = { onClose()},
         isfullScreen = false,
         childrenForExtend = {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(top=12.dp,start=12.dp,end=12.dp,bottom=20.dp)) {
                 Row(modifier= Modifier.fillMaxWidth().padding(bottom = 12.dp),horizontalArrangement = Arrangement.Absolute.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     ChipDropDown(listOf("Par nom", "Par date de création", "Last Occurence"))
                     Icon(Icons.Outlined.FilterList, "Croissant")

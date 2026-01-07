@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -36,7 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.VariantType
@@ -58,6 +62,7 @@ import com.dyentrack.app.presentation.components.BottomSheetInput
 import com.dyentrack.app.presentation.components.BottomSheetPreset
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
+import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
@@ -536,7 +541,8 @@ fun HomePage(
                                 modifier= Modifier.padding(8.dp,4.dp),
                                 text = "Voir mes Presets",
                                 onClick = {homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)},
-                                subText = "2"
+                                componentRight = {Icon(Icons.Default.DashboardCustomize,"", tint = secondaryTextColor.copy(0.1f))},
+                                subText = presetList.size.toString()
                             )
                         }
                     }
@@ -581,8 +587,9 @@ fun HomePage(
             presetViewModel.createPreset(value);
         },
         title="Preset",
-
         )
+
+
 
 }
 

@@ -2,6 +2,7 @@ package com.dyentrack.app.domain.usecase
 
 import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.LANGUAGE
+import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -48,7 +49,7 @@ class GetDaysRangeUseCase @Inject constructor() {
             shortDay = this.dayOfWeek.getDisplayName(TextStyle.SHORT, locale),
             dayNumber = this.dayOfMonth,
             month = this.month.getDisplayName(TextStyle.SHORT, locale),
-            dateFormat = this.format(DateTimeFormatter.ISO_DATE)
+            dateFormat = this.toIsoDate()
         )
     }
 }

@@ -32,12 +32,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BottomSheetContent(
     title: String,
+    titleAction: (@Composable () -> Unit)? = null,
     closeButtonTitle: Boolean = true,
     childrenForExtend: @Composable (() -> Unit)? = null,
     footerComponent: @Composable (() -> Unit)? = null,
     showBottomSheet: Boolean = false,
     onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onTitleClick:  () -> Unit= {},
     isfullScreen:Boolean=true,
     dragZoneComponent: @Composable (() -> Unit)? = null,
 ) {
@@ -90,8 +92,10 @@ fun BottomSheetContent(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = title, style = MaterialTheme.typography.titleSmall)
-
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = title, style = MaterialTheme.typography.titleSmall)
+                            titleAction?.invoke()
+                        }
                         if (closeButtonTitle) {
                             IconButton(onClick = { onDismiss?.invoke() }) {
                                 Icon(

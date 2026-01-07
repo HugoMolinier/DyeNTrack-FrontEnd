@@ -88,6 +88,13 @@ fun InformationPage(
         isEditing.value = false
         authViewModel.clearRequestState()
     }
+
+    val sexeOptions = listOf(
+        stringResource(R.string.male_label) to true,
+        stringResource(R.string.female_label) to false,
+        stringResource(R.string.other_label) to null
+    )
+
     val focusManager = LocalFocusManager.current
     Box(modifier = Modifier
         .fillMaxSize()
@@ -193,56 +200,27 @@ fun InformationPage(
                         )
 
                         Row(
-                            horizontalArrangement = Arrangement.Absolute.spacedBy(40.dp),
+                            horizontalArrangement = Arrangement.spacedBy(40.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    stringResource(R.string.male_label),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                                SingleCircleSelector(
-                                    isSelected = sexe.value == true,
-
-                                    onClick = { sexe.value = true },
-                                    isEditing.value || isLoading
-
-                                )
+                            sexeOptions.forEach { (label, value) ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    SingleCircleSelector(
+                                        isSelected = sexe.value == value,
+                                        onClick = { sexe.value = value },
+                                        enabled = isEditing.value || isLoading
+                                    )
+                                }
                             }
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    stringResource(R.string.female_label),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                                SingleCircleSelector(
-                                    isSelected = sexe.value == false,
-                                    onClick = { sexe.value = false },
-                                    isEditing.value || isLoading
-                                )
-                            }
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    stringResource(R.string.other_label),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                                SingleCircleSelector(
-                                    isSelected = sexe.value == null,
-                                    onClick = { sexe.value = null },
-                                    isEditing.value || isLoading
-                                )
-                            }
-
                         }
                     }
 

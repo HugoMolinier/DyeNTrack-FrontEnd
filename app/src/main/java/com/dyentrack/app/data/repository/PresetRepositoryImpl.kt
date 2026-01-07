@@ -53,7 +53,7 @@ class PresetRepositoryImpl @Inject constructor(
     ): List<Preset> {
 
         val result = mutableListOf<Preset>()
-        val apiMap = apip.associateBy { it.idPreset ?: -1L }
+        val apiMap = apip.associateBy { it.idPreset }
 
         for (localPreset in localp) {
             val apiPreset = localPreset.idPreset?.let { apiMap[it] }
@@ -82,6 +82,7 @@ class PresetRepositoryImpl @Inject constructor(
                         result.add(localPreset)
                         // Synchroniser local → API
                         if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
+                            Log.d("ici","la")
                             api.savePreset(localPreset)
                         }
                     }
@@ -95,6 +96,7 @@ class PresetRepositoryImpl @Inject constructor(
                 // Aucun preset correspondant côté API → garder local + push API
                 result.add(localPreset)
                 if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
+                    Log.d("ici","maybe")
                     api.savePreset(localPreset)
                 }
             }
@@ -104,8 +106,13 @@ class PresetRepositoryImpl @Inject constructor(
         val localIds = localp.mapNotNull { it.idPreset }.toSet()
         for (apiOnly in apip) {
             if (apiOnly.idPreset != null && apiOnly.idPreset !in localIds) {
+                Log.d("ici","ici")
                 result.add(apiOnly)
-                presetDao.saveOrUpdatePreset(apiOnly)
+                presetDao.saveOrUpdatePreset(apiOnly.copy(
+                    idLocal =null,
+                    idPreset = apiOnly.idPreset
+                ),
+                    dateSave = apiOnly.lastUpdate)
             }
         }
 

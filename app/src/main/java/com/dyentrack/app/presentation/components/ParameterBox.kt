@@ -37,7 +37,7 @@ fun ParameterBox(items: List<ParameterItem>,
         Column(
             Modifier.fillMaxWidth()
         ) {
-            items.forEachIndexed { index,(onClick, label, icon,composableRight) ->
+            items.forEachIndexed { index,(onClick, label, icon,composableRight,sublabel) ->
                 Box(
                     Modifier
                         .fillMaxWidth()        .then(
@@ -94,10 +94,18 @@ fun ParameterBox(items: List<ParameterItem>,
 
                                 null -> null
                             }
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
-                            )
+                            Column {
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                )
+                                sublabel?.let {
+                                    Text(
+                                        sublabel,
+                                        style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
+                                    )
+                                }
+                            }
                         }
                         if (composableRight != null) {
                             composableRight()

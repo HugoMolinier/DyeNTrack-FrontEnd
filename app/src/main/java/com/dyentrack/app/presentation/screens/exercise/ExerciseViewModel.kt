@@ -39,7 +39,7 @@ class ExerciseViewModel @Inject constructor(
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
     private val _currentExercise = MutableStateFlow<Exercise?>(null)
     val currentExercise: StateFlow<Exercise?> = _currentExercise
 

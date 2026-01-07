@@ -13,6 +13,10 @@
     <string name="details">Details</string>
     <string name="made_by">Made by %1$s</string>
 
+    <plurals name="rep">
+        <item quantity="one">rep</item>
+        <item quantity="other">reps</item>
+    </plurals>
     <string name="explanation">Explanation</string>
     <string name="statistics">Statistics</string>
     <string name="exercise_per_week">Exercise/week</string>

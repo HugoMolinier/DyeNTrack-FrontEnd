@@ -72,8 +72,7 @@ fun ConnexionPage(
     val errorText = when ((requestState as? RequestState.Error)?.error) {
         AuthError.NOT_PASSWORD -> stringResource(R.string.error_invalid_password)
         AuthError.NOT_EMAILFORMAT -> stringResource(R.string.error_invalid_email)
-        AuthError.UNAUTHORIZED -> stringResource(R.string.error_email_used)
-        AuthError.INVALID_ARGUMENT -> stringResource(R.string.error_email_used)
+        AuthError.UNAUTHORIZED -> "Email ou mot de passe incorect"
         AuthError.ERROR_API -> stringResource(R.string.error_api)
         else -> ""
     }

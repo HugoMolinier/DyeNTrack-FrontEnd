@@ -29,7 +29,7 @@ class PresetPageViewModel @Inject constructor(
     ) : ViewModel() {
 
 
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
     private val _uiState = MutableStateFlow(PresetUiState())
     val uiState: StateFlow<PresetUiState> = _uiState
 

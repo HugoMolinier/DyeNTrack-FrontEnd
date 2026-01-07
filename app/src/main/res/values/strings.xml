@@ -121,6 +121,10 @@
         <item quantity="one">Jour</item>
         <item quantity="other">Jours</item>
     </plurals>
+    <plurals name="rep">
+        <item quantity="one">rep</item>
+        <item quantity="other">reps</item>
+    </plurals>
     <string name="hello">Bonjour</string>
     <string name="prepare_day">Préparons la journée</string>
     <string name="legend_exercises">Nombre d\'exercices</string>

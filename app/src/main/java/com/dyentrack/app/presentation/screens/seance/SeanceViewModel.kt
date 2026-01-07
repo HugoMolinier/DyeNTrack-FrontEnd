@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -17,7 +18,6 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.data.worker.SaveSeanceWorker
-import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.PresetId
 import com.dyentrack.app.domain.model.SetData
@@ -25,23 +25,29 @@ import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.domain.model.TypeOfAction
+import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.ExerciseMode
 import com.dyentrack.app.domain.model.enum.NutritionField
 import com.dyentrack.app.domain.model.enum.PhysioField
 import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.enum.SectionSelectType
+import com.dyentrack.app.domain.model.enum.SyncPerformanceMode
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.model.getName
+import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.usecase.GetDaysRangeUseCase
 import com.dyentrack.app.domain.usecase.GetLastExercisePerfBetweenDateUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.usecase.preference.FetchUserPreferenceUseCase
 import com.dyentrack.app.presentation.components.SeanceSummary
 import com.dyentrack.app.presentation.mapper.toDayDataRequest
 import com.dyentrack.app.presentation.mapper.toSeanceDuJour
+import com.dyentrack.app.presentation.utils.toIsoDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -56,11 +62,6 @@ import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.collections.forEach
-import kotlin.collections.minOfOrNull
-import kotlin.collections.removeAll
-import kotlin.collections.set
-
 
 @HiltViewModel
 class SeanceViewModel @Inject constructor(
@@ -71,24 +72,37 @@ class SeanceViewModel @Inject constructor(
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
+    fetchUserPreferenceUseCase: FetchUserPreferenceUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SeanceUiState())
     val uiState: StateFlow<SeanceUiState> = _uiState
+
+
     val days: SnapshotStateSet<DayInfo> = mutableStateSetOf()
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Companion.Lazily, initialValue = null)
+    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 
     val languageUser = LocaleManager.getCurrentLanguage()
-    val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
+    private val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
 
+    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null
+    )
+
+
+    private var _lastExerciseSetMapAll: Map<Long, SetData> = emptyMap()
+    private var _lastExerciseSetMapPreset: Map<Long, Map<Long, SetData>> = emptyMap()
     init {
         days.addAll(getDaysRangeUseCase.getLast30Days(languageUser))
+        val last15DaysSet = (0L until 15L).map { LocalDate.now().minusDays(it).toIsoDate() }.toSet()
+
         viewModelScope.launch {
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
             dayDataFlow.collect { dayDataList ->
-                if (dayDataList == null) {
-                    return@collect
-                }
+                if (dayDataList == null) return@collect
+
                 val minDayDataDate = dayDataList.minOfOrNull { LocalDate.parse(it.dayData) }
                 if (minDayDataDate != null) {
                     val additionalDays = getDaysRangeUseCase.extendDaysIfNeeded(days, minDayDataDate,languageUser)
@@ -96,13 +110,55 @@ class SeanceViewModel @Inject constructor(
                         days.addAll( additionalDays)
                     }
                 }
-                val newMap = mutableStateMapOf<String, SeanceDuJour>()
+
+                val sceanceJourUi = mutableStateMapOf<String, SeanceDuJour>()
                 dayDataList.forEach { dayData ->
-                    newMap[dayData.dayData] = dayData.toSeanceDuJour()
+                    sceanceJourUi[dayData.dayData] = dayData.toSeanceDuJour()
+
                 }
                 _uiState.update { current ->
-                    current.copy(seancesParJour = newMap, masterDataMaps = maps)
+                    current.copy(seancesParJour = sceanceJourUi, masterDataMaps = maps)
                 }
+
+                val lastExerciseSetMapPreset = mutableMapOf<Long, MutableMap<Long, SetData>>()
+                val lastExerciseSetMapAll = mutableMapOf<Long, SetData>()
+
+                sceanceJourUi.filter { it.key in last15DaysSet }
+                    .toSortedMap()
+                    .forEach { (_, seance) ->
+
+                        // Parcours de tous les sets pour mémoriser la dernière charge et RIR par exercice
+                        userPreference.value?.syncPerformanceMode?.let { mode ->
+                            when (mode) {
+                                SyncPerformanceMode.ALL -> {
+                                    seance.setsMap.forEach { (exerciseId, setsList) ->
+                                        setsList.firstOrNull()?.let { firstSet ->
+                                            lastExerciseSetMapAll[exerciseId] = firstSet
+                                        }
+                                    }
+                                }
+
+                                SyncPerformanceMode.PRESET_ONLY -> {
+                                    seance.idPreset?.let { presetId ->
+                                        seance.setsMap.forEach { (exerciseId, setsList) ->
+                                            setsList.firstOrNull()?.let { firstSet ->
+                                                val presetMap = lastExerciseSetMapPreset.getOrPut(exerciseId) { mutableMapOf() }
+                                                presetId.localId?.let { presetMap[it] = firstSet }
+                                                presetId.apiId?.let { presetMap[it] = firstSet }
+                                            }
+                                        }
+                                    }
+                                }
+                                SyncPerformanceMode.NONE -> {
+                                }
+                            }
+                        }
+
+                }
+                _lastExerciseSetMapAll = lastExerciseSetMapAll
+                _lastExerciseSetMapPreset = lastExerciseSetMapPreset
+
+
             }
         }
 
@@ -299,6 +355,78 @@ class SeanceViewModel @Inject constructor(
             )
         }
     }
+
+    fun addExerciseFromPresetForDaySelected(presets:List<Preset>) {
+
+
+        val day = _uiState.value.daySelected
+        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
+        val presetId = todaySeance.idPreset ?: return
+        val preset = presets.find { preset ->
+            (presetId.localId != null && preset.idLocal == presetId.localId) ||
+                    (presetId.apiId != null && preset.idPreset == presetId.apiId)
+        } ?: return
+        val syncMode = userPreference.value?.syncPerformanceMode ?: SyncPerformanceMode.NONE
+        val exercisesToAdd = preset.presetSeanceExerciseVO
+            ?.filter { presetEx ->
+                todaySeance.exercisesInSceance.none { it.exerciseId == presetEx.idExercise }
+            }
+            ?.map { presetEx ->
+                val newExercise = ExerciseInSeance(
+                    exerciseId = presetEx.idExercise,
+                    laterite = presetEx.idLateralite,
+                    equipment = presetEx.idEquipment
+                )
+
+                // Créer les sets par défaut pour cet exercice
+                val lastSet = when (syncMode) {
+                    SyncPerformanceMode.ALL -> _lastExerciseSetMapAll[presetEx.idExercise]
+                    SyncPerformanceMode.PRESET_ONLY -> {
+                        val presetMap = _lastExerciseSetMapPreset[presetEx.idExercise]
+                        presetId.localId?.let { presetMap?.get(it) }
+                            ?: presetId.apiId?.let { presetMap?.get(it) }
+                    }
+                    SyncPerformanceMode.NONE -> null
+                }
+
+                val sets = mutableListOf<SetData>()
+                repeat(presetEx.nbSet) {
+                    val set = if (presetEx.idLateralite == 2L) { // unilatéral
+                        val rightSet = SetData(
+                            type = SetType.EFFECTIVE,
+                            charge = lastSet?.charge,
+                            reps = null,
+                            rir = lastSet?.rir,
+                            side = SetSide.RIGHT
+                        )
+                        SetData(
+                            type = SetType.EFFECTIVE,
+                            charge = lastSet?.charge,
+                            reps = null,
+                            rir = lastSet?.rir,
+                            side = SetSide.LEFT,
+                            linkedRightSet = rightSet
+                        )
+                    } else { // bilatéral ou autre
+                        SetData(
+                            type = SetType.EFFECTIVE,
+                            charge = lastSet?.charge,
+                            reps = null,
+                            rir = lastSet?.rir,
+                            side = SetSide.BOTH
+                        )
+                    }
+                    sets.add(set)
+                }
+
+                // Ajouter les sets dans la map de la séance
+                todaySeance.setsMap[newExercise.exerciseId] = sets.toMutableStateList()
+                newExercise
+            } ?: emptyList()
+
+        todaySeance.exercisesInSceance.addAll(exercisesToAdd)
+        changeSaveStatus(SaveType.NOTSAVE)
+    }
     fun setExerciseToAdd(exercises: List<Long>) {
         _uiState.update { currentState ->
             currentState.copy(exerciseToAdd = exercises)
@@ -316,12 +444,28 @@ class SeanceViewModel @Inject constructor(
 
 
     fun addSetToExercise(exerciseId: Long, lateriteId: Long) {
+        val syncMode = userPreference.value?.syncPerformanceMode ?: SyncPerformanceMode.NONE
+        val day = _uiState.value.daySelected
+        val todaySeance = _uiState.value.seancesParJour[day] ?: return
+        val presetId = todaySeance.idPreset
         updateExercise(
             exerciseId,
             propertyUpdater = { it },
             setsUpdater = { sets ->
-                val lastCharge = sets.lastOrNull()?.charge
-                val lastRir = sets.lastOrNull()?.rir ?: 1
+                val referenceSet: SetData? = when (syncMode) {
+                    SyncPerformanceMode.ALL -> sets.lastOrNull() ?: _lastExerciseSetMapAll[exerciseId]
+                    SyncPerformanceMode.PRESET_ONLY -> {
+                        val presetMap = _lastExerciseSetMapPreset[exerciseId]
+                        val lastSetForPreset = presetId?.let { id ->
+                            presetMap?.get(id.localId) ?: presetMap?.get(id.apiId)
+                        }
+                        sets.lastOrNull() ?: lastSetForPreset
+                    }
+                    SyncPerformanceMode.NONE -> sets.lastOrNull()
+                }
+
+                val lastCharge = referenceSet?.charge
+                val lastRir = referenceSet?.rir ?: 1
                 val newSet = if (lateriteId == 2L) {
                     val rightSet = SetData(
                         type = SetType.EFFECTIVE,
@@ -481,6 +625,8 @@ class SeanceViewModel @Inject constructor(
         }
 
     }
+
+
 
     fun getSeanceSummary(day: String): SeanceSummary {
         val state = uiState.value

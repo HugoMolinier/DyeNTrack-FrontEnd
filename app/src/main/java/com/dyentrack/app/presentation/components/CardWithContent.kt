@@ -51,7 +51,8 @@ data class MenuItemData(
     val label: String,
     val onClick: () -> Unit,
     val style: TextStyle?=null,
-    val canBeClick :Boolean = true
+    val canBeClick :Boolean = true,
+    val color:Color=secondaryTextColor,
 )
 
 sealed class LeftIcon {
@@ -238,7 +239,7 @@ fun CardWithContent(
 
             menuOnLongClick?.forEach { menuItemAction ->
                 DropdownMenuItem(
-                    text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium ) },
+                    text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium,color=menuItemAction.color ) },
                     onClick = {
                         if(menuItemAction.canBeClick) {
                             menuItemAction.onClick()

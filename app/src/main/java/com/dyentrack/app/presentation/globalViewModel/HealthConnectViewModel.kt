@@ -2,20 +2,22 @@ package com.dyentrack.app.presentation.globalViewModel
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.health.connect.client.HealthConnectClient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.HealthConnectStatus
+import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
 import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
 import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
-import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
+import com.dyentrack.app.domain.usecase.preference.FetchUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -28,15 +30,21 @@ class HealthConnectViewModel @Inject constructor(
     private val healthConnectUseCase: CheckHealthConnectUseCase,
     private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase,
     private val syncHealthDataUseCase: SyncHealthDataUseCase,
-    private val getUserPreferenceUseCase: GetUserPreferenceUseCase
+    fetchUserPreferenceUseCase: FetchUserPreferenceUseCase
 ) : ViewModel() {
 
     private val _etat = MutableStateFlow(HealthConnectEtat.VERIFICATION)
     val etat: StateFlow<HealthConnectEtat> = _etat
 
-    //No flow car juste pour auto sync au lancement donc flow demande + de perf
-    private val syncGranded: Boolean
-        get() = getUserPreferenceUseCase().autoSync ?: true
+    //seulement au démarage pour le sync donc 0 collect
+    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null
+    )
+
+
+    private val syncGranded: Boolean = userPreference.value?.autoSync ?: true
 
 
     private val _autorisationNeed = MutableStateFlow<Set<String>?>(null)
@@ -76,7 +84,7 @@ class HealthConnectViewModel @Inject constructor(
     private fun openPlayStore(context: Context) {
         val intent = Intent(
             Intent.ACTION_VIEW,
-            Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
+            "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata".toUri()
         )
         context.startActivity(intent)
     }

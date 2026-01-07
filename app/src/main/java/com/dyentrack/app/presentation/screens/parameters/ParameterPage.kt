@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.DatasetLinked
+import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Straighten
@@ -177,24 +178,25 @@ fun ParameterPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        val menu1 = listOfNotNull(
-                            if (authState.isConnected) ParameterItem(
-                                { navController.navigate("information") },
-                                stringResource(R.string.information),
-                                icon = ParameterIcon.Vector(Icons.Outlined.Person)
-                            ) else null,
-                            ParameterItem(
-                                { navController.navigate("connectedApp") },
-                                stringResource(R.string.connected_app),
-                                ParameterIcon.Vector(Icons.Outlined.DatasetLinked)
-                            ),
-                            ParameterItem(
-                                { navController.navigate("objectif") },
-                                stringResource(R.string.my_goals),
-                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Rule)
-                            ),
+                        ParameterBox(
+                            listOfNotNull(
+                                if (authState.isConnected) ParameterItem(
+                                    { navController.navigate("information") },
+                                    stringResource(R.string.information),
+                                    icon = ParameterIcon.Vector(Icons.Outlined.Person)
+                                ) else null,
+                                ParameterItem(
+                                    { navController.navigate("connectedApp") },
+                                    stringResource(R.string.connected_app),
+                                    ParameterIcon.Vector(Icons.Outlined.DatasetLinked)
+                                ),
+                                ParameterItem(
+                                    { navController.navigate("objectif") },
+                                    stringResource(R.string.my_goals),
+                                    ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Rule)
+                                ),
+                            )
                         )
-                        ParameterBox(menu1)
 
                     }
 
@@ -209,27 +211,25 @@ fun ParameterPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        val menu1 = listOfNotNull(
-                            ParameterItem(
-                                { navController.navigate("mesureUnit") },
-                                stringResource(R.string.measurement_unit),
-                                ParameterIcon.Vector(Icons.Outlined.Straighten)
-                            ),
-                            ParameterItem(
-                                {navController.navigate("language") },
-                                stringResource(R.string.language),
-                                ParameterIcon.Vector(Icons.Default.Translate)
-                            )
-                            /*,
-                            if (authState.isConnected)
+                        ParameterBox(
+                            listOfNotNull(
                                 ParameterItem(
-                                    { },
-                                    stringResource(R.string.export_data),
-                                    ParameterIcon.Vector(Icons.Outlined.Download)
+                                    { navController.navigate("mesureUnit") },
+                                    stringResource(R.string.measurement_unit),
+                                    ParameterIcon.Vector(Icons.Outlined.Straighten)
+                                ),
+                                ParameterItem(
+                                    { navController.navigate("language") },
+                                    stringResource(R.string.language),
+                                    ParameterIcon.Vector(Icons.Default.Translate)
+                                ),
+                                ParameterItem(
+                                    { navController.navigate("advanceParam") },
+                                    "Avancé",
+                                    ParameterIcon.Vector(Icons.Outlined.Memory)
                                 )
-                            else null*/
+                            )
                         )
-                        ParameterBox(menu1)
                     }
 
 
@@ -245,23 +245,22 @@ fun ParameterPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        val menu1 = listOf(
-                           /* ParameterItem(
-                                { }, stringResource(R.string.accessibility),
-                                ParameterIcon.Vector(Icons.Outlined.Accessibility)
-                            ),*/
+                        ParameterBox( listOf(
+                            /* ParameterItem(
+                                 { }, stringResource(R.string.accessibility),
+                                 ParameterIcon.Vector(Icons.Outlined.Accessibility)
+                             ),*/
                             ParameterItem(
                                 { navController.navigate("privacy") },
                                 stringResource(R.string.privacy),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
                             ParameterItem(
-                                {navController.navigate("legal") },
+                                { navController.navigate("legal") },
                                 stringResource(R.string.legal_notices),
                                 ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
                             ),
-                        )
-                        ParameterBox(menu1)
+                        ))
                     }
 
 
@@ -270,12 +269,19 @@ fun ParameterPage(
                     item {
                         Button(
                             onClick = { authViewModel.logout();navController.navigate("parametre") },
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = secondaryTextColor
                             )
-                        ) { Text(stringResource(R.string.logout), style = MaterialTheme.typography.bodySmall) }
+                        ) {
+                            Text(
+                                stringResource(R.string.logout),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
             }

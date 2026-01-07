@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -109,7 +110,9 @@ fun ConnectedAppPage(
                             label = textHealthStatus,
                             size = SizeType.SMALL,
                             emphasis = EmphasisType.SECONDARY,
-                            onClick = { healthViewModel.onButtonClick(context) })
+                            onClick = { healthViewModel.onButtonClick(context) },
+                            contentPadding = PaddingValues(12.dp,4.dp)
+                        )
                     }
 
 

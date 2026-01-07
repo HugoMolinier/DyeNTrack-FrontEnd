@@ -75,8 +75,6 @@ class DayDataRepositoryImpl @Inject constructor(
             val localSeanceTime = Instant.parse(localDay.lastUpdate)
             val localHealthTime = Instant.parse(localDay.lastUpdateHealthLocal)
 
-
-            Log.d("time","${localDay.lastUpdate}__${apiDay.lastUpdate}")
             val seanceFromLocal = localSeanceTime > apiTime
             val healthFromLocal = localHealthTime > apiTime
             val merged = apiDay.copy(

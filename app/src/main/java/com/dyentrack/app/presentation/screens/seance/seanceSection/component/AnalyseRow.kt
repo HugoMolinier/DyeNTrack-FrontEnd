@@ -47,7 +47,7 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,us
     if (!state.showAnalyseData) return
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp, top = 4.dp)    ,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, top = 4.dp)    ,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         reverseLayout = true,
     ) {

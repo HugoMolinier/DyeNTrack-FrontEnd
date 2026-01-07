@@ -84,6 +84,7 @@ import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.formatSubtitle
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -316,14 +317,19 @@ fun PresetPage(
                                         } else Modifier
                                     )
                             ) {
+
                                 CardWithContent(
                                     modifier = Modifier.padding(start = 10.dp, bottom = 4.dp, top = 4.dp),
                                     state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
                                         ?.getName(language) ?: "",
-                                    subText = "${exInPreset.nbSet} " + pluralStringResource(
-                                        R.plurals.set,
-                                        exInPreset.nbSet
-                                    ) + " x " + "${exInPreset.rangeRepInf ?: ""} - ${exInPreset.rangeRepSup ?: ""}",
+                                    subText = exInPreset.formatSubtitle(
+                                        setPlural = { count ->
+                                            context.resources.getQuantityString(R.plurals.set, count, count)
+                                        },
+                                        repPlural = { count ->
+                                            context.resources.getQuantityString(R.plurals.rep, count, count)
+                                        }
+                                    ),
                                     leftIcon = LeftIcon.Single(
                                         ExerciseImages.map[exInPreset.idExercise]
                                             ?: R.drawable.logotransparent
@@ -336,11 +342,13 @@ fun PresetPage(
                                         ), MenuItemData(
                                             "Supprimer",
                                             { presetPageViewModel.deleteExercice(exInPreset.idExercise) },
-                                            MaterialTheme.typography.bodyMedium.copy(
-                                                color = Color.Red.copy(
-                                                    alpha = if (modeActual.isNormal()) 0.8f else 0.4f
-                                                ),
-                                            ), modeActual.isNormal()
+                                            MaterialTheme.typography.bodyMedium,
+                                            modeActual.isNormal(),
+                                            color = Color.Red.copy(
+                                                alpha = if (modeActual.isNormal()) 0.8f else 0.4f
+                                            )
+
+
                                         )
 
                                     ),
@@ -612,6 +620,7 @@ fun PresetPage(
                 )
 
             }
+
         }
     }
 

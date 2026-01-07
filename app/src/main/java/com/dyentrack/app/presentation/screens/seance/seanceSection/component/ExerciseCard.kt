@@ -124,8 +124,7 @@ fun ExerciseCard(
                     MenuItemData(
                         "Voir Exercice",
                         {
-                            navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
-                            navController.navigate("exercise")
+                            navController.navigate("exercise/${exercise.idExercise}")
                         }
                     )
                 )
@@ -134,7 +133,8 @@ fun ExerciseCard(
                         MenuItemData(
                             "Supprimer",
                             { viewModel.deleteExercice(exerciseId) }
-                            , MaterialTheme.typography.bodyMedium.copy(color = Color.Red.copy(alpha = 0.8f))
+                            , MaterialTheme.typography.bodyMedium,
+                            color = Color.Red.copy(alpha = 0.8f)
                         )
                     )
                 }
@@ -250,12 +250,12 @@ fun ExerciseCard(
                             horizontalArrangement = Arrangement.spacedBy(15.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 4.dp)
+                                .padding(bottom = 4.dp, top = 4.dp)
                         ) {
                             Spacer(modifier = Modifier.width(24.dp))
-                            Text("rep", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
-                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
-                            Text("rir", modifier = Modifier.width(65.dp)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall.copy(color=secondaryTextColor))
+                            Text("rep", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
+                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall, color=secondaryTextColor)
+                            Text("rir", modifier = Modifier.width(65.dp)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
                         }
                     }
                     exerciseSets?.forEachIndexed { index, set ->

@@ -43,6 +43,7 @@ import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.screens.analyse.AnalysePage
 import com.dyentrack.app.presentation.screens.exercise.ExercisePage
 import com.dyentrack.app.presentation.screens.home.HomePage
+import com.dyentrack.app.presentation.screens.parameters.AdvanceParamPage
 import com.dyentrack.app.presentation.screens.parameters.ConfidentialPage
 import com.dyentrack.app.presentation.screens.parameters.ConnectedAppPage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
@@ -177,6 +178,7 @@ fun MyApp() {
             composable("language") { LanguagePage(navController = navController) }
             composable("privacy") { ConfidentialPage(navController = navController) }
             composable("legal") { LegalNoticesPage(navController = navController) }
+            composable("advanceParam") { AdvanceParamPage(navController = navController) }
 
             composable("inscription") { RegisterPage(navController = navController) }
             composable("exercise/{exerciseId}",

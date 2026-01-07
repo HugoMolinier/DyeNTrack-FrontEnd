@@ -1,37 +1,35 @@
 package com.dyentrack.app.presentation.globalViewModel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.UserPreference
-import com.dyentrack.app.domain.usecase.preference.GetUserPreferenceUseCase
+import com.dyentrack.app.domain.usecase.preference.FetchUserPreferenceUseCase
 import com.dyentrack.app.domain.usecase.preference.SaveUserPreferenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class UserPreferenceViewModel @Inject constructor(
-    private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
+    private val fetchUserPreferenceUseCase: FetchUserPreferenceUseCase,
     private val saveUserPreferenceUseCase: SaveUserPreferenceUseCase
 ) : ViewModel() {
 
 
+    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+                scope = viewModelScope,
+                started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+                initialValue = null
+            )
 
-
-    private val _userPreference = MutableStateFlow<UserPreference?>(null)
-    val userPreference: StateFlow<UserPreference?> get() = _userPreference
-
-    init {
-        fetchUserPreference()
+    fun fetchUserPreference() {
+        fetchUserPreferenceUseCase.invoke()
     }
 
 
-    private fun fetchUserPreference() {
-        _userPreference.value = getUserPreferenceUseCase()
-    }
-
-    fun   updateUserPreference(newPref: UserPreference) {
+    fun updateUserPreference(newPref: UserPreference) {
         saveUserPreferenceUseCase(newPref)
-        _userPreference.value = getUserPreferenceUseCase()
+        fetchUserPreferenceUseCase()
     }
 }

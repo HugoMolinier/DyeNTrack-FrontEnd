@@ -16,11 +16,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PresetViewModel @Inject constructor(
-    private val getPresetUseCase: GetPresetUseCase,
+    getPresetUseCase: GetPresetUseCase,
     private val savePresetUseCase: SavePresetUseCase,
     private val deletePresetUseCase: DeletePresetUseCase
 ) : ViewModel() {
-
+    //
     val presetFlow = getPresetUseCase.presetFlow.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _navigateToPreset = MutableSharedFlow<Preset?>()

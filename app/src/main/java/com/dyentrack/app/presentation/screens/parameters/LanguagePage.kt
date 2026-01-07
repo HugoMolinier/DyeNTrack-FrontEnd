@@ -19,8 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -48,10 +46,13 @@ fun LanguagePage(
     val focusManager = LocalFocusManager.current
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
-
-    val selectedLanguage = remember { mutableStateOf(userPreference?.language == LANGUAGE.FR) }
     val context = LocalContext.current
     val activity = context.findActivity()
+
+    val languageOptions = listOf(
+        "Français (FR)" to LANGUAGE.FR,
+        "English (EN)" to LANGUAGE.EN
+    )
 
     key(userPreference?.language) {
         Box(
@@ -93,52 +94,38 @@ fun LanguagePage(
                                 modifier = Modifier.padding(start = 8.dp)
                             )
 
-                            val menu1 = listOfNotNull(
+                            val menu = languageOptions.map { (label, language) ->
+                                val isSelected = userPreference?.language == language
+
                                 ParameterItem(
                                     onClick = {
-                                        userPreferenceViewModel.updateUserPreference(
-                                            UserPreference(language = LANGUAGE.FR)
-                                        );selectedLanguage.value = true;activity?.recreate()
+                                        if (!isSelected) {
+                                            userPreferenceViewModel.updateUserPreference(
+                                                UserPreference(language = language)
+                                            )
+                                            activity?.recreate()
+                                        }
                                     },
-                                    "Francais (FR)",
-                                    null,
-                                    {
+                                    label = label,
+                                    sublabel = null,
+                                    composableRight = {
                                         SingleCircleSelector(
-                                            selectedLanguage.value,
+                                            isSelected = isSelected,
                                             onClick = {
-                                                userPreferenceViewModel.updateUserPreference(
-                                                    UserPreference(language = LANGUAGE.FR)
-                                                );selectedLanguage.value = true;activity?.recreate()
+                                                if (!isSelected) {
+                                                    userPreferenceViewModel.updateUserPreference(
+                                                        UserPreference(language = language)
+                                                    )
+                                                    activity?.recreate()
+                                                }
                                             },
-                                            enable = (!selectedLanguage.value)
+                                            enabled = !isSelected
                                         )
-
                                     }
-                                ),
-
-                                ParameterItem(
-                                    onClick = {
-                                        userPreferenceViewModel.updateUserPreference(
-                                            UserPreference(language = LANGUAGE.EN)
-                                        );selectedLanguage.value = false;activity?.recreate()
-                                    },
-                                    "English (EN)",
-                                    null,
-                                    {
-                                        SingleCircleSelector(
-                                            !selectedLanguage.value,
-                                            onClick = {
-                                                userPreferenceViewModel.updateUserPreference(
-                                                    UserPreference(language = LANGUAGE.EN)
-                                                );selectedLanguage.value = false; activity?.recreate()
-                                            }, enable = (selectedLanguage.value)
-                                        )
-
-                                    }
-                                ),
-
                                 )
-                            ParameterBox(menu1)
+                            }
+
+                            ParameterBox(menu)
 
                         }
 

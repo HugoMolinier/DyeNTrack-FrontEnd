@@ -1,5 +1,6 @@
 package com.dyentrack.app.data.local.database
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -36,26 +37,28 @@ interface PresetDao {
 
 
     @Query("SELECT * FROM preset WHERE idLocal = :idLocal")
-    suspend fun getPresetById(idLocal: Long): Preset?
+    suspend fun getPresetById(idLocal: Long?): Preset?
     suspend fun saveOrUpdatePreset(preset: Preset,dateSave: String? = null):Preset? {
 
+        Log.d("^preset","${preset}")
+
         val saveDate = dateSave ?: Instant.now().toString()
-        if (preset.idLocal == 0L) {
+        val existing = if (preset.idLocal != 0L) getPresetById(preset.idLocal) else null
+
+        return if (existing == null) {
             // Nouveau preset → insert
-            return getPresetById(insertPreset(preset.copy(lastUpdate=saveDate)))
+            val newId = insertPreset(preset.copy(lastUpdate = saveDate))
+            getPresetById(newId)
         } else {
             // Preset existant → merge et update
-            val existing = getPresetById(  preset.idLocal )
-
-            val merged = existing?.copy(
+            val merged = existing.copy(
                 name = preset.name.ifEmpty { existing.name },
                 presetSeanceExerciseVO = preset.presetSeanceExerciseVO?.ifEmpty { existing.presetSeanceExerciseVO },
                 idPreset = preset.idPreset ?: existing.idPreset,
                 lastUpdate = preset.lastUpdate
-
-            ) ?: preset.copy(lastUpdate = saveDate)
+            )
             updatePreset(merged)
-            return merged
+            merged
         }
     }
 
