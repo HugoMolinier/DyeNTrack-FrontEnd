@@ -463,6 +463,83 @@ fun AnalysePage(
                     }
                 }
             }
+
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                ) {
+                    Text(
+                        "Par Preset",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .padding(vertical = 8.dp)
+
+
+                        .wrapContentHeight()
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                            .fillMaxWidth()
+                            .height(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = state.masterDataMaps?.exerciseMap?.get(state.exerciceChose)
+                                ?.getName(userLANGUAGE)
+                                ?: stringResource(R.string.no_exercise),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        IconButton(onClick = { analyseViewModel.toggleBottomSheet(true) }) {
+                            Icon(
+                                Icons.Default.SwapHoriz,
+                                contentDescription = stringResource(R.string.change_selection),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    val numberSize = state.allDataExercise.values.size
+                    CombinedChartMP(
+                        labels = state.allDataExercise.keys.toList(),
+                        barValues = state.allDataExercise.values.map {
+                            convertWeight(
+                                it.rateSetSomme?.sommePond,
+                                MesureUnit.KG,
+                                userUnit
+                            )?.toFloat() ?: 0f
+                        },
+                        lineValues = state.allDataExercise.values.map {
+                            val totalSet = it.numberSet
+                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
+                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+                        },
+                        showValueBar = numberSize < 35,
+                        showValueLine = numberSize < 20,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        barLegendLabel = stringResource(R.string.weighted_sum),
+                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
+                    )
+                }
+
+
+            }
             item {
                 Row(
                     horizontalArrangement = Arrangement.Absolute.SpaceBetween,
@@ -536,45 +613,45 @@ fun AnalysePage(
                         lineLegendLabel = stringResource(R.string.fail_set_ratio)
                     )
                 }
-                BottomSheetSelectionExercise(
-                    bottomSheetVisibility = state.isBottomSheetVisible,
-                    selectedExerciseIds = listOf(state.tempChose),
-                    officialExercise = masterData?.officialExercise,
-                    infoMapUser = infoMapUser,
-                    title = stringResource(R.string.choose_exercise),
-                    navController = navController,
-                    onClose = { analyseViewModel.toggleBottomSheet(false) },
-                    onClickExercise = { exercise -> analyseViewModel.changeTempExercice(exercise.idExercise) },
-                    onClickFavorite = {
-                        analyseViewModel.updateInfoExerciseUser(
-                            it,
-                            !(infoMapUser[it]?.favorite ?: false),
-                            null
-                        )
-                    },
-                    userlanguage = userLANGUAGE,
-                    musclesGroupMap = state.masterDataMaps?.musclesGroupMap
-                ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CustomButton(
-                            label = stringResource(R.string.choose),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                analyseViewModel.choseThisExercise();analyseViewModel.toggleBottomSheet(
-                                false
-                            )
-                            }
-                        )
-                    }
-                }
 
             }
 
+        }
+    }
+    BottomSheetSelectionExercise(
+        bottomSheetVisibility = state.isBottomSheetVisible,
+        selectedExerciseIds = listOf(state.tempChose),
+        officialExercise = masterData?.officialExercise,
+        infoMapUser = infoMapUser,
+        title = stringResource(R.string.choose_exercise),
+        navController = navController,
+        onClose = { analyseViewModel.toggleBottomSheet(false) },
+        onClickExercise = { exercise -> analyseViewModel.changeTempExercice(exercise.idExercise) },
+        onClickFavorite = {
+            analyseViewModel.updateInfoExerciseUser(
+                it,
+                !(infoMapUser[it]?.favorite ?: false),
+                null
+            )
+        },
+        userlanguage = userLANGUAGE,
+        musclesGroupMap = state.masterDataMaps?.musclesGroupMap
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            CustomButton(
+                label = stringResource(R.string.choose),
+                modifier = Modifier.weight(1f),
+                onClick = {
+                    analyseViewModel.choseThisExercise();analyseViewModel.toggleBottomSheet(
+                    false
+                )
+                }
+            )
         }
     }
 

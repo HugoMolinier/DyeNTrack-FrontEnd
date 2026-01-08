@@ -73,8 +73,7 @@ class AnalyseViewModel @Inject constructor(
                     if (seance?.plannedExercises?.isNotEmpty() == true) {
                         allSeanceByDay[dayData.dayData] = seance
 
-                        val currentDate =
-                            LocalDate.parse(dayData.dayData, DateTimeFormatter.ISO_DATE)
+                        val currentDate = dayData.localDate
                         minDate = when {
                             minDate == null -> currentDate
                             currentDate.isBefore(minDate) -> currentDate
@@ -115,7 +114,7 @@ class AnalyseViewModel @Inject constructor(
         val lastDays = (0L until rangeInDays).map { today.minusDays(it) }
 
         dayDataFlow.value?.forEach { dayData ->
-            val dayDate = LocalDate.parse(dayData.dayData, DateTimeFormatter.ISO_DATE)
+            val dayDate = dayData.localDate
             if (dayDate in lastDays) {
                 dayData.seanceTrack?.plannedExercises?.forEach { plannedExercise ->
                     if (plannedExercise.exerciseId == _uiState.value.exerciceChose) {

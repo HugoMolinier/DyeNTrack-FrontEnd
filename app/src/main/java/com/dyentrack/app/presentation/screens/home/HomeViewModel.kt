@@ -70,7 +70,7 @@ class HomeViewModel @Inject constructor(
                     val exercises = dayData.seanceTrack?.plannedExercises
                     if (!exercises.isNullOrEmpty()) {
                         tempMap[dayData.dayData] = dayData.seanceTrack
-                        last5DaysSorted.add(LocalDate.parse(dayData.dayData))
+                        last5DaysSorted.add(dayData.localDate)
                         if (last5DaysSorted.size > 5) last5DaysSorted.pollLast()
                     }
                 }

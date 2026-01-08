@@ -4,8 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.dyentrack.app.data.local.database.Converters
-import com.dyentrack.app.domain.model.SetSide
-import com.dyentrack.app.domain.model.SetType
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,4 +19,8 @@ data class DayDataRequest(
     val physioTrack: PhysioTrack?=null,
     val lastUpdate: String?=null,
     val lastUpdateHealthLocal: String ?=null  //local only seulement pour le merge API / local
-)
+){
+    val localDate: LocalDate by lazy {
+        LocalDate.parse(dayData, DateTimeFormatter.ISO_DATE)
+    }
+}

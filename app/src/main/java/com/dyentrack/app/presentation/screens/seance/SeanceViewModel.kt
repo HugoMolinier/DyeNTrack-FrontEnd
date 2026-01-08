@@ -103,7 +103,7 @@ class SeanceViewModel @Inject constructor(
             dayDataFlow.collect { dayDataList ->
                 if (dayDataList == null) return@collect
 
-                val minDayDataDate = dayDataList.minOfOrNull { LocalDate.parse(it.dayData) }
+                val minDayDataDate = dayDataList.minOfOrNull {it.localDate }
                 if (minDayDataDate != null) {
                     val additionalDays = getDaysRangeUseCase.extendDaysIfNeeded(days, minDayDataDate,languageUser)
                     if (additionalDays.isNotEmpty()) {

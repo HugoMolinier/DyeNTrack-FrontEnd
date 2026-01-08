@@ -73,6 +73,7 @@ import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
 import com.dyentrack.app.domain.model.enum.ExerciseMode
 import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.BottomSheetInput
 import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
@@ -84,6 +85,7 @@ import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ParameterBox
+import com.dyentrack.app.presentation.components.SeanceSummary
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
@@ -664,7 +666,27 @@ fun PresetPage(
                             }
                         }
 
+                    }
+                    else {
+                        item {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth().fillMaxHeight()
+                                    .padding(horizontal = 20.dp, vertical = 120.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    stringResource(R.string.no_workout),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    "Ajouter un exercice en éditant le preset",
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                                )
 
+                            }
+                        }
                     }
                 }
             }

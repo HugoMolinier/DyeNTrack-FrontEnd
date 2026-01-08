@@ -49,7 +49,8 @@ class GetDaysRangeUseCase @Inject constructor() {
             shortDay = this.dayOfWeek.getDisplayName(TextStyle.SHORT, locale),
             dayNumber = this.dayOfMonth,
             month = this.month.getDisplayName(TextStyle.SHORT, locale),
-            dateFormat = this.toIsoDate()
+            dateFormat = this.toIsoDate(),
+            dateLocal = this
         )
     }
 }

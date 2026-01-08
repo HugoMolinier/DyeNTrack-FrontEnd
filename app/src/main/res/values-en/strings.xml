@@ -308,4 +308,60 @@
     <string name="legal_text_4_2">Users are encouraged to use the latest version for optimal performance.</string>
     <string name="legal_text_4_3">Continuing to use the application implies acceptance of these legal notices.</string>
 
+    <string name="advanced">Advanced</string>
+
+    <string name="sync_performance_title">
+    Automatic performance synchronization
+</string>
+
+    <string name="sync_performance_description">
+    Defines when to automatically reuse weight and RIR based on your last 15 workouts.
+</string>
+
+    <string name="sync_option_preset_only">Presets only</string>
+    <string name="none">None</string>
+
+    <string name="sync_details_title">
+    Synchronization mode details
+</string>
+
+    <string name="sync_detail_all">Weight and RIR are automatically filled in for all added exercises.
+</string>
+
+    <string name="sync_detail_preset">Performance data is reused only when adding exercises from the same preset.
+</string>
+
+    <string name="sync_detail_none">No automatic performance reuse. Weight and RIR remain empty.
+</string>
+
+
+    <string name="unsaved_changes_title">Unsaved changes</string>
+
+    <string name="unsaved_changes_description">
+    Leave without saving your changes?
+</string>
+
+    <string name="error">Error</string>
+
+    <string name="associate_preset">Link preset</string>
+    <string name="old_preset">Old preset</string>
+
+    <string name="revoke_preset_title">Unlink preset</string>
+    <string name="revoke_preset_description">
+    This will only remove the association between this preset and the workout.
+</string>
+
+    <string name="view_stats">View stats</string>
+
+    <string name="import_from_preset">Import from preset</string>
+    <string name="add_preset_exercises_title">Add preset exercises</string>
+    <string name="add_preset_exercises_description">
+    This will add the exercises without replacing the existing ones.
+</string>
+
+    <string name="associate_only">Link only</string>
+
+    <string name="menu">Menu</string>
+    <string name="swap">Swap</string>
+
 </resources>

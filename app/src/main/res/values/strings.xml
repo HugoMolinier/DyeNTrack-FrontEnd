@@ -311,4 +311,65 @@
     <string name="legal_text_4_2">Il est recommandé d’utiliser la dernière version pour des performances optimales.</string>
     <string name="legal_text_4_3">La poursuite de l’utilisation de l’application vaut acceptation des présentes mentions légales.</string>
 
+    <string name="advanced">Avancé</string>
+
+    <string name="sync_performance_title">
+    Synchronisation automatique des performances
+</string>
+
+    <string name="sync_performance_description">
+    Définit quand reprendre automatiquement la charge et le RIR depuis tes 15 séances précédentes.
+</string>
+
+    <string name="sync_option_preset_only">Seulement Preset</string>
+    <string name="none">Aucune</string>
+
+    <string name="sync_details_title">
+    Détails des modes de synchronisation
+</string>
+
+    <string name="sync_detail_all">
+    La charge et le RIR sont automatiquement entré, pour tous les exercices ajoutés.
+</string>
+
+    <string name="sync_detail_preset">
+    Les performances sont reprises uniquement lors de l’ajout d’exercices d\'un même preset.
+</string>
+
+    <string name="sync_detail_none">
+  Aucune reprise automatique des performances. Les charges et le RIR restent vides.
+</string>
+
+    <string name="unsaved_changes_title">Modifications non sauvegardées</string>
+
+    <string name="unsaved_changes_description">
+    Revenir quand même sans sauvegarder les changements ?
+</string>
+
+    <string name="error">Erreur</string>
+
+
+    <string name="associate_preset">Associer un preset</string>
+    <string name="old_preset">Ancien preset</string>
+
+    <string name="revoke_preset_title">Révoquer le preset</string>
+    <string name="revoke_preset_description">
+    Cela enlèvera uniquement l’association de ce preset à la séance.
+</string>
+
+    <string name="view_stats">Voir stats</string>
+
+    <string name="import_from_preset">Importer depuis un preset</string>
+    <string name="add_preset_exercises_title">Ajouter les exercices du preset</string>
+    <string name="add_preset_exercises_description">
+    Cela va associer les exercices sans remplacer ceux existants.
+</string>
+
+    <string name="associate_only">Juste associer</string>
+
+    <string name="menu">Menu</string>
+    <string name="swap">Changer</string>
+
+
+
 </resources>

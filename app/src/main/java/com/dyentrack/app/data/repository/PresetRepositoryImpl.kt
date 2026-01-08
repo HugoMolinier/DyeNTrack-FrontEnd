@@ -8,7 +8,6 @@ import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.repository.PresetRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -82,8 +81,17 @@ class PresetRepositoryImpl @Inject constructor(
                         result.add(localPreset)
                         // Synchroniser local → API
                         if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
-                            Log.d("ici","la")
-                            api.savePreset(localPreset)
+                            val response = api.savePreset(localPreset)
+                            if (response.status==200) {
+                                val presetApiObtain = response.data
+                                presetDao.saveOrUpdatePreset(
+                                    presetApiObtain.copy(
+                                        idLocal = localPreset.idLocal,
+                                        idPreset = presetApiObtain.idPreset
+                                    ),
+                                    dateSave = presetApiObtain.lastUpdate
+                                )
+                            }
                         }
                     }
 
@@ -96,8 +104,17 @@ class PresetRepositoryImpl @Inject constructor(
                 // Aucun preset correspondant côté API → garder local + push API
                 result.add(localPreset)
                 if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
-                    Log.d("ici","maybe")
-                    api.savePreset(localPreset)
+                    val response = api.savePreset(localPreset)
+                    if (response.status==200) {
+                        val presetApiObtain = response.data
+                        presetDao.saveOrUpdatePreset(
+                            presetApiObtain.copy(
+                                idLocal = localPreset.idLocal,
+                                idPreset = presetApiObtain.idPreset
+                            ),
+                            dateSave = presetApiObtain.lastUpdate
+                        )
+                    }
                 }
             }
         }
@@ -106,18 +123,9 @@ class PresetRepositoryImpl @Inject constructor(
         val localIds = localp.mapNotNull { it.idPreset }.toSet()
         for (apiOnly in apip) {
             if (apiOnly.idPreset != null && apiOnly.idPreset !in localIds) {
-                Log.d("ici","ici")
-
                 if(presetDao.getPresetByIdApi(apiOnly.idPreset)?.isDelete!=true) {
                     result.add(apiOnly)
-                    Log.d("ici","Notici")
-                    presetDao.saveOrUpdatePreset(
-                        apiOnly.copy(
-                            idLocal = null,
-                            idPreset = apiOnly.idPreset
-                        ),
-                        dateSave = apiOnly.lastUpdate
-                    )
+                    presetDao.saveOrUpdatePreset(apiOnly)
                 }
             }
         }
@@ -126,7 +134,7 @@ class PresetRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveLocalOnly(preset: Preset): Preset? {
-        return (presetDao.saveOrUpdatePreset(preset))
+        return presetDao.saveOrUpdatePreset(preset)
     }
 
     // sauvegarder ou mettre à jour un preset

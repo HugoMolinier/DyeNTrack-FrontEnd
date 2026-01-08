@@ -34,21 +34,27 @@ fun ShowInfoOfSeance(exerciseSummary: SeanceSummary, userUnit: MesureUnit) {
 
         InfoRow(label = stringResource(R.string.muscle_use), value = exerciseSummary.principalMuscle.joinToString(", "))
         InfoRow(label = stringResource(R.string.filter_muscle_groups), value = exerciseSummary.mainFocus.joinToString(", "), border = true)
-        InfoRow(
-            label = stringResource(R.string.number_of_sets),
-            value = exerciseSummary.totalSets.toString()
-        )
-        InfoRow(
-            label = stringResource(R.string.number_of_exercises),
-            value = exerciseSummary.exercisesList.count().toString(),
-            border = true
-        )
-        InfoRow(
-            label = stringResource(R.string.weighted_sum),
-            value = convertWeight(exerciseSummary.sommePond.toDouble(), MesureUnit.KG, userUnit)
-                ?.let { String.format("%.1f", it) }
-                .orEmpty() + userUnit.toString().lowercase()
-        )
+        if(exerciseSummary.totalSets!=null) {
+            InfoRow(
+                label = stringResource(R.string.number_of_sets),
+                value = exerciseSummary.totalSets.toString()
+            )
+        }
+        if(exerciseSummary.exercisesList !=null){
+            InfoRow(
+                label = stringResource(R.string.number_of_exercises),
+                value = exerciseSummary.exercisesList.count().toString(),
+                border = true
+            )
+        }
+        if(exerciseSummary.sommePond!=null){
+            InfoRow(
+                label = stringResource(R.string.weighted_sum),
+                value = convertWeight(exerciseSummary.sommePond?.toDouble(), MesureUnit.KG, userUnit)
+                    ?.let { String.format("%.1f", it) }
+                    .orEmpty() + userUnit.toString().lowercase()
+            )
+        }
 
     }
 }

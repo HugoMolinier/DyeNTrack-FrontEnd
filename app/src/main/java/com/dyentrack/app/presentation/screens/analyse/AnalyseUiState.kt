@@ -13,6 +13,9 @@ data class AnalyseUiState(
     val dayRatio:Map<String, MuscleRate> = emptyMap(),
     val graphData: Map<Long, MuscleRate> = emptyMap(),
 
+
+
+
     val muscleSetPercentage: List<Triple<Long, Float, MuscleRate>> = emptyList(),
 
     val dateRange : DateRangeSelected= DateRangeSelected(),
@@ -20,6 +23,7 @@ data class AnalyseUiState(
 
     val exerciceChose: Long=0L,
     val tempChose:Long=0L,
+
     val isBottomSheetVisible: Boolean=false,
     val allDataExercise: Map<String, MuscleRate> =emptyMap(),
 

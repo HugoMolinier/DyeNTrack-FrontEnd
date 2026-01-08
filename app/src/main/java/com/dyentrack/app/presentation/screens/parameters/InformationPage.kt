@@ -100,6 +100,12 @@ fun InformationPage(
     )
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val focusManager = LocalFocusManager.current
+
+    val unsavedTitle = stringResource(R.string.unsaved_changes_title)
+    val unsavedDescription = stringResource(R.string.unsaved_changes_description)
+    val yesLabel = stringResource(R.string.yes)
+    val noLabel = stringResource(R.string.no)
+
     Box(modifier = Modifier
         .fillMaxSize()
         .pointerInput(Unit) {
@@ -109,7 +115,9 @@ fun InformationPage(
         }
     ) {
         Column {
+
             TopNavigationBar(
+
                 stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { if(originalPseudo.value != pseudo.value.text ||
@@ -117,12 +125,13 @@ fun InformationPage(
                     originalBirthday.value != birthday.value  ||
                     originalSexe.value != sexe.value){
 
+
                     activeMenu = ActiveMenu(
-                        title = "Modification non sauvegarder",
-                        description = "Revenir quand meme sans sauvegarder les changements?",
+                        title =unsavedTitle,
+                        description = unsavedDescription,
                         content = listOf(
-                            MenuItemData("Non", onClick = { activeMenu = null }),
-                            MenuItemData("Oui", color = Color.Red, onClick = {
+                            MenuItemData(noLabel, onClick = { activeMenu = null }),
+                            MenuItemData(yesLabel, color = Color.Red, onClick = {
                                 navController.popBackStack()
 
                             }
@@ -281,7 +290,7 @@ fun InformationPage(
                         ) {
                             if (errorText != "") Icon(
                                 Icons.Outlined.ErrorOutline,
-                                "Error",
+                                stringResource(R.string.error),
                                 tint = Color.Red,
                                 modifier = Modifier.size(14.dp)
                             )

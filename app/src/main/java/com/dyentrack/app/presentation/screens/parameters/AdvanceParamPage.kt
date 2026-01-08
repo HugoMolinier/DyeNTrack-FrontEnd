@@ -41,15 +41,15 @@ fun AdvanceParamPage(
 
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
     val syncOptions = listOf(
-        "Tout" to SyncPerformanceMode.ALL,
-        "Seulement Preset" to SyncPerformanceMode.PRESET_ONLY,
-        "Rien" to SyncPerformanceMode.NONE
+        stringResource(R.string.all) to SyncPerformanceMode.ALL,
+        stringResource(R.string.sync_option_preset_only) to SyncPerformanceMode.PRESET_ONLY,
+        stringResource(R.string.none) to SyncPerformanceMode.NONE
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                "Avancé",
+                stringResource(R.string.advanced),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {
@@ -73,12 +73,12 @@ fun AdvanceParamPage(
                     ) {
 
                         Text(
-                            "Synchronisation automatique des performances",
+                            stringResource(R.string.sync_performance_title),
                             style = MaterialTheme.typography.bodyLarge
                         )
 
                         Text(
-                            "Définit quand reprendre automatiquement la charge et le RIR depuis tes 15 séances précédentes.",
+                            stringResource(R.string.sync_performance_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = secondaryTextColor,
                         )
@@ -126,30 +126,48 @@ fun AdvanceParamPage(
                     ) {
 
                         Text(
-                            "Détails des modes de synchronisation",
+                            stringResource(R.string.sync_details_title),
                             style = MaterialTheme.typography.bodyLarge
                         )
 
-                        Text(
-                            "1. Tout\n" +
-                                    "La charge et le RIR sont automatiquement entré, pour tous les exercices ajoutés.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor
-                        )
+                        Column (verticalArrangement = Arrangement.spacedBy(4.dp)){
+                            Text(
+                                "1. " + stringResource(R.string.all),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                stringResource(R.string.sync_detail_all),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryTextColor
+                            )
+                        }
 
-                        Text(
-                            "2. Seulement presets\n" +
-                                    "Les performances sont reprises uniquement lors de l’ajout d’exercices d'un même preset.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor
-                        )
+                        Column (verticalArrangement = Arrangement.spacedBy(4.dp)){
+                            Text(
+                                "2. " + stringResource(R.string.sync_option_preset_only),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                stringResource(R.string.sync_detail_preset),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryTextColor
+                            )
+                        }
 
-                        Text(
-                            "3. Aucune\n" +
-                                    "Aucune reprise automatique des performances. Les charges et le RIR restent vides.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor
-                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                "3. " + stringResource(R.string.none),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                stringResource(R.string.sync_detail_none),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryTextColor
+                            )
+                        }
                     }
                 }
 

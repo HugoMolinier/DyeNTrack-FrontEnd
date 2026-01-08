@@ -34,7 +34,6 @@ import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun DateSelectorRange(
@@ -73,7 +72,7 @@ fun DateSelectorRange(
             val hasSeance =
                 uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() == true
             val isToday = today == day.dateFormat
-            val isAfterToday = LocalDate.parse(day.dateFormat).isAfter(todayDate)
+            val isAfterToday = day.dateLocal.isAfter(todayDate)
             val saveStatus = uiState.seancesParJour[day.dateFormat]?.saveAPI
             val dotColor = when (saveStatus) {
                 SaveType.APISAVE -> Color(0xFF4CAF50)   // vert

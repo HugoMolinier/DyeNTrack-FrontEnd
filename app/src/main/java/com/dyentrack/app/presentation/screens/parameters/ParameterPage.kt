@@ -223,7 +223,7 @@ fun ParameterPage(
                                 ),
                                 ParameterItem(
                                     { navController.navigate("advanceParam") },
-                                    "Avancé",
+                                    stringResource(R.string.advanced),
                                     ParameterIcon.Vector(Icons.Outlined.Memory)
                                 )
                             )

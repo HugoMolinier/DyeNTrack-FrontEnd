@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.seance
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -18,17 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLink
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,13 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -124,6 +117,21 @@ fun SeancePage(
 
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val presets by presetViewModel.presetFlow.collectAsState()
+
+
+
+    val revokePresetTitle = stringResource(R.string.revoke_preset_title)
+    val revokePresetDescription = stringResource(R.string.revoke_preset_description)
+
+    val addPresetExercisesTitle = stringResource(R.string.add_preset_exercises_title)
+    val addPresetExercisesDescription = stringResource(R.string.add_preset_exercises_description)
+
+    val yesText = stringResource(R.string.yes)
+    val noText = stringResource(R.string.no)
+    val associateOnlyText = stringResource(R.string.associate_only)
+
+    val associatePresetText = stringResource(R.string.associate_preset)
+    val importFromPresetText = stringResource(R.string.import_from_preset)
 
     Box(modifier = modifier
         .fillMaxSize()
@@ -205,14 +213,14 @@ fun SeancePage(
                                                 ) {
                                                     Icon(
                                                         Icons.Default.AddLink,
-                                                        "Associer",
+                                                        stringResource(R.string.associate_preset),
                                                         tint = MaterialTheme.colorScheme.primary.copy(
                                                             alpha = 0.6f
                                                         ),
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                     Text(
-                                                        "Associer un preset",
+                                                        stringResource(R.string.associate_preset),
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             color = MaterialTheme.colorScheme.primary.copy(
                                                                 alpha = 0.6f
@@ -231,11 +239,11 @@ fun SeancePage(
 
 
                                                             activeMenu = ActiveMenu(
-                                                                title = "Revoquer le Préset",
-                                                                description = "Cela enlèvera juste l'association de ce preset à la scéance",
+                                                                title = revokePresetTitle,
+                                                                description = revokePresetDescription,
                                                                 content = listOf(
-                                                                    MenuItemData("Non", onClick = { activeMenu = null }),
-                                                                    MenuItemData("Oui", color = Color.Red, onClick = {
+                                                                    MenuItemData(noText, onClick = { activeMenu = null }),
+                                                                    MenuItemData(yesText, color = Color.Red, onClick = {
                                                                         viewModel.setPreset(null, null)
                                                                         activeMenu = null
 
@@ -248,14 +256,14 @@ fun SeancePage(
                                                 ) {
                                                     Icon(
                                                         Icons.Default.Link,
-                                                        "Associer",
+                                                        "",
                                                         tint = MaterialTheme.colorScheme.primary.copy(
                                                             alpha = 0.6f
                                                         ),
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                     Text(
-                                                        currentPreset?.name ?: "Ancien Preset ",
+                                                        currentPreset?.name ?: stringResource(R.string.old_preset),
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             color = MaterialTheme.colorScheme.primary.copy(
                                                                 alpha = 0.6f
@@ -282,7 +290,7 @@ fun SeancePage(
                                         ) {
                                             Icon(
                                                 Icons.Outlined.Lock,
-                                                contentDescription = "Voir stats",
+                                                contentDescription = "Lock Mode",
                                                 tint = if (modeActual.isLock()) MaterialTheme.colorScheme.primary else secondaryTextColor,
                                                 modifier = Modifier.size(18.dp)
                                             )
@@ -295,7 +303,7 @@ fun SeancePage(
                                         ) {
                                             Icon(
                                                 Icons.Outlined.SwapVert,
-                                                contentDescription = "Voir stats",
+                                                contentDescription = "Swap Mode",
                                                 tint = if (modeActual.isChangeOrder()) MaterialTheme.colorScheme.primary else secondaryTextColor,
                                                 modifier = Modifier.size(20.dp)
                                             )
@@ -379,7 +387,7 @@ fun SeancePage(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 20.dp, vertical = 20.dp),
+                                        .padding(horizontal = 20.dp, vertical = 32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
@@ -457,7 +465,7 @@ fun SeancePage(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        title = if(todaySeance?.exercisesInSceance?.isEmpty()==true) "Importer d'un preset" else "Associer un preset",
+        title = if(todaySeance?.exercisesInSceance?.isEmpty()==true) importFromPresetText else associatePresetText,
         presetList = presets,
         titleAction = {
         if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
@@ -480,11 +488,11 @@ fun SeancePage(
                 viewModel.addExerciseFromPresetForDaySelected(presets);
             } else {
                 activeMenu = ActiveMenu(
-                    title = "Ajouter les Exercices du preset",
-                    description = "Cela va associer les exercices sans remplacer ceux existants",
+                    title =addPresetExercisesTitle,
+                    description = addPresetExercisesDescription,
                     content = listOf(
-                        MenuItemData("Juste Associer", onClick = { activeMenu = null }),
-                        MenuItemData("Oui", onClick = {
+                        MenuItemData(associateOnlyText, onClick = { activeMenu = null }),
+                        MenuItemData(yesText, onClick = {
                             viewModel.addExerciseFromPresetForDaySelected(presets);
                             activeMenu = null
                         })
