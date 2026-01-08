@@ -107,12 +107,18 @@ class PresetRepositoryImpl @Inject constructor(
         for (apiOnly in apip) {
             if (apiOnly.idPreset != null && apiOnly.idPreset !in localIds) {
                 Log.d("ici","ici")
-                result.add(apiOnly)
-                presetDao.saveOrUpdatePreset(apiOnly.copy(
-                    idLocal =null,
-                    idPreset = apiOnly.idPreset
-                ),
-                    dateSave = apiOnly.lastUpdate)
+
+                if(presetDao.getPresetByIdApi(apiOnly.idPreset)?.isDelete!=true) {
+                    result.add(apiOnly)
+                    Log.d("ici","Notici")
+                    presetDao.saveOrUpdatePreset(
+                        apiOnly.copy(
+                            idLocal = null,
+                            idPreset = apiOnly.idPreset
+                        ),
+                        dateSave = apiOnly.lastUpdate
+                    )
+                }
             }
         }
 
@@ -164,8 +170,9 @@ class PresetRepositoryImpl @Inject constructor(
     suspend fun deleteHardPreset(preset: Preset) {
         if (preset.idPreset != null) {
             if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
-                val responseStatus = api.deletePreset(preset.idPreset).status
-                if (responseStatus == 200) {
+                val response = api.deletePreset(preset.idPreset)
+                Log.d("apiDeleterespons","${response}")
+                if (response.status == 200) {
                     presetDao.hardDeleteByApiId(preset.idPreset)
                 }
 

@@ -63,8 +63,6 @@ fun ParameterPage(
         Column {
             TopNavigationBar(
                 stringResource(R.string.parameter),
-                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("home") },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,

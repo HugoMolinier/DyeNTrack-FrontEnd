@@ -38,6 +38,9 @@ interface PresetDao {
 
     @Query("SELECT * FROM preset WHERE idLocal = :idLocal")
     suspend fun getPresetById(idLocal: Long?): Preset?
+
+    @Query("SELECT * FROM preset WHERE idPreset = :idApi")
+    suspend fun getPresetByIdApi(idApi: Long): Preset?
     suspend fun saveOrUpdatePreset(preset: Preset,dateSave: String? = null):Preset? {
 
         Log.d("^preset","${preset}")

@@ -67,7 +67,9 @@ android {
 hilt {
     enableAggregatingTask = false
 }
-
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
 dependencies {
     // Core Android
     implementation(libs.androidx.core.ktx)
@@ -98,6 +100,7 @@ dependencies {
     //Ad
 
     implementation(libs.play.services.ads.api)
+    implementation(libs.androidx.compose.animation)
 
 
     // Navigation

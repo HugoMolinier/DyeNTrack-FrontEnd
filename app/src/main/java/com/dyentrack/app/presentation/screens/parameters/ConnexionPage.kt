@@ -89,7 +89,7 @@ fun ConnexionPage(
             TopNavigationBar(
                 stringResource(R.string.login),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("parametre") },
+                onClickLeft = { navController.popBackStack() },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
@@ -195,7 +195,9 @@ fun ConnexionPage(
                         Text(
                             text = stringResource(R.string.signup_here),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.clickable(onClick = { navController.navigate("inscription") })
+                            modifier = Modifier.clickable(onClick = { navController.navigate("inscription") {
+                                popUpTo("connexion") { inclusive = true }
+                            } })
                         )
                     }
 

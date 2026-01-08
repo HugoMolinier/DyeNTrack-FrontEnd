@@ -17,19 +17,13 @@ import androidx.compose.ui.unit.dp
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.presentation.components.InfoRow
+import com.dyentrack.app.presentation.components.SeanceSummary
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.utils.convertWeight
 
 @Composable
-fun ShowInfoOfSeance(viewModel: SeanceViewModel, userUnit: MesureUnit) {
+fun ShowInfoOfSeance(exerciseSummary: SeanceSummary, userUnit: MesureUnit) {
 
-    val state by viewModel.uiState.collectAsState()
-
-
-
-    val exerciseSummary by remember(state.daySelected) {
-        mutableStateOf(viewModel.getSeanceSummary(state.daySelected))
-    }
 
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
         Text(

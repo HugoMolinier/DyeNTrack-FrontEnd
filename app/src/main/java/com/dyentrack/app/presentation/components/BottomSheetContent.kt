@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetContent(
-    title: String,
+    title: String="",
     titleAction: (@Composable () -> Unit)? = null,
     closeButtonTitle: Boolean = true,
     childrenForExtend: @Composable (() -> Unit)? = null,
@@ -84,7 +84,7 @@ fun BottomSheetContent(
             if (dragZoneComponent != null) {
                 dragZoneComponent.invoke()
             } else {
-                if (title.isNotBlank() || closeButtonTitle) {
+                if (title?.isNotBlank()==true || closeButtonTitle) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -92,7 +92,7 @@ fun BottomSheetContent(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(text = title, style = MaterialTheme.typography.titleSmall)
                             titleAction?.invoke()
                         }

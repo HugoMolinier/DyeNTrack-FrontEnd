@@ -586,7 +586,8 @@ fun HomePage(
         onNew = {value->
             presetViewModel.createPreset(value);
         },
-        title="Preset",
+        title="Nouveau Preset",
+        buttonText = "Crée",
         )
 
 

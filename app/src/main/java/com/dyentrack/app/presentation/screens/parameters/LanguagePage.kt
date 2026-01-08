@@ -67,7 +67,7 @@ fun LanguagePage(
                 TopNavigationBar(
                     stringResource(R.string.language),
                     leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                    onClickLeft = { navController.navigate("parametre") },
+                    onClickLeft = { navController.popBackStack() },
                     rightSide = {
                         Icon(
                             Icons.Default.Close,

@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.presentation.components.CustomButton
@@ -45,6 +47,8 @@ import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.presentation.components.CenterMenu
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
 @Composable
@@ -94,7 +98,7 @@ fun InformationPage(
         stringResource(R.string.female_label) to false,
         stringResource(R.string.other_label) to null
     )
-
+    var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val focusManager = LocalFocusManager.current
     Box(modifier = Modifier
         .fillMaxSize()
@@ -108,12 +112,53 @@ fun InformationPage(
             TopNavigationBar(
                 stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("parametre") },
+                onClickLeft = { if(originalPseudo.value != pseudo.value.text ||
+                    originalHeight.value != height.value.text  ||
+                    originalBirthday.value != birthday.value  ||
+                    originalSexe.value != sexe.value){
+
+                    activeMenu = ActiveMenu(
+                        title = "Modification non sauvegarder",
+                        description = "Revenir quand meme sans sauvegarder les changements?",
+                        content = listOf(
+                            MenuItemData("Non", onClick = { activeMenu = null }),
+                            MenuItemData("Oui", color = Color.Red, onClick = {
+                                navController.popBackStack()
+
+                            }
+                            )
+                        )
+                    )
+
+                }else { navController.popBackStack()} },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
-                        modifier = Modifier.clickable(onClick = { navController.navigate("home") })
+                        modifier = Modifier.clickable(onClick = {
+                            if(originalPseudo.value != pseudo.value.text ||
+                                originalHeight.value != height.value.text  ||
+                                originalBirthday.value != birthday.value  ||
+                                originalSexe.value != sexe.value){
+
+                                activeMenu = ActiveMenu(
+                                    title = "Modification non sauvegarder",
+                                    description = "Revenir quand meme sans sauvegarder les changements?",
+                                    content = listOf(
+                                        MenuItemData("Non", onClick = { activeMenu = null }),
+                                        MenuItemData("Oui", color = Color.Red, onClick = {
+                                            navController.navigate("home")
+
+                                        }
+                                        )
+                                    )
+                                )
+
+                            }else {
+                                navController.navigate("home")
+                            }
+
+                        })
                     )
                 })
 
@@ -309,5 +354,17 @@ fun InformationPage(
                 }
             }
         }
+    }
+
+    activeMenu?.let { menu ->
+        CenterMenu(
+            onDismiss = { activeMenu = null },
+
+            title = menu.title,
+            descrition = menu.description,
+            items = menu.content
+
+
+        )
     }
 }

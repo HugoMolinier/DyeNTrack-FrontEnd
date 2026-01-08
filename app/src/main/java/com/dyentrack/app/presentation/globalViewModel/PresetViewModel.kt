@@ -29,10 +29,11 @@ class PresetViewModel @Inject constructor(
 
     fun deletePreset(preset: Preset) = viewModelScope.launch { deletePresetUseCase(preset) }
 
-    suspend fun savePreset(preset: Preset): Preset? {
-        return savePresetUseCase(preset)
+    fun savePreset(preset: Preset) {
+        viewModelScope.launch {
+            savePresetUseCase(preset)
+        }
     }
-
     fun createPreset(name: String) {
         viewModelScope.launch {
             val preset = savePresetUseCase.localOnly(

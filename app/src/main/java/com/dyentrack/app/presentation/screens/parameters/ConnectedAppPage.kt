@@ -73,7 +73,7 @@ fun ConnectedAppPage(
             TopNavigationBar(
                 stringResource(R.string.connected_app),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("parametre") },
+                onClickLeft = { navController.popBackStack() },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,

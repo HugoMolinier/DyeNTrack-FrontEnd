@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.CircularProgressIndicator
@@ -104,13 +105,13 @@ fun SeancePage(
         daySelected?.let { viewModel.setDaySelected(it) }
         section?.let { viewModel.setSectionSelected(it) }
     }
+
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
 
     val state by viewModel.uiState.collectAsState()
     val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     val authViewModel by authViewModel.authState.collectAsState()
-    val presetList by presetViewModel.presetFlow.collectAsState()
     val language = viewModel.languageUser
     val masterData by viewModel.masterData.collectAsState()
 
@@ -122,8 +123,7 @@ fun SeancePage(
     val todaySeance = state.seancesParJour[state.daySelected]
 
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
-    val presets by presetViewModel.presetFlow.collectAsState(emptyList())
-    var expanded by remember { mutableStateOf(false) }
+    val presets by presetViewModel.presetFlow.collectAsState()
 
     Box(modifier = modifier
         .fillMaxSize()
@@ -136,8 +136,6 @@ fun SeancePage(
         Column {
             TopNavigationBar(
                 stringResource(R.string.today_session),
-                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("home") },
                 rightSide = {
                     if (todaySeance?.saveAPI == SaveType.NOTSAVE) { //TODO( "add Flow of requestDayDataStatus")
                         CircularProgressIndicator(
@@ -224,7 +222,7 @@ fun SeancePage(
                                                 }
                                             } else {
                                                 val currentPreset =
-                                                    presets.find { it.idLocal == todaySeance?.idPreset?.localId || todaySeance.idPreset.apiId == it.idPreset }
+                                                    presets.find { it.idLocal == todaySeance.idPreset.localId || todaySeance.idPreset.apiId == it.idPreset }
                                                 Row(
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                     verticalAlignment = Alignment.CenterVertically,
@@ -257,7 +255,7 @@ fun SeancePage(
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                     Text(
-                                                        currentPreset?.name ?: "Preset Associé",
+                                                        currentPreset?.name ?: "Ancien Preset ",
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             color = MaterialTheme.colorScheme.primary.copy(
                                                                 alpha = 0.6f
@@ -368,7 +366,11 @@ fun SeancePage(
                                         )
                                 }
                             }
-                            item { ShowInfoOfSeance(viewModel, userUnit) }
+                            item {
+                                val exerciseSummary by remember(state.daySelected) {
+                                    mutableStateOf(viewModel.getSeanceSummary(state.daySelected))
+                                }
+                                ShowInfoOfSeance(exerciseSummary, userUnit) }
 
 
                         } else {
@@ -455,35 +457,19 @@ fun SeancePage(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        title = "Associer un preset",
-        presetList = presetList,
+        title = if(todaySeance?.exercisesInSceance?.isEmpty()==true) "Importer d'un preset" else "Associer un preset",
+        presetList = presets,
         titleAction = {
         if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
-            Box {
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Menu",
+                    imageVector = Icons.Default.SwapHoriz,
+                    contentDescription = "Swap",
                     modifier = Modifier
-                        .size(24.dp)
-                        .clickable { expanded = true },
+                        .size(20.dp)
+                        .clickable {  viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) },
                     tint = MaterialTheme.colorScheme.onSurface
                 )
 
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    offset = DpOffset(x = (-40).dp, y = 0.dp)
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Ajouter un exercice") },
-                        onClick = {
-                            expanded = false
-                            viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE)
-                        }
-                    )
-
-                }
-            }
         }
                       },
         onClickPreset = { preset ->
@@ -519,31 +505,14 @@ fun SeancePage(
         title = stringResource(R.string.add_exercise),
         titleAction = {
             if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
-                Box {
                     Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
+                        imageVector = Icons.Default.SwapHoriz,
                         contentDescription = "Menu",
                         modifier = Modifier
-                            .size(24.dp)
-                            .clickable { expanded = true },
+                            .size(20.dp)
+                            .clickable { viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)},
                         tint = MaterialTheme.colorScheme.onSurface
                     )
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        offset = DpOffset(x = (-40).dp, y = 0.dp)
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Ajouter un preset") },
-                            onClick = {
-                                expanded = false
-                                viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)
-                            }
-                        )
-
-                    }
-                }
             }
         },
         onClose = { viewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },

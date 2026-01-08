@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -28,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -35,8 +38,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.NavItem
+import com.dyentrack.app.domain.model.enum.NavTransitionType
 import com.dyentrack.app.presentation.globalViewModel.AppViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
@@ -57,6 +62,7 @@ import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.preset.PresetPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -200,4 +206,3 @@ fun MyApp() {
         }
     }
 }
-

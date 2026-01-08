@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,13 +38,16 @@ fun BottomSheetInput(
     onNew: (String) -> Unit,
     onClose: () -> Unit= {},
     title:String="",
+    buttonText:String="",
+    inputDefaultValue:String?=null,
 
     ) {
-    val inputState = remember { mutableStateOf(TextFieldValue()) }
+    val inputState = remember(inputDefaultValue) {
+        mutableStateOf(TextFieldValue(inputDefaultValue ?: "", TextRange(inputDefaultValue?.length?:0)))
+    }
     var isError by remember { mutableStateOf(false) }
 
     BottomSheetContent(
-        title = title,
         showBottomSheet = bottomSheetVisibility,
         onDismiss = { onClose()},
         isfullScreen = false,
@@ -56,7 +60,7 @@ fun BottomSheetInput(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Text(text = "Nouveau Préset", style = MaterialTheme.typography.titleSmall)
+                Text(text = title, style = MaterialTheme.typography.titleSmall)
                 Button(
                     onClick = {  if (inputState.value.text.isBlank()) {
                         isError = true
@@ -67,9 +71,9 @@ fun BottomSheetInput(
                     modifier = Modifier.padding(bottom = 4.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = secondaryTextColor
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
-                ) { Text("Crée", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp)) }
+                ) { Text(buttonText, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp)) }
 
 
             }

@@ -62,7 +62,7 @@ fun MesureUnitPage(
             TopNavigationBar(
                 stringResource(R.string.measurement_unit),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("parametre") },
+                onClickLeft = { navController.popBackStack() },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,

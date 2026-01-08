@@ -1,4 +1,5 @@
 package com.dyentrack.app.presentation.components
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -79,6 +80,15 @@ fun InputCustom(
         }
     }
 
+    if(replaceZeroToNull) {
+        LaunchedEffect(isFocused) {
+            if (isFocused ) {
+                if (text.value.text == "0" || text.value.text == "0.0") {
+                    text.value = TextFieldValue(text = "", selection = TextRange(0))
+                }
+            }
+        }
+    }
     Row (
         modifier = modifier
             .fillMaxWidth()

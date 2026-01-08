@@ -100,9 +100,7 @@ fun AnalysePage(
         mutableStateOf(convertWeight(globalData.rateSetSomme?.sommePond, MesureUnit.KG, userUnit))
     }
     Column(modifier = modifier.fillMaxWidth()) {
-        TopNavigationBar(
-            stringResource(R.string.full_analysis), leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-            onClickLeft = { navController.popBackStack() })
+        TopNavigationBar(stringResource(R.string.full_analysis))
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

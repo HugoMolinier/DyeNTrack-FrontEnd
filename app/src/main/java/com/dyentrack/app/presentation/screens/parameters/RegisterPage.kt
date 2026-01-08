@@ -83,7 +83,7 @@ fun RegisterPage(
             TopNavigationBar(
                 stringResource(R.string.signup),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { navController.navigate("parametre") },
+                onClickLeft = { navController.popBackStack() },
 
                 rightSide = {
                     Icon(
@@ -212,7 +212,9 @@ fun RegisterPage(
                         Text(
                             text = stringResource(R.string.login_here),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.clickable(onClick = { navController.navigate("connexion") })
+                            modifier = Modifier.clickable(onClick = { navController.navigate("connexion") {
+                                popUpTo("inscription") { inclusive = true }
+                            } })
                         )
                     }
 
