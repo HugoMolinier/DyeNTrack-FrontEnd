@@ -1,6 +1,7 @@
 package com.dyentrack.app.data.local.datasource
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.security.GeneralSecurityException
 
 @Singleton
 class SecureSessionDataSource @Inject constructor(
@@ -20,19 +22,27 @@ class SecureSessionDataSource @Inject constructor(
 ) {
 
     private val gson = Gson()
+    private val prefs: SharedPreferences by lazy {
+        createEncryptedPrefs()
+    }
+    private fun createEncryptedPrefs(): SharedPreferences {
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
 
-    private val prefs by lazy {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        EncryptedSharedPreferences.create(
-            context,
-            "user_session_secure",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+            EncryptedSharedPreferences.create(
+                context,
+                "user_session_secure", // nom constant
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.w("SecurePrefs", "Cannot decrypt keyset, recreating prefs", e)
+            context.deleteSharedPreferences("user_session_secure")
+            createEncryptedPrefs()
+        }
     }
 
     companion object {

@@ -37,9 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,16 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.BottomSheetInput
-import com.dyentrack.app.presentation.components.BottomSheetPreset
-import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
-import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
@@ -474,7 +470,6 @@ fun HomePage(
                 )
             }
             item {
-
                 Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -494,32 +489,69 @@ fun HomePage(
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
                 }
-                Box(
+                LazyRow(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(340.dp)
-                        .padding(horizontal = 10.dp)
-
-
-                        .wrapContentHeight()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.medium
-                        )
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    val radarData = remember(state.graphData, state.masterDataMaps?.musclesGroupMap) {
-                        val radarLabels = state.graphData.keys.map { state.masterDataMaps?.musclesGroupMap?.get(it) ?: "N/A" }
-                        val values2 = state.graphData.values.map { it.numberExercise.toFloat() }
-                        val values3 = state.graphData.values.map { it.numberSet.toFloat() }
-                        Triple(radarLabels, values2, values3)
+
+
+                    item {
+
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
+
+
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val radarGroupData = homeViewModel.getRadarData(
+                                data = state.groupRateOfEachDay,
+                                labelsMap = state.masterDataMaps?.musclesGroupMap ?: emptyMap()
+                            )
+                            RadarChartMP(
+                                modifier = Modifier.fillMaxSize(),
+                                radarGroupData.first,
+                                radarGroupData.second,
+                                radarGroupData.third
+                            )
+
+                        }
                     }
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
 
-                    RadarChartMP(modifier=  Modifier.fillMaxSize(),radarData.first,radarData.second,radarData.third)
 
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val radarMuscleData = homeViewModel.getRadarData(
+                                data = state.muscleRateOfEachDay,
+                                labelsMap = state.masterDataMaps?.muscleMap?.mapValues { it.value.getName(language) } ?: emptyMap()
+                            )
+
+                            RadarChartMP(
+                                modifier = modifier,
+                                radarMuscleData.first,
+                                radarMuscleData.second,
+                                radarMuscleData.third
+                            )
+                        }
+
+                    }
                 }
-
-
-
             }
 
             item{

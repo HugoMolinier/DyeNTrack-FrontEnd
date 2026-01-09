@@ -1,6 +1,7 @@
 package com.dyentrack.app.data.repository
 
 import android.util.Log
+import com.dyentrack.app.data.local.database.AppDatabase
 import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.AuthStatus
@@ -97,10 +98,13 @@ class DayDataRepositoryImpl @Inject constructor(
             // ---- SYNC LOCAL ---- si l'api a un élémênt plus récent
             if (localHealthTime < apiTime || localSeanceTime < apiTime) {
                 updateToLocal(
-                    merged,
+                    merged.copy(
+                        seanceTrack = merged.seanceTrack?.copy(presetLocalId = localDay.seanceTrack?.presetLocalId )
+                    ),
                     apiDay.lastUpdate,
                     TypeOfAction.UPDATEBOTH
                 )
+
             }
 
 
@@ -141,7 +145,6 @@ class DayDataRepositoryImpl @Inject constructor(
             _dayDataFlow.value = (_dayDataFlow.value.orEmpty().filter { it.dayData != day.dayData } + day.copy())
         }
     }
-
 
 
 }

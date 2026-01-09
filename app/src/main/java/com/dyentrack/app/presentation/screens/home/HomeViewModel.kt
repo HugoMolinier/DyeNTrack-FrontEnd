@@ -8,6 +8,7 @@ import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.usecase.GetRadarDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
 import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
@@ -31,7 +32,7 @@ class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
-
+    private val getRadarDataUseCase: GetRadarDataUseCase,
     ) : ViewModel() {
 
     private val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
@@ -63,6 +64,7 @@ class HomeViewModel @Inject constructor(
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
                 list.forEach { dayData ->
+                    val date = dayData.localDate ?: return@forEach
                     if (dayData.dayData !in last15DaysSet) return@forEach // seulement 15 derniers jours
 
                     if (dayData.dayData == todayIso) todaySeance = dayData
@@ -107,56 +109,62 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun getRadarData(
+        data: Map<String, Map<Long, MuscleRate>>,
+        labelsMap: Map<Long, String>
+    ): Triple<List<String>, List<Float>, List<Float>> {
+        return getRadarDataUseCase(data,labelsMap)
+    }
+
     fun toggleBottomSheet(show: BottomSheetVisibleType) {
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
-    fun muscleRateOfEachDay(principalOnly:Boolean) {
-        val lastScence = _uiState.value.mapSeance
+    fun muscleRateOfEachDay(principalOnly: Boolean) {
+        val lastSeance = _uiState.value.mapSeance
 
-        val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
-        val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
-        lastScence.forEach { (dayKey, seanceTrack) ->
+        val muscleRateByDay: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
+        val groupRateByDay: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf() // par jour
 
-            val dayMap = muscleRate.getOrPut(dayKey) { mutableMapOf() }
+        lastSeance.forEach { (dayKey, seanceTrack) ->
+            val dayMap = muscleRateByDay.getOrPut(dayKey) { mutableMapOf() }
+            val groupMap = groupRateByDay.getOrPut(dayKey) { mutableMapOf() }
 
-
-
-            seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
-                val exercise = uiState.value.masterDataMaps?.exerciseMap?.get(plannedExerciseVO.exerciseId)?: return@forEach
-                val setsCount = plannedExerciseVO.sets?.count() ?: 0
-                val adjustedSets = if (plannedExerciseVO.lateraliteId == 2L) ceil(setsCount / 2.0).toInt() else setsCount
+            seanceTrack.plannedExercises.forEach { exerciseVO ->
+                val exercise = _uiState.value.masterDataMaps?.exerciseMap?.get(exerciseVO.exerciseId) ?: return@forEach
+                val setsCount = exerciseVO.sets?.count() ?: 0
+                val adjustedSets = if (exerciseVO.lateraliteId == 2L) ceil(setsCount / 2.0).toInt() else setsCount
 
                 exercise.muscleInfos
                     ?.filter { !principalOnly || it.principal }
                     ?.forEach { muscleInfo ->
                         val muscleId = muscleInfo.idMuscle
-                        val groupId = _uiState.value.masterDataMaps?.muscleMap?.get(muscleId)?.idMuscularGroup?:0L
+                        val groupId = _uiState.value.masterDataMaps?.muscleMap?.get(muscleId)?.idMuscularGroup ?: 0L
 
-
-                        val prev = dayMap[muscleId]
-                        dayMap[muscleId] = prev?.copy(
-                            numberExercise = prev.numberExercise + 1,
-                            numberSet = prev.numberSet + adjustedSets
+                        // Muscle individuel
+                        dayMap[muscleId] = dayMap[muscleId]?.copy(
+                            numberExercise = dayMap[muscleId]!!.numberExercise + 1,
+                            numberSet = dayMap[muscleId]!!.numberSet + adjustedSets
                         ) ?: MuscleRate(1, adjustedSets)
 
-
-                        //pour groupe musculmaire sur 15j:
-                        val prevGroup = futurGraphData[groupId]
-                        futurGraphData[groupId] = prevGroup?.copy(
-                            numberExercise = prevGroup.numberExercise + 1,
-                            numberSet = prevGroup.numberSet + adjustedSets
+                        // Groupe musculaire
+                        groupMap[groupId] = groupMap[groupId]?.copy(
+                            numberExercise = groupMap[groupId]!!.numberExercise + 1,
+                            numberSet = groupMap[groupId]!!.numberSet + adjustedSets
                         ) ?: MuscleRate(1, adjustedSets)
-
-
-
-
-                }
+                    }
             }
-            muscleRate[dayKey] = dayMap
+
+            muscleRateByDay[dayKey] = dayMap
+            groupRateByDay[dayKey] = groupMap
         }
 
-        _uiState.update { it.copy(muscleRateOfEachDay = muscleRate, graphData = futurGraphData) }
+        _uiState.update { it.copy(
+            muscleRateOfEachDay = muscleRateByDay,
+            groupRateOfEachDay = groupRateByDay
+        ) }
     }
+
+
 
     fun expandSeance(id: Int?) {
         _uiState.update { it.copy(expandedSeance = id) }

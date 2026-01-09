@@ -182,7 +182,7 @@ fun ExercisePage(
                                     modifier = Modifier.padding(vertical = 12.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
-                                if (language != LANGUAGE.EN) {
+                                if (language != LANGUAGE.EN && exercise.nameFR!= exercise.nameEN) {
                                     InfoRow(
                                         label = "Aussi Appellé",
                                         value = exercise.getName(LANGUAGE.EN)

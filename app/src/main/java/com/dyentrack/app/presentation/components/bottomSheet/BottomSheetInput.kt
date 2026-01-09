@@ -1,13 +1,11 @@
-package com.dyentrack.app.presentation.components
+package com.dyentrack.app.presentation.components.bottomSheet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Button
@@ -23,14 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.enum.VariantType
-import com.dyentrack.app.presentation.theme.secondaryTextColor
+import com.dyentrack.app.presentation.components.InputCustom
 
 @Composable
 fun BottomSheetInput(
@@ -49,7 +45,7 @@ fun BottomSheetInput(
 
     BottomSheetContent(
         showBottomSheet = bottomSheetVisibility,
-        onDismiss = { onClose()},
+        onDismiss = { onClose() },
         isfullScreen = false,
         dragZoneComponent = {
             Row(
@@ -62,25 +58,46 @@ fun BottomSheetInput(
 
                 Text(text = title, style = MaterialTheme.typography.titleSmall)
                 Button(
-                    onClick = {  if (inputState.value.text.isBlank()) {
-                        isError = true
-                    } else {
-                        isError = false
-                        onNew(inputState.value.text)
-                    } },
+                    onClick = {
+                        if (inputState.value.text.isBlank()) {
+                            isError = true
+                        } else {
+                            isError = false
+                            onNew(inputState.value.text)
+                        }
+                    },
                     modifier = Modifier.padding(bottom = 4.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.primary
                     )
-                ) { Text(buttonText, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp)) }
+                ) {
+                    Text(
+                        buttonText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
 
 
             }
         },
         childrenForExtend = {
-            Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 20.dp, bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                InputCustom(text = inputState, autoFocus = true, maxCaracter = 80, placeholder = "Nom du preset", variant = VariantType.OUTLINED)
+            Column(
+                modifier = Modifier.padding(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = 20.dp,
+                    bottom = 20.dp
+                ), verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                InputCustom(
+                    text = inputState,
+                    autoFocus = true,
+                    maxCaracter = 80,
+                    placeholder = "Nom du preset",
+                    variant = VariantType.OUTLINED
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -98,7 +115,7 @@ fun BottomSheetInput(
 
                     }
                     Text(
-                        text = if (isError)"Le nom ne peut etre vide" else "",
+                        text = if (isError) "Le nom ne peut etre vide" else "",
                         style = MaterialTheme.typography.bodySmall.copy(
                             color = Color.Red,
                             fontSize = 12.sp

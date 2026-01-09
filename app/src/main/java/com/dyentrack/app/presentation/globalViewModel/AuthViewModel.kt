@@ -56,5 +56,6 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         logoutUseCase()
+
     }
 }

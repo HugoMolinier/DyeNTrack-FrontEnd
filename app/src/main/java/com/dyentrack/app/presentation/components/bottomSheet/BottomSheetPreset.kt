@@ -1,4 +1,4 @@
-package com.dyentrack.app.presentation.components
+package com.dyentrack.app.presentation.components.bottomSheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.domain.model.preset.Preset
+import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -34,19 +35,31 @@ fun BottomSheetPreset(
     onClickPreset: (Preset) -> Unit= {},
     title:String="",
     titleAction: (@Composable () -> Unit)? = null,
+    canAddPreset:Boolean=true
 
     ) {
 
 
     BottomSheetContent(
         title = title,
-        titleAction=titleAction,
+        titleAction = titleAction,
         showBottomSheet = bottomSheetVisibility,
-        onDismiss = { onClose()},
+        onDismiss = { onClose() },
         isfullScreen = false,
         childrenForExtend = {
-            Column(modifier = Modifier.padding(top=12.dp,start=12.dp,end=12.dp,bottom=20.dp)) {
-                Row(modifier= Modifier.fillMaxWidth().padding(bottom = 12.dp),horizontalArrangement = Arrangement.Absolute.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier.padding(
+                    top = 12.dp,
+                    start = 12.dp,
+                    end = 12.dp,
+                    bottom = 20.dp
+                )
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     ChipDropDown(listOf("Par nom", "Par date de création", "Last Occurence"))
                     Icon(Icons.Outlined.FilterList, "Croissant")
                 }
@@ -90,35 +103,37 @@ fun BottomSheetPreset(
                     }
 
                     // Bouton Ajouter
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.clickable {
-                            onNew()
-                        }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(MaterialTheme.shapes.extraLarge)
-                                .border(
-                                    width = 1.dp,
-                                    color = secondaryTextColor,
-                                    shape = MaterialTheme.shapes.extraLarge
-                                ),
-                            contentAlignment = Alignment.Center
+                    if (canAddPreset) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.clickable {
+                                onNew()
+                            }
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Ajouter",
-                                tint = secondaryTextColor
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(MaterialTheme.shapes.extraLarge)
+                                    .border(
+                                        width = 1.dp,
+                                        color = secondaryTextColor,
+                                        shape = MaterialTheme.shapes.extraLarge
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Ajouter",
+                                    tint = secondaryTextColor
+                                )
+                            }
+
+                            Text(
+                                text = "Ajouter",
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
-
-                        Text(
-                            text = "Ajouter",
-                            style = MaterialTheme.typography.bodySmall
-                        )
                     }
                 }
 

@@ -18,27 +18,22 @@ class BuildMasterDataMapsUseCase @Inject constructor(
     private val repository: MasterDataRepository
 ) {
 
-    private var cachedMaps: MasterDataMaps? = null
-    private var cachedLanguage: LANGUAGE? = null
+    private val cache = mutableMapOf<LANGUAGE, MasterDataMaps>()
 
     suspend fun execute(language: LANGUAGE): MasterDataMaps {
-        if (cachedMaps != null && cachedLanguage == language) {
-            return cachedMaps!!
-        }
+        cache[language]?.let { return it }
 
         val data = repository.masterDataFlow
             .filterNotNull()
             .first()
-
-        val maps = MasterDataMaps(
+        return MasterDataMaps(
             exerciseMap = data.officialExercise.associateBy { it.idExercise },
             musclesGroupMap = data.musclesGroup.associate { it.id to it.getName(language) },
-            muscleMap =  data.muscles.associateBy { it.id },
+            muscleMap = data.muscles.associateBy { it.id },
             lateraliteMap = data.lateralites.associate { it.id to it.getName(language) },
             equipmentMap = data.equipment.associate { it.id to it.getName(language) }
-        )
-        cachedMaps = maps
-        cachedLanguage = language
-        return maps
+        ).also {
+            cache[language] = it
+        }
     }
 }

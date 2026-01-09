@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -34,9 +34,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,61 +44,83 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.ChipDropDownFlowRow
-import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
+import com.dyentrack.app.presentation.components.chart.PieChartMP
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
+import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
+import com.dyentrack.app.presentation.theme.BlueExercise
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.convertWeight
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 
 @Composable
 fun AnalysePage(
     modifier: Modifier = Modifier, navController: NavController,
     analyseViewModel: AnalyseViewModel = hiltViewModel<AnalyseViewModel>(),
+    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
 ) {
     val state by analyseViewModel.uiState.collectAsState()
     val userPref by userPreferenceViewModel.userPreference.collectAsState()
-
+    val allPreset by presetViewModel.presetFlow.collectAsState()
+    LaunchedEffect(allPreset) {
+        if (allPreset.isNotEmpty())
+            analyseViewModel.choseThisPreset(allPreset.firstOrNull())
+    }
     val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     var inputIndex by remember { mutableIntStateOf(0) }
     var extendFilter by remember { mutableStateOf(false) }
     val userUnit by remember(userPref) { mutableStateOf(userPref?.mesureUnit ?: MesureUnit.KG) }
 
     val userLANGUAGE by remember(analyseViewModel.languageUser) { mutableStateOf(analyseViewModel.languageUser) }
-    val globalData by remember(state.muscleRateOfEachDay) {
-        mutableStateOf(analyseViewModel.computeGlobalMuscleRate())
+
+    val filteredData by remember(state.dateRange, state.notIncludeGroupMuscle) {
+        mutableStateOf(
+            analyseViewModel.getFilteredMuscleRateByDay(
+                state.dateRange.oldDate, state.dateRange.recentDate,
+                state.notIncludeGroupMuscle
+            )
+        )
+    }
+    if (state.exerciceChose == 0L) {
+        analyseViewModel.choseThisExercise(filteredData.values.first().perExerciseStat.keys.first())
     }
 
     val masterData by analyseViewModel.masterData.collectAsState()
 
-    val moyenneSetParEx by remember(globalData) {
-        mutableDoubleStateOf(analyseViewModel.moyenneSetParEx(globalData))
+    val globalMuscleRate by remember(filteredData) {
+        mutableStateOf(analyseViewModel.computeGlobalMuscleRate(filteredData))
     }
-    val proportionSetFail by remember(globalData) {
-        mutableDoubleStateOf(analyseViewModel.proportionSetFail(globalData))
-    }
-    val sommePondUserUnit by remember(globalData, userUnit) {
-        mutableStateOf(convertWeight(globalData.rateSetSomme?.sommePond, MesureUnit.KG, userUnit))
-    }
+
+    val moyenneSetParEx = analyseViewModel.moyenneSetParEx(globalMuscleRate)
+    val proportionSetFail = analyseViewModel.proportionSetFail(globalMuscleRate)
+    val sommePondUserUnit =
+        convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)
     Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(stringResource(R.string.full_analysis))
         LazyColumn(
@@ -222,7 +244,10 @@ fun AnalysePage(
                             )
 
                             if (state.masterDataMaps?.musclesGroupMap?.isNotEmpty() == true) {
-                                ChipDropDownFlowRow(state.masterDataMaps!!.musclesGroupMap)
+                                ChipDropDownFlowRow(
+                                    state.masterDataMaps!!.musclesGroupMap,
+                                    state.notIncludeGroupMuscle,
+                                    onClick = { analyseViewModel.changeNotIncludeList(it) })
                             }
                         }
                     }
@@ -237,8 +262,8 @@ fun AnalysePage(
                                     stringResource(R.string.number_of_sessions),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
-                                Text(state.mapSeance.filter { it.value.plannedExercises.isNotEmpty() }
-                                    .count().toString(), style = MaterialTheme.typography.bodyLarge)
+                                Text(filteredData.count { it.value.perExerciseStat.isNotEmpty() }
+                                    .toString(), style = MaterialTheme.typography.bodyLarge)
 
                             }
 
@@ -330,28 +355,19 @@ fun AnalysePage(
                             shape = MaterialTheme.shapes.medium
                         )
                 ) {
-                    val sizeDayRatio = state.dayRatio.values.size
+                    val allStatByDay: Map<String, MuscleRate> =
+                        filteredData.mapValues { it.value.AllStat }
+                    val chartData = analyseViewModel.getCombinedChartData(allStatByDay, userUnit)
+
                     CombinedChartMP(
-                        labels = state.dayRatio.keys.toList(),
-                        barValues = state.dayRatio.values.map {
-                            convertWeight(
-                                it.rateSetSomme?.sommePond,
-                                MesureUnit.KG,
-                                userUnit
-                            )?.toFloat() ?: 0f
-                        },
-                        lineValues = state.dayRatio.values.map {
-                            val totalSet = it.numberSet
-                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
-                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
-                        },
-                        showValueBar = sizeDayRatio < 35,
-                        showValueLine = sizeDayRatio < 25,
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        labels = chartData.labels,
+                        barValues = chartData.barValues,
+                        lineValues = chartData.lineValues,
+                        showValueBar = chartData.showValueBar,
+                        showValueLine = chartData.showValueLine,
+                        modifier = Modifier.fillMaxWidth(),
                         barLegendLabel = stringResource(R.string.weighted_sum),
                         lineLegendLabel = stringResource(R.string.fail_set_ratio)
-
                     )
                 }
             }
@@ -384,14 +400,18 @@ fun AnalysePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
-                            val radarData = remember(state.graphData, state.masterDataMaps?.musclesGroupMap) {
-                                val radarLabels = state.graphData.keys.map { state.masterDataMaps?.musclesGroupMap?.get(it) ?: "N/A" }
-                                val values2 = state.graphData.values.map { it.numberExercise.toFloat() }
-                                val values3 = state.graphData.values.map { it.numberSet.toFloat() }
-                                Triple(radarLabels, values2, values3)
+                            val radarData = remember(filteredData, state.masterDataMaps) {
+                                analyseViewModel.getRadarData(
+                                    data = filteredData.mapValues { it.value.perGroupMuscularStat }, // <-- ici on prend directement perMuscleStat
+                                    labelsMap = state.masterDataMaps?.musclesGroupMap ?: emptyMap()
+                                )
                             }
-
-                            RadarChartMP(modifier=  Modifier.fillMaxSize(),radarData.first,radarData.second,radarData.third)
+                            RadarChartMP(
+                                modifier = Modifier.fillMaxSize(),
+                                radarData.first,
+                                radarData.second,
+                                radarData.third
+                            )
 
                         }
                     }
@@ -408,25 +428,22 @@ fun AnalysePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
-                            val radarLabels by remember(
-                                state.muscleSetPercentage,
-                                state.masterDataMaps
-                            ) {
-                                mutableStateOf(
-                                    state.muscleSetPercentage.mapNotNull { (muscleId, _, _) ->
-                                        state.masterDataMaps?.muscleMap?.get(muscleId)
-                                            ?.getName(userLANGUAGE)
-                                    }
+                            val radarData = remember(filteredData, state.masterDataMaps) {
+                                analyseViewModel.getRadarData(
+                                    data = filteredData.mapValues { it.value.perMuscleStat }, // <-- ici on prend directement perMuscleStat
+                                    labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
+                                        it.value.getName(userLANGUAGE)
+                                    } ?: emptyMap()
                                 )
                             }
-                            val radarValues by remember(state.muscleSetPercentage) {
-                                mutableStateOf(state.muscleSetPercentage.map { it.third.numberSet.toFloat() })
-                            }
-                            val radarValues2 by remember(state.muscleSetPercentage) {
-                                mutableStateOf(state.muscleSetPercentage.map { it.third.numberExercise.toFloat() })
-                            }
-                            RadarChartMP(modifier, radarLabels, radarValues2, radarValues)
+                            RadarChartMP(
+                                modifier = modifier,
+                                radarData.first,
+                                radarData.second,
+                                radarData.third
+                            )
                         }
+
                     }
                 }
             }
@@ -438,7 +455,9 @@ fun AnalysePage(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    state.muscleSetPercentage.forEach { (key, value) ->
+                    val musclePercentage =
+                        analyseViewModel.calculateMuscleSetPercentage(filteredData)
+                    musclePercentage.forEach { (key, value) ->
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.fillMaxWidth(0.48f)
@@ -463,83 +482,169 @@ fun AnalysePage(
                     }
                 }
             }
-
-            item {
-                Row(
-                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                ) {
-                    Text(
-                        "Par Preset",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(260.dp)
-                        .padding(vertical = 8.dp)
-
-
-                        .wrapContentHeight()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.medium
-                        )
-                ) {
+            if (allPreset.isNotEmpty()) {
+                item {
                     Row(
+                        horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                         modifier = Modifier
-                            .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                             .fillMaxWidth()
-                            .height(20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(top = 20.dp)
                     ) {
                         Text(
-                            text = state.masterDataMaps?.exerciseMap?.get(state.exerciceChose)
-                                ?.getName(userLANGUAGE)
-                                ?: stringResource(R.string.no_exercise),
-                            style = MaterialTheme.typography.bodyMedium
+                            "Par Preset",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding( bottom = 8.dp)
                         )
-                        IconButton(onClick = { analyseViewModel.toggleBottomSheet(true) }) {
-                            Icon(
-                                Icons.Default.SwapHoriz,
-                                contentDescription = stringResource(R.string.change_selection),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+
                     }
-                    val numberSize = state.allDataExercise.values.size
-                    CombinedChartMP(
-                        labels = state.allDataExercise.keys.toList(),
-                        barValues = state.allDataExercise.values.map {
-                            convertWeight(
-                                it.rateSetSomme?.sommePond,
-                                MesureUnit.KG,
-                                userUnit
-                            )?.toFloat() ?: 0f
-                        },
-                        lineValues = state.allDataExercise.values.map {
-                            val totalSet = it.numberSet
-                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
-                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
-                        },
-                        showValueBar = numberSize < 35,
-                        showValueLine = numberSize < 20,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        barLegendLabel = stringResource(R.string.weighted_sum),
-                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
-                    )
                 }
 
+                item {
 
+                    Column(
+                        modifier = Modifier
+                            .fillParentMaxWidth()
+                            .height(260.dp)
+                            .padding(vertical = 8.dp)
+
+
+                            .wrapContentHeight()
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                                .fillMaxWidth()
+                                .height(20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = (state.presetChose?.name ?: "No name Preset"),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            IconButton(onClick = {
+                                analyseViewModel.toggleBottomSheet(
+                                    BottomSheetVisibleType.ONLYPRESET
+                                )
+                            }) {
+                                Icon(
+                                    Icons.Default.SwapHoriz,
+                                    contentDescription = stringResource(R.string.change_selection),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        val presetData = state.presetChose?.let { preset ->
+                            filteredData
+                                .filter { it.value.presetId?.localId == preset.idLocal || it.value.presetId?.apiId == preset.idPreset }
+                                .mapValues { it.value.AllStat }
+                        } ?: emptyMap()
+
+                        val chartDataPreset = analyseViewModel.getCombinedChartData(
+                            data = presetData,
+                            userUnit = userUnit
+                        )
+                        CombinedChartMP(
+                            labels = chartDataPreset.labels,
+                            barValues = chartDataPreset.barValues,
+                            lineValues = chartDataPreset.lineValues,
+                            showValueBar = chartDataPreset.showValueBar,
+                            showValueLine = chartDataPreset.showValueLine,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            barLegendLabel = stringResource(R.string.weighted_sum),
+                            lineLegendLabel = stringResource(R.string.fail_set_ratio)
+                        )
+                    }
+
+                }
             }
+            item {
+
+                Row(modifier=Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val presetUsage = remember(filteredData, allPreset) {
+                        val usageList = mutableListOf<Triple<String, Int, Float>>() // name, count, ratio%
+                        var usedCount = 0
+                        val total = filteredData.size.coerceAtLeast(1) // éviter div par 0
+
+                        // Presets existants
+                        allPreset.forEach { preset ->
+                            val count = filteredData.count {
+                                it.value.presetId?.localId == preset.idLocal ||
+                                        it.value.presetId?.apiId == preset.idPreset
+                            }
+                            if (count > 0) {
+                                usedCount += count
+                                usageList.add(Triple(preset.name, count, count.toFloat() / total * 100f))
+                            }
+                        }
+
+                        // No preset
+                        val noPresetCount = total - usedCount
+                        if (noPresetCount > 0) {
+                            usageList.add(Triple("No preset", noPresetCount, noPresetCount.toFloat() / total * 100f))
+                        }
+
+                        usageList
+                    }
+                    val pieLabels = presetUsage.map { it.first }
+                    val pieValues = presetUsage.map { it.third }
+                    val baseColor = MaterialTheme.colorScheme.primary
+                    val pieColors = pieLabels.mapIndexed { index, _ ->
+
+                        val hsv = FloatArray(3)
+                        android.graphics.Color.colorToHSV(baseColor.toArgb(), hsv)
+                        hsv[0] = (hsv[0] + index * 45f) % 360f
+                        Color(android.graphics.Color.HSVToColor((0.5f * 255).toInt(), hsv))
+                    }
+
+                    PieChartMP(
+                        modifier = Modifier.fillMaxWidth(0.6f) .aspectRatio(1f),
+                        labels = pieLabels,
+                        values = pieValues,
+                        colors = pieColors
+                    )
+                    Column(modifier = Modifier.padding(top = 8.dp,start=8.dp)) {
+
+                        Text(
+                            text = ("Nombre d'occurence"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier=Modifier.padding(bottom=12.dp)
+                        )
+                        presetUsage.forEach { (name, count, _) ->
+
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    name,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+
+                                Text(
+                                    "$count",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = secondaryTextColor
+                                    )
+                                )
+                            }
+
+                        }
+
+
+
+                        }
+
+                }
+            }
+
             item {
                 Row(
                     horizontalArrangement = Arrangement.Absolute.SpaceBetween,
@@ -549,7 +654,8 @@ fun AnalysePage(
                 ) {
                     Text(
                         stringResource(R.string.per_exercise),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding( bottom = 8.dp)
                     )
                 }
             }
@@ -581,7 +687,11 @@ fun AnalysePage(
                                 ?: stringResource(R.string.no_exercise),
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        IconButton(onClick = { analyseViewModel.toggleBottomSheet(true) }) {
+                        IconButton(onClick = {
+                            analyseViewModel.toggleBottomSheet(
+                                BottomSheetVisibleType.ONLYEXERCICE
+                            )
+                        }) {
                             Icon(
                                 Icons.Default.SwapHoriz,
                                 contentDescription = stringResource(R.string.change_selection),
@@ -590,25 +700,27 @@ fun AnalysePage(
                             )
                         }
                     }
-                    val numberSize = state.allDataExercise.values.size
+
+                    // Construire les données par date pour le graphique
+                    val allDataExercise = filteredData
+                        .mapNotNull { (day, dayData) ->
+                            dayData.perExerciseStat[state.exerciceChose]
+                                ?.let { day to it }
+                        }.toMap()
+
+                    val chartDataExercise = analyseViewModel.getCombinedChartData(
+                        data = allDataExercise,
+                        userUnit = userUnit
+                    )
+
                     CombinedChartMP(
-                        labels = state.allDataExercise.keys.toList(),
-                        barValues = state.allDataExercise.values.map {
-                            convertWeight(
-                                it.rateSetSomme?.sommePond,
-                                MesureUnit.KG,
-                                userUnit
-                            )?.toFloat() ?: 0f
-                        },
-                        lineValues = state.allDataExercise.values.map {
-                            val totalSet = it.numberSet
-                            val failSet = it.rateSetSomme?.numberSetFail ?: 0
-                            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
-                        },
-                        showValueBar = numberSize < 35,
-                        showValueLine = numberSize < 20,
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        labels = chartDataExercise.labels,
+                        barValues = chartDataExercise.barValues,
+                        lineValues = chartDataExercise.lineValues,
+                        showValueBar = chartDataExercise.showValueBar,
+                        showValueLine = chartDataExercise.showValueLine,
+                        modifier = Modifier.fillMaxWidth(),
+                        barLegendColor = BlueExercise.copy(alpha = 0.8f),
                         barLegendLabel = stringResource(R.string.weighted_sum),
                         lineLegendLabel = stringResource(R.string.fail_set_ratio)
                     )
@@ -618,17 +730,34 @@ fun AnalysePage(
 
         }
     }
+    BottomSheetPreset(
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
+        onClose = { analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onNew = { analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET) },
+        title = "Preset",
+        presetList = allPreset,
+        onClickPreset = { preset ->
+            analyseViewModel.choseThisPreset(preset)
+            analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
+        },
+        canAddPreset = false
+
+    )
     BottomSheetSelectionExercise(
-        bottomSheetVisibility = state.isBottomSheetVisible,
-        selectedExerciseIds = listOf(state.tempChose),
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
+        selectedExerciseIds = listOf(state.exerciceChose),
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
         title = stringResource(R.string.choose_exercise),
         navController = navController,
-        onClose = { analyseViewModel.toggleBottomSheet(false) },
-        onClickExercise = { exercise -> analyseViewModel.changeTempExercice(exercise.idExercise) },
+        onClose = { analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onClickExercise = { exercise ->
+            analyseViewModel.choseThisExercise(exercise.idExercise);analyseViewModel.toggleBottomSheet(
+            BottomSheetVisibleType.NO
+        )
+        },
         onClickFavorite = {
-            analyseViewModel.updateInfoExerciseUser(
+            infoUserViewModel.updateInfoExerciseUser(
                 it,
                 !(infoMapUser[it]?.favorite ?: false),
                 null
@@ -636,24 +765,7 @@ fun AnalysePage(
         },
         userlanguage = userLANGUAGE,
         musclesGroupMap = state.masterDataMaps?.musclesGroupMap
-    ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            CustomButton(
-                label = stringResource(R.string.choose),
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    analyseViewModel.choseThisExercise();analyseViewModel.toggleBottomSheet(
-                    false
-                )
-                }
-            )
-        }
-    }
+    )
 
 
 }

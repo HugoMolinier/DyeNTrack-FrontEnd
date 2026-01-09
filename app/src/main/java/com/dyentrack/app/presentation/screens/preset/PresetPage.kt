@@ -73,10 +73,9 @@ import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
 import com.dyentrack.app.domain.model.enum.ExerciseMode
 import com.dyentrack.app.domain.model.enum.SizeType
-import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.BottomSheetInput
-import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.ChipDropDown
@@ -85,7 +84,6 @@ import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ParameterBox
-import com.dyentrack.app.presentation.components.SeanceSummary
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
@@ -198,7 +196,10 @@ fun PresetPage(
                     }
                 },
                 onClickLeft = {
-                   navController.popBackStack()
+                    if ( state.currentPreset != null && state.isModified) {
+                        presetViewModel.savePreset(state.currentPreset!!)
+                    }
+                    navController.popBackStack()
                 }
             )
 

@@ -58,8 +58,8 @@ import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.enum.SectionSelectType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.components.AdaptiveAdBanner
-import com.dyentrack.app.presentation.components.BottomSheetPreset
-import com.dyentrack.app.presentation.components.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
@@ -337,14 +337,12 @@ fun SeancePage(
 
                                                             if (offsetY > threshold && currentIndex < lastIndex) {
                                                                 viewModel.swapExercise(
-                                                                    state.daySelected,
                                                                     currentIndex,
                                                                     currentIndex + 1
                                                                 )
                                                                 offsetY = 0f
                                                             } else if (offsetY < -threshold && currentIndex > 0) {
                                                                 viewModel.swapExercise(
-                                                                    state.daySelected,
                                                                     currentIndex,
                                                                     currentIndex - 1
                                                                 )

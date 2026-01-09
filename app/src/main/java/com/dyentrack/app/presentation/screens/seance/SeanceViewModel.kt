@@ -1,7 +1,6 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -189,17 +188,12 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun swapExercise(day: String, fromIndex: Int, toIndex: Int) {
-        val seance = _uiState.value.seancesParJour[day] ?: return
-        val exercises = seance.exercisesInSceance.toMutableList()
+    fun swapExercise( fromIndex: Int, toIndex: Int)= withCurrentSeance { day, seance ->
+        val exercises = seance.exercisesInSceance
         if (fromIndex !in exercises.indices || toIndex !in exercises.indices) return
         val temp = exercises[fromIndex]
         exercises[fromIndex] = exercises[toIndex]
         exercises[toIndex] = temp
-
-        _uiState.value.seancesParJour[day] = seance.copy(
-            exercisesInSceance = exercises.toMutableStateList()
-        )
 
         changeSaveStatus(SaveType.NOTSAVE)
     }
@@ -316,21 +310,17 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun addExerciseToSeance() {
-        val day = _uiState.value.daySelected
-        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
-
+    fun addExerciseToSeance()  = withCurrentSeance { _, seance ->
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
-            val exerciseAlreadyHave = todaySeance.exercisesInSceance.find { it.exerciseId== exerciseId}
+            val exerciseAlreadyHave = seance.exercisesInSceance.find { it.exerciseId== exerciseId}
             ExerciseInSeance(
                 exerciseId = exerciseId,
                 exerciseAlreadyHave?.laterite ?: 1L,
                 exerciseAlreadyHave?.equipment ?: 1L
             )
         }
-        todaySeance.exercisesInSceance.clear()
-
-        todaySeance.exercisesInSceance.addAll(newExercises)
+        seance.exercisesInSceance.clear()
+        seance.exercisesInSceance.addAll(newExercises)
 
         _uiState.update {
             it.copy(
@@ -356,12 +346,8 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun addExerciseFromPresetForDaySelected(presets:List<Preset>) {
-
-
-        val day = _uiState.value.daySelected
-        val todaySeance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
-        val presetId = todaySeance.idPreset ?: return
+    fun addExerciseFromPresetForDaySelected(presets:List<Preset>)  = withCurrentSeance { _, seance ->
+        val presetId = seance.idPreset ?: return
         val preset = presets.find { preset ->
             (presetId.localId != null && preset.idLocal == presetId.localId) ||
                     (presetId.apiId != null && preset.idPreset == presetId.apiId)
@@ -369,7 +355,7 @@ class SeanceViewModel @Inject constructor(
         val syncMode = userPreference.value?.syncPerformanceMode ?: SyncPerformanceMode.NONE
         val exercisesToAdd = preset.presetSeanceExerciseVO
             ?.filter { presetEx ->
-                todaySeance.exercisesInSceance.none { it.exerciseId == presetEx.idExercise }
+                seance.exercisesInSceance.none { it.exerciseId == presetEx.idExercise }
             }
             ?.map { presetEx ->
                 val newExercise = ExerciseInSeance(
@@ -420,11 +406,11 @@ class SeanceViewModel @Inject constructor(
                 }
 
                 // Ajouter les sets dans la map de la séance
-                todaySeance.setsMap[newExercise.exerciseId] = sets.toMutableStateList()
+                seance.setsMap[newExercise.exerciseId] = sets.toMutableStateList()
                 newExercise
             } ?: emptyList()
 
-        todaySeance.exercisesInSceance.addAll(exercisesToAdd)
+        seance.exercisesInSceance.addAll(exercisesToAdd)
         changeSaveStatus(SaveType.NOTSAVE)
     }
     fun setExerciseToAdd(exercises: List<Long>) {
@@ -433,21 +419,16 @@ class SeanceViewModel @Inject constructor(
         }
     }
 
-    fun deleteExercice(exerciseId: Long) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
+    fun deleteExercice(exerciseId: Long)  = withCurrentSeance { _, seance ->
         seance.exercisesInSceance.removeAll { it.exerciseId == exerciseId }
-
         seance.setsMap.remove(exerciseId)
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
 
-    fun addSetToExercise(exerciseId: Long, lateriteId: Long) {
+    fun addSetToExercise(exerciseId: Long, lateriteId: Long) = withCurrentSeance { _, seance ->
         val syncMode = userPreference.value?.syncPerformanceMode ?: SyncPerformanceMode.NONE
-        val day = _uiState.value.daySelected
-        val todaySeance = _uiState.value.seancesParJour[day] ?: return
-        val presetId = todaySeance.idPreset
+        val presetId = seance.idPreset
         updateExercise(
             exerciseId,
             propertyUpdater = { it },
@@ -579,9 +560,7 @@ class SeanceViewModel @Inject constructor(
 
     private val autoSaveJobs = mutableMapOf<String, Job>()
 
-    fun changeSaveStatus(status: SaveType, exerciseContentEdit : Boolean = true) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
+    fun changeSaveStatus(status: SaveType, exerciseContentEdit : Boolean = true) = withCurrentSeance { day, seance ->
         _uiState.value.seancesParJour[day] = seance.copy(saveAPI = status)
         if (status == SaveType.NOTSAVE||status == SaveType.LocalSAVE) {
             if (status != SaveType.LocalSAVE) {
@@ -680,9 +659,7 @@ class SeanceViewModel @Inject constructor(
         exerciseId: Long,
         propertyUpdater: (ExerciseInSeance) -> ExerciseInSeance,
         setsUpdater: ((MutableList<SetData>) -> Unit)? = null
-    ) {
-        val day = _uiState.value.daySelected
-        val seance = _uiState.value.seancesParJour[day] ?: return
+    ) = withCurrentSeance { _, seance ->
         val index = seance.exercisesInSceance.indexOfFirst { it.exerciseId == exerciseId }
         if (index != -1) {
             seance.exercisesInSceance[index] = propertyUpdater(seance.exercisesInSceance[index])
@@ -691,6 +668,12 @@ class SeanceViewModel @Inject constructor(
         changeSaveStatus(SaveType.NOTSAVE)
     }
 
-
+    private inline fun withCurrentSeance(
+        block: (day: String, seance: SeanceDuJour) -> Unit
+    ) {
+        val day = _uiState.value.daySelected
+        val seance = _uiState.value.seancesParJour.getOrPut(day) { SeanceDuJour() }
+        block(day, seance)
+    }
 }
 

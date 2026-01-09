@@ -1,5 +1,6 @@
 package com.dyentrack.app.data.repository
 
+import com.dyentrack.app.data.local.database.AppDatabase
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
 import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
@@ -23,6 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class UserConnectionRepositoryImpl @Inject constructor(
     private val api: ApiInterface,
+    private val db: AppDatabase,
     private val secureSessionDataSource: SecureSessionDataSource
 ) : UserConnectionRepository {
 
@@ -173,6 +175,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
 
     override fun logout() {
         secureSessionDataSource.clearAll()
+        db.clearAllTables()
         updateAuthState()
     }
 
