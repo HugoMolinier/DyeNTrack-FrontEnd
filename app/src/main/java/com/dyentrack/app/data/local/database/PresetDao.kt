@@ -43,10 +43,13 @@ interface PresetDao {
     suspend fun getPresetByIdApi(idApi: Long): Preset?
     suspend fun saveOrUpdatePreset(preset: Preset,dateSave: String? = null):Preset? {
 
-        Log.d("^preset","${preset}")
 
         val saveDate = dateSave ?: Instant.now().toString()
-        val existing = if (preset.idLocal != 0L) getPresetById(preset.idLocal) else null
+        val existing = when {
+            preset.idLocal != 0L -> getPresetById(preset.idLocal)
+            preset.idPreset != null -> getPresetByIdApi(preset.idPreset)
+            else -> null
+        }
 
         return if (existing == null) {
             // Nouveau preset → insert

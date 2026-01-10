@@ -60,7 +60,13 @@ class HealthConnectViewModel @Inject constructor(
                     val granted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(status.client)
                     if (granted) {
                         _etat.value = HealthConnectEtat.OPERATIONNEL
-                        if(syncGranded) syncHealthData();syncHealthData(LocalDate.now().minusDays(1L))
+                        if(syncGranded){
+                            syncHealthData()
+                            syncHealthData(LocalDate.now().minusDays(1L))
+                            syncHealthData(LocalDate.now().minusDays(2L))
+
+
+                        };
                     } else {
                         _etat.value = HealthConnectEtat.AUTORISER
                     }

@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.seance
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -510,7 +511,7 @@ fun SeancePage(
         navController = navController,
         title = stringResource(R.string.add_exercise),
         titleAction = {
-            if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
+            if(todaySeance?.exercisesInSceance?.isEmpty()==true||todaySeance?.exercisesInSceance == null) {
                     Icon(
                         imageVector = Icons.Default.SwapHoriz,
                         contentDescription = "Menu",

@@ -149,7 +149,7 @@ fun AnalysePage(
                                 ),
                                 MenuItemData(
                                     stringResource(R.string.all),
-                                    { analyseViewModel.applyDateRange(3000L);inputIndex = 2 }
+                                    { analyseViewModel.applyDateRange(-1L);inputIndex = 2 }
                                 )
                             ))
                     }
@@ -263,9 +263,20 @@ fun AnalysePage(
                                     stringResource(R.string.number_of_sessions),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
-                                Text(filteredData.count { it.value.perExerciseStat.isNotEmpty() }
-                                    .toString(), style = MaterialTheme.typography.bodyLarge)
-
+                                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        "${filteredData.count { it.value.perExerciseStat.isNotEmpty() }}",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(" / ",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color=secondaryTextColor)
+                                    Text(
+                                        "${state.dateRange.numberBetweenDate}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color=secondaryTextColor
+                                    )
+                                }
                             }
 
                         }

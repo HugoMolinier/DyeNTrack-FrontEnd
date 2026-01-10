@@ -729,6 +729,7 @@ fun HomePage(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.INPUTPRESET,
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { value ->
+            homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
             presetViewModel.createPreset(value);
         },
         title = "Nouveau Preset",

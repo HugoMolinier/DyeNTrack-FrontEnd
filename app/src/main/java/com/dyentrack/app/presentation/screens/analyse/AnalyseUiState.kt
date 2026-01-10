@@ -7,6 +7,7 @@ import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.preset.Preset
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import kotlin.collections.Map
 
 
@@ -42,9 +43,24 @@ data class DateRangeSelected(
 ) {
     val oldDate: LocalDate
         get() {
+            // MODE ALL
+            if (rangeInDays == -1L && minExistingDate != null) {
+                return minExistingDate
+            }
             val computedOldDate = recentDate.minusDays(rangeInDays - 1)
             return if (minExistingDate != null && computedOldDate.isBefore(minExistingDate)) {
                 minExistingDate
             } else computedOldDate
+        }
+
+    val numberBetweenDate: Int
+        get() {
+            // MODE ALL
+            if (rangeInDays == -1L && minExistingDate != null) {
+                return ChronoUnit.DAYS
+                    .between(minExistingDate, recentDate)
+                    .toInt() + 1
+            }
+            return rangeInDays.toInt()
         }
 }

@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.preset.Preset
 
-@Database(entities = [DayDataRequest::class, Preset::class], version = 15,exportSchema = true )
+@Database(entities = [DayDataRequest::class, Preset::class], version = 16,exportSchema = true )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun seanceDao(): SeanceDao
