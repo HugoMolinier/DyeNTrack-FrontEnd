@@ -158,13 +158,10 @@ class AnalyseViewModel @Inject constructor(
 
             //  Filtre exercices
             val filteredExercises = dayData.perExerciseStat.filterKeys { exerciseId ->
-                masterMaps.exerciseMap[exerciseId]
-                    ?.muscleInfos
-                    ?.filter { it.principal }
-                    ?.none { info ->
-                        masterMaps.muscleMap[info.idMuscle]?.idMuscularGroup in excludedGroups
-                    } ?: true
+                masterMaps.exerciseMap[exerciseId]?.mainMuscle
+                    ?.let { masterMaps.muscleMap[it]?.idMuscularGroup !in excludedGroups } ?: true
             }
+
 
             if (filteredExercises.isEmpty()) return@mapNotNull null
 
@@ -179,18 +176,14 @@ class AnalyseViewModel @Inject constructor(
 
                 allStat = allStat.plus(rate)
 
-                exercise.muscleInfos
-                    ?.filter { it.principal }
-                    ?.forEach { info ->
-                        val muscle = masterMaps.muscleMap[info.idMuscle] ?: return@forEach
-                        val groupId = muscle.idMuscularGroup ?: return@forEach
+                val muscle = masterMaps.muscleMap[exercise.mainMuscle] ?: return@forEach
+                val groupId = muscle.idMuscularGroup ?: return@forEach
 
-                        perMuscleStat[muscle.id] =
-                            perMuscleStat[muscle.id]?.plus(rate) ?: rate
+                perMuscleStat[muscle.id] = perMuscleStat[muscle.id]?.plus(rate) ?: rate
 
-                        perGroupStat[groupId] =
-                            perGroupStat[groupId]?.plus(rate) ?: rate
-                    }
+                perGroupStat[groupId] = perGroupStat[groupId]?.plus(rate) ?: rate
+
+
             }
 
             dayStr to dayData.copy(
@@ -257,16 +250,15 @@ class AnalyseViewModel @Inject constructor(
 
                 // Stats par muscle et groupe musculaire
                 val exercise = masterDataMaps.exerciseMap[exerciseVO.exerciseId] ?: return@forEach
-                exercise.muscleInfos?.forEach { info ->
-                    if (!info.principal) return@forEach
-                    val muscle = masterDataMaps.muscleMap[info.idMuscle] ?: return@forEach
+
+                    val muscle = masterDataMaps.muscleMap[exercise.mainMuscle] ?: return@forEach
                     val groupId = muscle.idMuscularGroup ?: 0L
                     perMuscleStat[muscle.id] =
                         perMuscleStat[muscle.id]?.plus(muscleRate) ?: muscleRate
 
                     perGroupMuscularStat[groupId] =
                         perGroupMuscularStat[groupId]?.plus(muscleRate) ?: muscleRate
-                }
+
             }
 
             muscleRateByDay[dayStr] = DayExerciseData(

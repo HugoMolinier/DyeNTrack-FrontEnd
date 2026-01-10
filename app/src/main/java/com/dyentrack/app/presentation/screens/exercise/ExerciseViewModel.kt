@@ -164,10 +164,7 @@ class ExerciseViewModel @Inject constructor(
             }?.toSet() ?: emptySet()
     }
     fun getPrimaryMuscleName(exercise: Exercise): String {
-        val primaryId = exercise.muscleInfos?.firstOrNull { it.principal }?.idMuscle
-        return primaryId?.let { id ->
-            uiState.value.masterDataMaps?.muscleMap?.get(primaryId)?.getName(languageUser)
-        } ?: "NaN"
+        return uiState.value.masterDataMaps?.muscleMap?.get(exercise.mainMuscle)?.getName(languageUser) ?: "NaN"
     }
 
     fun getEquipmentNames(): String {

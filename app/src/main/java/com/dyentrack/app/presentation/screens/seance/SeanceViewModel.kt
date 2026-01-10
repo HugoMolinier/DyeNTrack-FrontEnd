@@ -620,11 +620,8 @@ class SeanceViewModel @Inject constructor(
             .mapNotNull { maps.exerciseMap[it.exerciseId] }
 
         val principalMuscle = exercisesList
-            .mapNotNull { ex ->
-                ex.muscleInfos?.find { it.principal }?.idMuscle
-            }
-            .mapNotNull { maps.muscleMap[it]?.getName(languageUser) }
-            .toSet()
+            .mapNotNull { maps.muscleMap[it.mainMuscle]?.getName(languageUser) }.toSet()
+
 
         val mainFocus = exercisesList
             .mapNotNull { it.mainFocusGroup?.let { id -> maps.musclesGroupMap[id] } }

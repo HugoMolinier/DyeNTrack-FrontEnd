@@ -6,6 +6,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class MuscleInfos(
     val idMuscle : Long,
-    val principal: Boolean
-
+    //val principal: Boolean? //pour futur création
 ): Parcelable

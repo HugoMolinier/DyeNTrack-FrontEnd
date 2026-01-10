@@ -11,6 +11,7 @@ data class Exercise(
     override val nameFR : String,
     override val nameEN : String,
     val mainFocusGroup: Long?=null,
+    val mainMuscle:Long?=null,
     override val descriptionFR: String?="",
     override val descriptionEN: String?="",
     val muscleInfos : List<MuscleInfos>?=listOf(),
