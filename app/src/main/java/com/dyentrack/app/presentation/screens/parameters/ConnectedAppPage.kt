@@ -159,11 +159,11 @@ fun ConnectedAppPage(
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 SingleCircleSelector(
-                                    isSelected = userPreference?.autoSync == true, onClick = {
+                                    isSelected = userPreference?.autoSync != false, onClick = {
                                         userPreferenceViewModel.updateUserPreference(
                                             UserPreference(autoSync = true)
                                         )
-                                    }, userPreference?.autoSync == false
+                                    }, userPreference?.autoSync != true
 
                                 )
                             }
@@ -180,7 +180,7 @@ fun ConnectedAppPage(
                                         userPreferenceViewModel.updateUserPreference(
                                             UserPreference(autoSync = false)
                                         )
-                                    }, userPreference?.autoSync == true
+                                    }, userPreference?.autoSync != false
                                 )
                             }
                         }

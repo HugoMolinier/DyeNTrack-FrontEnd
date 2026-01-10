@@ -54,8 +54,13 @@ class HomeViewModel @Inject constructor(
             _uiState.update { it.copy(masterDataMaps=maps)}
 
             dayDataFlow.collect { list ->
-                if (list == null) {
-                    _uiState.update { it.copy(mapSeance = emptyMap()) }
+                if (list == null ) {
+                    _uiState.update { it.copy(mapSeance = emptyMap(),
+                        todaySeance = null,
+                        last5DaysKeys = emptyList(),
+                        muscleRateOfEachDay=emptyMap(),
+                        groupRateOfEachDay=emptyMap())}
+
                     return@collect
                 }
 
@@ -64,7 +69,6 @@ class HomeViewModel @Inject constructor(
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
                 list.forEach { dayData ->
-                    val date = dayData.localDate ?: return@forEach
                     if (dayData.dayData !in last15DaysSet) return@forEach // seulement 15 derniers jours
 
                     if (dayData.dayData == todayIso) todaySeance = dayData

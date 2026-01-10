@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -100,7 +101,7 @@ class AnalyseViewModel @Inject constructor(
     }
 
 
-    fun choseThisExercise(exercise: Long) {
+    fun choseThisExercise(exercise: Long?) {
         _uiState.update { it.copy(exerciceChose = exercise) }
     }
 
@@ -151,7 +152,7 @@ class AnalyseViewModel @Inject constructor(
         return _uiState.value.muscleRateByDay.mapNotNull { (dayStr, dayData) ->
 
             //  Filtre date
-            val day = allSeanceByDay[dayStr]?.second
+            allSeanceByDay[dayStr]?.second
                 ?.takeIf { !it.isBefore(start) && !it.isAfter(end) }
                 ?: return@mapNotNull null
 
@@ -221,6 +222,15 @@ class AnalyseViewModel @Inject constructor(
                 dateRange = it.dateRange.copy(rangeInDays = rangeInDays)//refresh
             )
         }
+    }
+    fun applyDateRange(recentDate: LocalDate,oldDate: LocalDate){
+        val nbday = ChronoUnit.DAYS.between(recentDate, oldDate)+1
+        _uiState.update {
+            it.copy(
+                dateRange = it.dateRange.copy(rangeInDays = nbday, recentDate = oldDate)//refresh
+            )
+        }
+
     }
 
     /** Calcule tout MuscleRate pour chaque exercice et chaque jour */

@@ -117,7 +117,7 @@ fun SeancePage(
 
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val presets by presetViewModel.presetFlow.collectAsState()
-
+    val fetchStatus by viewModel.fetchStatus.collectAsState()
 
 
     val revokePresetTitle = stringResource(R.string.revoke_preset_title)
@@ -145,7 +145,7 @@ fun SeancePage(
             TopNavigationBar(
                 stringResource(R.string.today_session),
                 rightSide = {
-                    if (todaySeance?.saveAPI == SaveType.NOTSAVE) { //TODO( "add Flow of requestDayDataStatus")
+                    if (todaySeance?.saveAPI == SaveType.NOTSAVE || fetchStatus== SaveType.NOTSAVE) { //TODO( "add Flow of requestDayDataStatus")
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -155,7 +155,7 @@ fun SeancePage(
 
 
             LazyColumn {
-                item { DateSelectorRange(uiState = state, viewModel = viewModel) }
+                item { DateSelectorRange(uiState = state, viewModel = viewModel, fetchStatus = fetchStatus) }
                 item {
                     AdaptiveAdBanner(
                         adViewModel = adViewModel

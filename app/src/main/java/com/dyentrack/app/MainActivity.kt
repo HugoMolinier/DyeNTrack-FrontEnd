@@ -82,9 +82,6 @@ class MainActivity : ComponentActivity() {
         )
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        MobileAds.initialize(this) { initializationStatus ->
-            Log.d("Ads", "AdMob initialized: $initializationStatus")
-        }
 
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)

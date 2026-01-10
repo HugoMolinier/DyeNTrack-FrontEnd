@@ -41,13 +41,13 @@ fun CustomButton(
     enable: Boolean = true,
     size:SizeType =SizeType.LARGE,
     isLoading:Boolean =false,
-    contentPadding:PaddingValues= PaddingValues(0.dp)
+    contentPadding:PaddingValues?= PaddingValues(0.dp)
 ) {
 
     val backgroundColor: Color
     val contentColor: Color
 
-    val contentPadding = when (size) {
+    val contentPadding = contentPadding?:when (size) {
         SizeType.SMALL -> PaddingValues(
             vertical = 2.dp
         )

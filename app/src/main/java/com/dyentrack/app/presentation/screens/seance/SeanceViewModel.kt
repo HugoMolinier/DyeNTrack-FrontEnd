@@ -1,6 +1,7 @@
 package com.dyentrack.app.presentation.screens.seance
 
 import android.content.Context
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -83,7 +84,7 @@ class SeanceViewModel @Inject constructor(
 
     val languageUser = LocaleManager.getCurrentLanguage()
     private val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
-
+    val fetchStatus : StateFlow<SaveType> = getDayDataUseCase.apiFetchStatus
     val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,

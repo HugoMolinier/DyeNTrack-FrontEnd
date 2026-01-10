@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DatePickerCustomDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <!-- Couleur de sélection / accent (ex. jour sélectionné) -->
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+
+        <item name="android:windowBackground">@color/tertia</item>
+        <!-- Couleur principale du texte et du titre -->
+        <item name="android:textColorSecondary">@color/secondary</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+
+
+</resources>

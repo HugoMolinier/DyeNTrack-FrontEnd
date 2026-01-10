@@ -18,7 +18,7 @@ data class AnalyseUiState(
     val dateRange : DateRangeSelected= DateRangeSelected(),
     val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
 
-    val exerciceChose: Long=0L,
+    val exerciceChose: Long?=0L,
     val presetChose: Preset?=null,
 
     val notIncludeGroupMuscle:Set<Long>?=emptySet(),

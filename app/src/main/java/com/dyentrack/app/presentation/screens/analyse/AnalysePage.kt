@@ -57,6 +57,7 @@ import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
 import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.ChipDropDownFlowRow
+import com.dyentrack.app.presentation.components.DateRangePickerDialog
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.SectionSelector
@@ -72,9 +73,8 @@ import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.convertWeight
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import java.time.Instant
+import java.time.ZoneId
 
 
 @Composable
@@ -108,7 +108,7 @@ fun AnalysePage(
         )
     }
     if (state.exerciceChose == 0L) {
-        analyseViewModel.choseThisExercise(filteredData.values.first().perExerciseStat.keys.first())
+        analyseViewModel.choseThisExercise(filteredData.values.firstOrNull()?.perExerciseStat?.keys?.firstOrNull())
     }
 
     val masterData by analyseViewModel.masterData.collectAsState()
@@ -116,11 +116,12 @@ fun AnalysePage(
     val globalMuscleRate by remember(filteredData) {
         mutableStateOf(analyseViewModel.computeGlobalMuscleRate(filteredData))
     }
+    var showRangePicker by remember { mutableStateOf(false) }
 
     val moyenneSetParEx = analyseViewModel.moyenneSetParEx(globalMuscleRate)
     val proportionSetFail = analyseViewModel.proportionSetFail(globalMuscleRate)
     val sommePondUserUnit =
-        convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)
+        convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?:0.0
     Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(stringResource(R.string.full_analysis))
         LazyColumn(
@@ -160,8 +161,8 @@ fun AnalysePage(
                                 shape = RoundedCornerShape(6.dp)
                             )
                             .clickable(
-                                enabled = !isSelected,
-                                onClick = { inputIndex = 3 }
+                                enabled = true,
+                                onClick = { showRangePicker = true;inputIndex = 3 }
                             )
                             .padding(2.dp)
                             .background(
@@ -482,23 +483,22 @@ fun AnalysePage(
                     }
                 }
             }
-            if (allPreset.isNotEmpty()) {
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp)
-                    ) {
-                        Text(
-                            "Par Preset",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding( bottom = 8.dp)
-                        )
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                ) {
+                    Text(
+                        "Par Preset",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                    }
                 }
-
+            }
+            if (allPreset.isNotEmpty()) {
                 item {
 
                     Column(
@@ -566,9 +566,15 @@ fun AnalysePage(
             }
             item {
 
-                Row(modifier=Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     val presetUsage = remember(filteredData, allPreset) {
-                        val usageList = mutableListOf<Triple<String, Int, Float>>() // name, count, ratio%
+                        val usageList =
+                            mutableListOf<Triple<String, Int, Float>>() // name, count, ratio%
                         var usedCount = 0
                         val total = filteredData.size.coerceAtLeast(1) // éviter div par 0
 
@@ -580,14 +586,26 @@ fun AnalysePage(
                             }
                             if (count > 0) {
                                 usedCount += count
-                                usageList.add(Triple(preset.name, count, count.toFloat() / total * 100f))
+                                usageList.add(
+                                    Triple(
+                                        preset.name,
+                                        count,
+                                        count.toFloat() / total * 100f
+                                    )
+                                )
                             }
                         }
 
                         // No preset
                         val noPresetCount = total - usedCount
                         if (noPresetCount > 0) {
-                            usageList.add(Triple("No preset", noPresetCount, noPresetCount.toFloat() / total * 100f))
+                            usageList.add(
+                                Triple(
+                                    "No preset",
+                                    noPresetCount,
+                                    noPresetCount.toFloat() / total * 100f
+                                )
+                            )
                         }
 
                         usageList
@@ -604,23 +622,27 @@ fun AnalysePage(
                     }
 
                     PieChartMP(
-                        modifier = Modifier.fillMaxWidth(0.6f) .aspectRatio(1f),
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .aspectRatio(1f),
                         labels = pieLabels,
                         values = pieValues,
                         colors = pieColors
                     )
-                    Column(modifier = Modifier.padding(top = 8.dp,start=8.dp)) {
+                    Column(modifier = Modifier.padding(top = 8.dp, start = 8.dp)) {
 
                         Text(
-                            text = ("Nombre d'occurence"),
+                            text = ("Occurence"),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier=Modifier.padding(bottom=12.dp)
+                            modifier = Modifier.padding(bottom = 12.dp)
                         )
                         presetUsage.forEach { (name, count, _) ->
 
 
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
@@ -639,8 +661,7 @@ fun AnalysePage(
                         }
 
 
-
-                        }
+                    }
 
                 }
             }
@@ -655,7 +676,7 @@ fun AnalysePage(
                     Text(
                         stringResource(R.string.per_exercise),
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding( bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
             }
@@ -745,7 +766,7 @@ fun AnalysePage(
     )
     BottomSheetSelectionExercise(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
-        selectedExerciseIds = listOf(state.exerciceChose),
+        selectedExerciseIds = listOf(state.exerciceChose ?: 0L),
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
         title = stringResource(R.string.choose_exercise),
@@ -766,6 +787,30 @@ fun AnalysePage(
         userlanguage = userLANGUAGE,
         musclesGroupMap = state.masterDataMaps?.musclesGroupMap
     )
+
+    if (showRangePicker) {
+        DateRangePickerDialog(
+            startDate= state.dateRange.oldDate,
+            endDate= state.dateRange.recentDate,
+            onDismiss = { showRangePicker = false },
+            onRangeSelected = { (startMillis, endMillis) ->
+                startMillis?.let { st ->
+                    endMillis?.let { en ->
+                        val startDate = Instant.ofEpochMilli(st)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        val endDate = Instant.ofEpochMilli(en)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+
+                        analyseViewModel.applyDateRange(startDate, endDate)
+                    }
+                }
+
+
+            }
+        )
+    }
 
 
 }

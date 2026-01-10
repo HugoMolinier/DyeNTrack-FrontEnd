@@ -168,7 +168,7 @@ fun ConnexionPage(
                 }
                 item {
                     CustomButton(
-                        label = if (isLoading) stringResource(R.string.logging_in) else stringResource(R.string.signup),
+                        label = if (isLoading) stringResource(R.string.logging_in) else stringResource(R.string.login),
                         onClick = { authViewModel.login(email.value.text, password.value.text) },
                         modifier = Modifier.fillMaxWidth(),
                         isLoading = isLoading,

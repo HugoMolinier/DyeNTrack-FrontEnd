@@ -11,9 +11,11 @@ import com.dyentrack.app.domain.usecase.auth.RegisterUserUseCase
 import com.dyentrack.app.domain.usecase.auth.UpdateUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -55,7 +57,8 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout() {
-        logoutUseCase()
-
+        viewModelScope.launch(Dispatchers.IO) {
+            logoutUseCase()
+        }
     }
 }

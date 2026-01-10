@@ -3,13 +3,18 @@ package com.dyentrack.app.presentation.screens.home
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.content.MediaType.Companion.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +34,8 @@ import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -77,24 +85,24 @@ fun HomePage(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
-    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
     presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>()
-    ) {
+) {
 
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
     val presetList by presetViewModel.presetFlow.collectAsState()
     LaunchedEffect(Unit) {
         presetViewModel.navigateToPreset.collect { preset ->
-            Log.d("presetNav","${preset}")
-            if(preset!=null) navController.navigate("preset/${preset.idLocal}")
+            Log.d("presetNav", "${preset}")
+            if (preset != null) navController.navigate("preset/${preset.idLocal}")
         }
     }
 
     val authState by authViewModel.authState.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
-    val objectifStep = userPreference?.objStep ?:0
-    val objectifCal = userPreference?.objCalorie ?:0
-    val objectifsommeil = userPreference?.objHourSleep ?:0.0
+    val objectifStep = userPreference?.objStep ?: 0
+    val objectifCal = userPreference?.objCalorie ?: 0
+    val objectifsommeil = userPreference?.objHourSleep ?: 0.0
 
     val masterData by homeViewModel.masterData.collectAsState()
 
@@ -115,8 +123,10 @@ fun HomePage(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier
-            .fillMaxWidth()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
             item {
                 Row(
                     modifier = Modifier
@@ -126,13 +136,13 @@ fun HomePage(
                 ) {
                     Column {
                         Text(
-                            stringResource(R.string.hello) +",",
+                            stringResource(R.string.hello) + ",",
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                         Text(
-                            "${authState.user?.pseudo ?:stringResource(R.string.prepare_day)} !",
+                            "${authState.user?.pseudo ?: stringResource(R.string.prepare_day)} !",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier= Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                     IconButton(
@@ -148,23 +158,77 @@ fun HomePage(
                     }
                 }
             }
-            item { Column(Modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
-                    Text(
-                        stringResource(R.string.daily_data),
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600 )
-                    )
-                    Text(
-                            "${(pourcentage*100).toInt()} %",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600),
-                    )
+            if (!authState.isConnected) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, top = 20.dp, end = 20.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.shapes.medium
+                            )
+                            .height(
+                                IntrinsicSize.Min
+                            ).clickable(onClick = {navController.navigate("parametre")}),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .padding(start=16.dp, top = 16.dp, end = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Sauvegarder sur le cloud",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                "Connectez-vous ou Inscrivez-vous pour sauvegarder vos données",
+                                color = secondaryTextColor,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier=Modifier
+                                    .padding(bottom=16.dp, )
+                            )
+
+                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.welcope),
+                            "",
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(end = 16.dp).align(Alignment.Bottom)
+                        )
+                    }
                 }
-                ProgressLine(pourcentage, height = 8.dp)
+            }
+            item {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 40.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            stringResource(R.string.daily_data),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600)
+                        )
+                        Text(
+                            "${(pourcentage * 100).toInt()} %",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600),
+                        )
+                    }
+                    ProgressLine(pourcentage, height = 8.dp)
 
 
-            } }
+                }
+            }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     val listState = rememberLazyListState()
@@ -177,7 +241,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true||state.todaySeance?.seanceTrack?.plannedExercises == null) {
+                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) {
                             item {
 
                                 Box(
@@ -214,9 +278,11 @@ fun HomePage(
                             }
                         }
                         item {
-                            val steps = remember(state.todaySeance) { state.todaySeance?.physioTrack?.step ?: 0 }
+                            val steps = remember(state.todaySeance) {
+                                state.todaySeance?.physioTrack?.step ?: 0
+                            }
                             val progressSteps = remember(steps, objectifStep) {
-                                if ( objectifStep == 0) {
+                                if (objectifStep == 0) {
                                     0f
                                 } else {
                                     (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
@@ -225,11 +291,11 @@ fun HomePage(
 
                             ObjectifBox(
                                 value = steps.toString(),
-                                objectif = if (objectifStep==0) "NaN" else objectifStep.toString(),
-                                onClickObjectif = {navController.navigate("objectif")},
+                                objectif = if (objectifStep == 0) "NaN" else objectifStep.toString(),
+                                onClickObjectif = { navController.navigate("objectif") },
                                 unit = stringResource(R.string.step),
-                                onClick = {navController.navigate("seance?section=data")},
-                                drawableTop =  R.drawable.icon_step
+                                onClick = { navController.navigate("seance?section=data") },
+                                drawableTop = R.drawable.icon_step
 
                             ) {
                                 ProgressLine(
@@ -241,7 +307,9 @@ fun HomePage(
                             }
                         }
                         item {
-                            val calories = remember(state.todaySeance) { state.todaySeance?.nutritionTrack?.calories ?: 0 }
+                            val calories = remember(state.todaySeance) {
+                                state.todaySeance?.nutritionTrack?.calories ?: 0
+                            }
                             val progressCalories = remember(calories, objectifCal) {
                                 if (objectifCal == 0) {
                                     0f
@@ -251,11 +319,11 @@ fun HomePage(
                             }
                             ObjectifBox(
                                 value = calories.toString(),
-                                objectif = if (objectifCal==0) "NaN" else objectifCal.toString(),
+                                objectif = if (objectifCal == 0) "NaN" else objectifCal.toString(),
                                 unit = "kcal",
-                                onClick = {navController.navigate("seance?section=data")},
-                                onClickObjectif = {navController.navigate("objectif")},
-                                drawableTop =  R.drawable.icon_cal
+                                onClick = { navController.navigate("seance?section=data") },
+                                onClickObjectif = { navController.navigate("objectif") },
+                                drawableTop = R.drawable.icon_cal
                             ) {
                                 ProgressLine(
                                     progressCalories,
@@ -266,7 +334,9 @@ fun HomePage(
                             }
                         }
                         item {
-                            val sleep = remember(state.todaySeance) { state.todaySeance?.physioTrack?.hourOfSleep ?: 0 }
+                            val sleep = remember(state.todaySeance) {
+                                state.todaySeance?.physioTrack?.hourOfSleep ?: 0
+                            }
                             val progressSleep = remember(sleep, objectifsommeil) {
                                 if (objectifsommeil == 0.0) {
                                     0f
@@ -276,11 +346,11 @@ fun HomePage(
                             }
                             ObjectifBox(
                                 value = sleep.toString(),
-                                objectif = if (objectifsommeil==0.0) "NaN" else objectifsommeil.toString(),
+                                objectif = if (objectifsommeil == 0.0) "NaN" else objectifsommeil.toString(),
                                 unit = "h",
-                                onClick = {navController.navigate("seance?section=data")},
-                                onClickObjectif = {navController.navigate("objectif")},
-                                drawableTop =  R.drawable.icon_sleep
+                                onClick = { navController.navigate("seance?section=data") },
+                                onClickObjectif = { navController.navigate("objectif") },
+                                drawableTop = R.drawable.icon_sleep
                             ) {
                                 ProgressLine(
                                     progressSleep,
@@ -295,16 +365,19 @@ fun HomePage(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        val itemCount = if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true|| state.todaySeance?.seanceTrack?.plannedExercises ==null) 4 else 3
+                        val itemCount =
+                            if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) 4 else 3
 
 
                         for (i in 0 until itemCount) {
                             val alpha = when {
                                 i < listState.firstVisibleItemIndex -> 0.3f
                                 i == listState.firstVisibleItemIndex -> {
-                                    val scrollFraction = listState.firstVisibleItemScrollOffset / 200f
+                                    val scrollFraction =
+                                        listState.firstVisibleItemScrollOffset / 200f
                                     1f - scrollFraction.coerceIn(0f, 0.7f)
                                 }
+
                                 else -> 1f
                             }
 
@@ -326,10 +399,15 @@ fun HomePage(
                     modifier = Modifier.padding(top = 32.dp, start = 10.dp, end = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)) {
-                        Text(stringResource(R.string.previous_workouts), Modifier.padding(bottom = 12.dp))
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.previous_workouts),
+                            Modifier.padding(bottom = 12.dp)
+                        )
                     }
 
 
@@ -348,14 +426,14 @@ fun HomePage(
                             text = groupMuscles.joinToString(", "),
                             day,
                             onExpandChange = { expanded ->
-                                homeViewModel.expandSeance(if (expanded) index  else null)
+                                homeViewModel.expandSeance(if (expanded) index else null)
                             },
                             canExtend = true,
-                            expanded = state.expandedSeance == index ,
+                            expanded = state.expandedSeance == index,
 
                             componentRight = {
                                 Icon(
-                                    if (state.expandedSeance == index ) {
+                                    if (state.expandedSeance == index) {
                                         Icons.Default.ArrowDropUp
                                     } else {
                                         Icons.Default.ArrowDropDown
@@ -380,14 +458,14 @@ fun HomePage(
                                             .padding(top = 12.dp, bottom = 8.dp)
                                     ) {
                                         Text(
-                                            pluralStringResource(R.plurals.muscle,2),
+                                            pluralStringResource(R.plurals.muscle, 2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .weight(1f)
                                         )
                                         Text(
-                                            pluralStringResource(R.plurals.exercise,2),
+                                            pluralStringResource(R.plurals.exercise, 2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -395,7 +473,7 @@ fun HomePage(
                                             textAlign = TextAlign.Center
                                         )
                                         Text(
-                                            pluralStringResource(R.plurals.set,2),
+                                            pluralStringResource(R.plurals.set, 2),
                                             style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -416,7 +494,8 @@ fun HomePage(
                                                 .height(30.dp)
                                         ) {
                                             Text(
-                                                state.masterDataMaps?.muscleMap?.get(key)?.getName(language) ?: "Not found",
+                                                state.masterDataMaps?.muscleMap?.get(key)
+                                                    ?.getName(language) ?: "Not found",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -438,7 +517,7 @@ fun HomePage(
                                             )
                                             if (isLast) {
                                                 IconButton(
-                                                    onClick = {navController.navigate("seance?dayKey=$day")},
+                                                    onClick = { navController.navigate("seance?dayKey=$day") },
                                                     modifier = Modifier.size(24.dp)
                                                 ) { Icon(Icons.Default.Fullscreen, "go to seance") }
                                             } else {
@@ -476,16 +555,23 @@ fun HomePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.analysis), style = MaterialTheme.typography.titleSmall)
-                        Box(Modifier.clickable(onClick = {navController.navigate("analyse")})){
+                        Text(
+                            stringResource(R.string.analysis),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Box(Modifier.clickable(onClick = { navController.navigate("analyse") })) {
 
                             Text(
                                 stringResource(R.string.see_more),
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
-                            ) }
+                            )
+                        }
                     }
                     Text(
-                        ""+ state.mapSeance.count() + " / 14 "+pluralStringResource(R.plurals.days,2),
+                        "" + state.mapSeance.count() + " / 14 " + pluralStringResource(
+                            R.plurals.days,
+                            2
+                        ),
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
                 }
@@ -539,7 +625,11 @@ fun HomePage(
                         ) {
                             val radarMuscleData = homeViewModel.getRadarData(
                                 data = state.muscleRateOfEachDay,
-                                labelsMap = state.masterDataMaps?.muscleMap?.mapValues { it.value.getName(language) } ?: emptyMap()
+                                labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
+                                    it.value.getName(
+                                        language
+                                    )
+                                } ?: emptyMap()
                             )
 
                             RadarChartMP(
@@ -554,74 +644,96 @@ fun HomePage(
                 }
             }
 
-            item{
+            item {
                 Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
                     Text("Collection", style = MaterialTheme.typography.titleSmall)
 
-                    Row(modifier= Modifier.fillMaxWidth().padding(top=8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box (modifier= Modifier.weight(1f)){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
                             CardWithContent(
-                                modifier= Modifier.padding(8.dp,4.dp),
+                                modifier = Modifier.padding(8.dp, 4.dp),
                                 text = "Exercices",
                                 subText = state.masterDataMaps?.exerciseMap?.size.toString(),
-                                componentRight = {Icon(Icons.Default.Bookmarks,"", tint = secondaryTextColor.copy(0.1f))},
-                                onClick = {homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE)}
+                                componentRight = {
+                                    Icon(
+                                        Icons.Default.Bookmarks,
+                                        "",
+                                        tint = secondaryTextColor.copy(0.1f)
+                                    )
+                                },
+                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) }
                             )
                         }
-                        Box (modifier= Modifier.weight(1f)) {
+                        Box(modifier = Modifier.weight(1f)) {
                             CardWithContent(
-                                modifier= Modifier.padding(8.dp,4.dp),
+                                modifier = Modifier.padding(8.dp, 4.dp),
                                 text = "Voir mes Presets",
-                                onClick = {homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)},
-                                componentRight = {Icon(Icons.Default.DashboardCustomize,"", tint = secondaryTextColor.copy(0.1f))},
+                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET) },
+                                componentRight = {
+                                    Icon(
+                                        Icons.Default.DashboardCustomize,
+                                        "",
+                                        tint = secondaryTextColor.copy(0.1f)
+                                    )
+                                },
                                 subText = presetList.size.toString()
                             )
                         }
                     }
-                    }
+                }
             }
         }
     }
 
     BottomSheetSelectionExercise(
-        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYEXERCICE,
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
         navController = navController,
-        title=stringResource(R.string.see_info),
+        title = stringResource(R.string.see_info),
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
-        onClickExercise = {  exercice ->
-            Log.d("aa","${exercice.idExercise}")
+        onClickExercise = { exercice ->
+            Log.d("aa", "${exercice.idExercise}")
             navController.navigate("exercise/${exercice.idExercise}")
         },
-        onClickFavorite = { if(authState.isConnected) infoUserViewModel.updateInfoExerciseUser(it, !(infoMapUser[it]?.favorite ?: false), null) else {
-            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
-        } },
-        userlanguage= language,
-        musclesGroupMap=state.masterDataMaps?.musclesGroupMap
+        onClickFavorite = {
+            if (authState.isConnected) infoUserViewModel.updateInfoExerciseUser(
+                it,
+                !(infoMapUser[it]?.favorite ?: false),
+                null
+            ) else {
+                Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+            }
+        },
+        userlanguage = language,
+        musclesGroupMap = state.masterDataMaps?.musclesGroupMap
     )
     BottomSheetPreset(
-        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.ONLYPRESET,
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        onNew ={homeViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET)},
-        title="Preset",
+        onNew = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET) },
+        title = "Preset",
         presetList = presetList,
-        onClickPreset={
+        onClickPreset = {
             navController.navigate("preset/${it.idLocal}")
         }
 
     )
 
     BottomSheetInput(
-        bottomSheetVisibility = state.isBottomSheetVisible==BottomSheetVisibleType.INPUTPRESET,
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.INPUTPRESET,
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
-        onNew = {value->
+        onNew = { value ->
             presetViewModel.createPreset(value);
         },
-        title="Nouveau Preset",
+        title = "Nouveau Preset",
         buttonText = "Crée",
-        )
-
+    )
 
 
 }

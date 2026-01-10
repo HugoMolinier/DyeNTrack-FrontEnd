@@ -101,7 +101,7 @@ class SecureSessionDataSource @Inject constructor(
         // Vérifie l'expiration
         if (session != null) {
             val currentTime = System.currentTimeMillis()
-            if (session.expirationTime != null && currentTime > session.expirationTime) {
+            if (currentTime > session.expirationTime) {
                 clearSession() // supprime la session expirée
                 return null
             }

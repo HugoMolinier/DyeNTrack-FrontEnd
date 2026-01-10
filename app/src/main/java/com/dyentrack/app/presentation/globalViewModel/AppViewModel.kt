@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
+    private val appScope: AppCoroutineScope,
     private val getMasterDataUseCase: GetMasterDataStaticUseCase,
     private val getInfoExerciseUser: GetInfoExerciseUserUseCase,
     private val getDayDataUseCase: GetDayDataUseCase,
@@ -27,24 +28,24 @@ class AppViewModel @Inject constructor(
 
     fun syncOnStart(isConnected:Boolean){
 
-        viewModelScope.launch (Dispatchers.IO){
+        appScope.scope.launch (Dispatchers.IO){
             fetchUserPreferenceUseCase()
         }
         if (isConnected) {
-            viewModelScope.launch(Dispatchers.IO) {
+            appScope.scope.launch(Dispatchers.IO) {
                 getDayDataUseCase()
             }
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        appScope.scope.launch(Dispatchers.IO) {
             getMasterDataUseCase()
         }
 
         if (isConnected) {
-            viewModelScope.launch(Dispatchers.IO) {
+            appScope.scope.launch(Dispatchers.IO) {
                 getInfoExerciseUser()
             }
-            viewModelScope.launch(Dispatchers.IO) {
+            appScope.scope.launch(Dispatchers.IO) {
                 getPresetUseCase()
             }
         }
@@ -52,15 +53,13 @@ class AppViewModel @Inject constructor(
     }
 
     fun syncUserData() {
-        if (!viewModelScope.isActive) return
-
-        viewModelScope.launch(Dispatchers.IO) {
+        appScope.scope.launch(Dispatchers.IO) {
             getDayDataUseCase()
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        appScope.scope.launch(Dispatchers.IO) {
             getInfoExerciseUser()
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        appScope.scope.launch(Dispatchers.IO) {
             getPresetUseCase()
         }
     }
