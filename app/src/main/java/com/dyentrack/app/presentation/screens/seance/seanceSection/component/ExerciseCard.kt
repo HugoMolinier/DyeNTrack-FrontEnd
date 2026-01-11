@@ -200,7 +200,9 @@ fun ExerciseCard(
                             viewModel.updateLaterite(exInSeance.exerciseId, lateriteId)
                         }
                         ChipDropDown(
-                            listOfSelectableItem = state.masterDataMaps.equipmentMap.values.toList(),
+                            listOfSelectableItem = exercise.equipmentInfo
+                                ?.mapNotNull { idEquipment -> state.masterDataMaps?.equipmentMap?.get(idEquipment.idEquipment) }
+                                ?: emptyList(),
                             defaultSelected = state.masterDataMaps.equipmentMap[selectedEquipment],
                             canChange = !modeActual.isLock()
                         ) { selectedName ->

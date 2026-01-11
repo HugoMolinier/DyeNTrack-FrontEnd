@@ -50,7 +50,7 @@ class HomeViewModel @Inject constructor(
         val today = LocalDate.now()
         val todayIso = today.toIsoDate()
         //Evite de parser 100date et compare juste des string
-        val last15DaysSet = (0L until 15L).map { today.minusDays(it).toIsoDate() }.toSet()
+        val last14DaysSet = (0L until 14L).map { today.minusDays(it).toIsoDate() }.toSet()
 
         viewModelScope.launch {
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
@@ -76,7 +76,7 @@ class HomeViewModel @Inject constructor(
                 val tempMap = mutableMapOf<String, SeanceTrack>()
 
                 list.forEach { dayData ->
-                    if (dayData.dayData !in last15DaysSet) return@forEach // seulement 15 derniers jours
+                    if (dayData.dayData !in last14DaysSet) return@forEach // seulement 15 derniers jours
 
                     if (dayData.dayData == todayIso) todaySeance = dayData
 
@@ -95,7 +95,7 @@ class HomeViewModel @Inject constructor(
                         last5DaysKeys = last5DaysSorted.map { it.toIsoDate() }
                     )
                 }
-                muscleRateOfEachDay(true)
+                muscleRateOfEachDay()
             }
 
         }
@@ -132,7 +132,7 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
 
-    fun muscleRateOfEachDay(principalOnly: Boolean) {
+    fun muscleRateOfEachDay() {
         val lastSeance = _uiState.value.mapSeance
 
         val muscleRateByDay: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()

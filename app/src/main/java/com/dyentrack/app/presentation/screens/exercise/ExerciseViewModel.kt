@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.collections.joinToString
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
@@ -168,7 +169,9 @@ class ExerciseViewModel @Inject constructor(
     }
 
     fun getEquipmentNames(): String {
-        return masterData.value?.equipment?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+        return currentExercise.value?.equipmentInfo?.joinToString(", ") { eq ->
+                uiState.value.masterDataMaps?.equipmentMap[eq.idEquipment]?: "NaN"
+            }?:"NaN"
     }
 
     fun getLateralities(): String {

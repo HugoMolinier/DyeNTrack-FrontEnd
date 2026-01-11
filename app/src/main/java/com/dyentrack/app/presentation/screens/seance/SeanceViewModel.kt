@@ -313,11 +313,12 @@ class SeanceViewModel @Inject constructor(
 
     fun addExerciseToSeance()  = withCurrentSeance { _, seance ->
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
+            val exercise = _uiState.value.masterDataMaps!!.exerciseMap[exerciseId]
             val exerciseAlreadyHave = seance.exercisesInSceance.find { it.exerciseId== exerciseId}
             ExerciseInSeance(
                 exerciseId = exerciseId,
                 exerciseAlreadyHave?.laterite ?: 1L,
-                exerciseAlreadyHave?.equipment ?: 1L
+                exerciseAlreadyHave?.equipment ?: exercise!!.defaultEquipment!!
             )
         }
         seance.exercisesInSceance.clear()

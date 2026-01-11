@@ -25,7 +25,7 @@ class MasterDataRepositoryImpl @Inject constructor(
         //cache
         cachedMasterData?.let {
             _masterDataFlow.value = it
-            return
+            //return
         }
 
         //local
@@ -34,7 +34,7 @@ class MasterDataRepositoryImpl @Inject constructor(
             _masterDataFlow.value = it
 
             val diffDays = Duration.between(Instant.parse(it.dateEnregistement), Instant.now()).toDays()
-            if (diffDays < 2) return
+            //if (diffDays < 2) return
         }
         //api
 

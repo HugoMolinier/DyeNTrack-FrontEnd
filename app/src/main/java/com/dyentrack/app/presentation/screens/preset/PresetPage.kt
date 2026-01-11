@@ -381,6 +381,7 @@ fun PresetPage(
                                         } else Modifier
                                     )
                             ) {
+                                val exercise = state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
 
                                 CardWithContent(
                                     modifier = Modifier.padding(
@@ -388,7 +389,7 @@ fun PresetPage(
                                         bottom = 4.dp,
                                         top = 4.dp
                                     ),
-                                    state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
+                                    exercise
                                         ?.getName(language) ?: "",
                                     subText = exInPreset.formatSubtitle(
                                         setPlural = { count ->
@@ -632,7 +633,8 @@ fun PresetPage(
                                                         )
                                                     }
                                                     ChipDropDown(
-                                                        listOfSelectableItem = state.masterDataMaps?.equipmentMap?.values?.toList()
+                                                        listOfSelectableItem = exercise?.equipmentInfo
+                                                            ?.mapNotNull { idEquipment -> state.masterDataMaps?.equipmentMap?.get(idEquipment.idEquipment) }
                                                             ?: emptyList(),
                                                         defaultSelected = state.masterDataMaps?.equipmentMap[exInPreset.idEquipment],
                                                         canChange = modeActual.isNormal()

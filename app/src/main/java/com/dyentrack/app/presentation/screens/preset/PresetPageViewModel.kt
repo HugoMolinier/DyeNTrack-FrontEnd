@@ -52,14 +52,14 @@ class PresetPageViewModel @Inject constructor(
     fun addExerciseToSeance() {
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
             val existing  = _uiState.value.currentPreset?.presetSeanceExerciseVO?.find { it.idExercise == exerciseId }
-
+            val exercise = _uiState.value.masterDataMaps!!.exerciseMap[exerciseId]
             ExerciceInPreset(
                 idExercise = exerciseId,
                 nbSet = existing?.nbSet?:1,
                 rangeRepInf = existing?.rangeRepInf,
                 rangeRepSup = existing?.rangeRepSup ,
                 idLateralite = existing?.idLateralite?:1L ,
-                idEquipment = existing?.idEquipment ?:1L
+                idEquipment = existing?.idEquipment ?: exercise!!.defaultEquipment!!
             )
         }
         _uiState.update { state ->

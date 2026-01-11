@@ -15,6 +15,8 @@ data class Exercise(
     override val descriptionFR: String?="",
     override val descriptionEN: String?="",
     val muscleInfos : List<MuscleInfos>?=listOf(),
+    val defaultEquipment: Long?=null,
+    val equipmentInfo:List<EquipmentInfo>?=listOf(),
     val linkVideo:String?=null,
     val idCreator: Long?=null
 ): HasLocalizedName, HasLocalizedDescription,Parcelable
