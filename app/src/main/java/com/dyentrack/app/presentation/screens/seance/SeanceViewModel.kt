@@ -196,7 +196,7 @@ class SeanceViewModel @Inject constructor(
         exercises[fromIndex] = exercises[toIndex]
         exercises[toIndex] = temp
 
-        changeSaveStatus(SaveType.NOTSAVE)
+
     }
 
     fun updateSet(exerciseId: Long, index: Int, newValue : SetField, rightSet: Boolean, unilateral: Boolean){
@@ -282,7 +282,7 @@ class SeanceViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 daySelected = dateFormat,
-                showAnalyseData = false,
+                showExpand = ExpandSection.NONE,
                 expandedExerciseId = null
             )
         }
@@ -292,10 +292,10 @@ class SeanceViewModel @Inject constructor(
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
 
-    fun toggleShowAnalyseData(show: Boolean? = null) {
+    fun toggleShowAnalyseData(show: ExpandSection) {
         _uiState.update { currentState ->
             currentState.copy(
-                showAnalyseData = show ?: !currentState.showAnalyseData
+                showExpand = if(show==currentState.showExpand)ExpandSection.NONE else show
             )
         }
     }
@@ -318,7 +318,7 @@ class SeanceViewModel @Inject constructor(
             ExerciseInSeance(
                 exerciseId = exerciseId,
                 exerciseAlreadyHave?.laterite ?: 1L,
-                exerciseAlreadyHave?.equipment ?: exercise!!.defaultEquipment!!
+                exerciseAlreadyHave?.equipment ?: exercise?.defaultEquipment?:1L
             )
         }
         seance.exercisesInSceance.clear()
@@ -517,7 +517,7 @@ class SeanceViewModel @Inject constructor(
     }
 
     fun expandExercise(exerciseId: Long?) {
-        _uiState.update { it.copy(expandedExerciseId = exerciseId, showAnalyseData = false) }
+        _uiState.update { it.copy(expandedExerciseId = exerciseId, showExpand = ExpandSection.NONE) }
     }
 
     fun changeSection(sectionSelectType: SectionSelectType){

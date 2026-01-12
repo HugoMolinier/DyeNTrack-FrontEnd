@@ -31,13 +31,16 @@ data class SeanceUiState(
 
     val exerciseMode: ExerciseMode = ExerciseMode.NORMAL,
     // résultats d’analyse
-    val showAnalyseData: Boolean = false,
+    val showExpand: ExpandSection = ExpandSection.NONE,
     val isLoadingRequest: Boolean = false,
     val analyseData: Map<String, List<SetData>> = emptyMap()
 
 
 )
 
+enum class ExpandSection(){
+    ANALYSE,NONE,COMMENT
+}
 data class SeanceDuJour(
     //séparé pouur éviter les recomposition
     val nutritionTrack: NutritionTrack = NutritionTrack(),

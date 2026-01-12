@@ -4,8 +4,11 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
@@ -72,6 +77,7 @@ import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.enum.EmphasisType
 import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
 import com.dyentrack.app.domain.model.enum.ExerciseMode
+import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
@@ -333,53 +339,14 @@ fun PresetPage(
                             exercises,
                             key = { _, ex -> ex.idExercise }) { _, exInPreset ->
                             var offsetY by remember { mutableFloatStateOf(0f) }
-
+                            var cardHeightPx by remember { mutableIntStateOf(0) }
                             Box(
                                 modifier = Modifier
                                     .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
                                     .offset { IntOffset(0, offsetY.roundToInt()) }
-                                    .then(
-                                        if (state.exerciseMode.isChangeOrder()) {
-                                            Modifier.pointerInput(exInPreset) {
-                                                detectDragGestures(
-                                                    onDragStart = { },
-                                                    onDrag = { change, dragAmount ->
-                                                        offsetY += dragAmount.y
-                                                        change.consume()
-                                                        val threshold = 70.dp.toPx()
-                                                        val lastIndex = exercises.lastIndex
-
-
-                                                        val currentIndex =
-                                                            exercises.indexOf(exInPreset)
-
-                                                        if (offsetY > threshold && currentIndex < lastIndex) {
-                                                            presetPageViewModel.swapExercise(
-
-                                                                currentIndex,
-                                                                currentIndex + 1
-                                                            )
-                                                            offsetY = 0f
-                                                        } else if (offsetY < -threshold && currentIndex > 0) {
-                                                            presetPageViewModel.swapExercise(
-                                                                currentIndex,
-                                                                currentIndex - 1
-                                                            )
-                                                            offsetY = 0f
-                                                        }
-                                                    },
-                                                    onDragEnd = {
-                                                        offsetY = 0f
-
-                                                    },
-                                                    onDragCancel = {
-                                                        offsetY = 0f
-
-                                                    }
-                                                )
-                                            }
-                                        } else Modifier
-                                    )
+                                    .onSizeChanged { size ->
+                                        cardHeightPx = size.height
+                                    }
                             ) {
                                 val exercise = state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
 
@@ -435,13 +402,37 @@ fun PresetPage(
 
                                     componentRight = { showMenu ->
                                         if (modeActual.isChangeOrder()) {
-                                            Icon(
-                                                Icons.Outlined.Reorder,
-                                                contentDescription = "Ouvrir le menu",
-                                                tint = secondaryTextColor,
+                                            Box(
                                                 modifier = Modifier
-                                                    .size(20.dp)
-                                            )
+                                                    .fillMaxHeight()
+                                                    .width(80.dp).then( if(state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                                    Modifier.draggable(
+                                                        orientation = Orientation.Vertical,
+                                                        state = rememberDraggableState { delta ->
+                                                            offsetY += delta
+                                                            val threshold = cardHeightPx
+                                                            val currentIndex = exercises.indexOf(exInPreset)
+
+                                                            if (offsetY > threshold && currentIndex < exercises.lastIndex) {
+                                                                presetPageViewModel.swapExercise(currentIndex, currentIndex + 1)
+                                                                offsetY = 0f
+                                                            } else if (offsetY < -threshold && currentIndex > 0) {
+                                                                presetPageViewModel.swapExercise(currentIndex, currentIndex - 1)
+                                                                offsetY = 0f
+                                                            }
+                                                        },
+                                                        onDragStopped = { offsetY = 0f }
+                                                    )
+                                                } else Modifier),
+                                                contentAlignment = Alignment.CenterEnd
+                                            ) {
+                                                Icon(
+                                                    Icons.Outlined.Reorder,
+                                                    contentDescription = "Déplacer l'exercice",
+                                                    tint = secondaryTextColor,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
                                         } else {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,

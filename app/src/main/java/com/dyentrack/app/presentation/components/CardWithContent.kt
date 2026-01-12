@@ -193,7 +193,7 @@ fun CardWithContent(
                             if (badgeText != null) {
                                 Badge(
                                     containerColor = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(24.dp)
                                 ) {
                                     Text(badgeText)
                                 }

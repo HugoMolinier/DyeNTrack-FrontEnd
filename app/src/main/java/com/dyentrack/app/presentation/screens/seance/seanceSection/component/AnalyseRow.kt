@@ -44,7 +44,6 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,userUnit: MesureUnit,userLANGUAGE: LANGUAGE) {
 
-    if (!state.showAnalyseData) return
 
     LazyRow(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, top = 4.dp)    ,

@@ -31,11 +31,10 @@ class AppViewModel @Inject constructor(
         appScope.scope.launch (Dispatchers.IO){
             fetchUserPreferenceUseCase()
         }
-        if (isConnected) {
-            appScope.scope.launch(Dispatchers.IO) {
-                getDayDataUseCase()
-            }
+        appScope.scope.launch(Dispatchers.IO) {
+            getDayDataUseCase()
         }
+
 
         appScope.scope.launch(Dispatchers.IO) {
             getMasterDataUseCase()

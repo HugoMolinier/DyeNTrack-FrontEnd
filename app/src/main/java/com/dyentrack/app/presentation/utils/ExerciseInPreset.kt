@@ -3,7 +3,7 @@ package com.dyentrack.app.presentation.utils
 import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 
 fun ExerciceInPreset.formatSubtitle(
-    setPlural: (Int) -> String,
+    setPlural: ((Int) -> String)? = null,
     repPlural: (Int) -> String
 ): String {
     val repText = when {
@@ -19,11 +19,15 @@ fun ExerciceInPreset.formatSubtitle(
     val repCount = rangeRepSup ?: rangeRepInf ?: 0
 
     return buildString {
-        append("$nbSet ")
-        append(setPlural(nbSet))
+        if(setPlural!=null) {
+            append("$nbSet ")
+            append(setPlural(nbSet))
+        }
 
         if (repText != null) {
-            append(" x ")
+            if(setPlural!=null) {
+                append(" x ")
+            }
             append(repText)
             append(" ")
             append(repPlural(repCount))

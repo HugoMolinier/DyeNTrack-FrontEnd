@@ -3,9 +3,13 @@ package com.dyentrack.app.presentation.screens.home
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.content.MediaType.Companion.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -36,6 +41,8 @@ import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +55,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -121,6 +130,8 @@ fun HomePage(
         }
         p
     }
+    val configuration = LocalConfiguration.current
+    val widthScreen = configuration.screenWidthDp.toFloat()
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -171,13 +182,14 @@ fun HomePage(
                             )
                             .height(
                                 IntrinsicSize.Min
-                            ).clickable(onClick = {navController.navigate("parametre")}),
+                            )
+                            .clickable(onClick = { navController.navigate("parametre") }),
                         verticalAlignment = Alignment.Bottom
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)
-                                .padding(start=16.dp, top = 16.dp, end = 16.dp),
+                                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
@@ -188,8 +200,8 @@ fun HomePage(
                                 "Connectez-vous ou Inscrivez-vous pour sauvegarder vos données",
                                 color = secondaryTextColor,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier=Modifier
-                                    .padding(bottom=16.dp, )
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp)
                             )
 
                         }
@@ -198,7 +210,8 @@ fun HomePage(
                             "",
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .padding(end = 16.dp).align(Alignment.Bottom)
+                                .padding(end = 16.dp)
+                                .align(Alignment.Bottom)
                         )
                     }
                 }
@@ -241,7 +254,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) {
+                        if ((state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null)&& state.last5DaysKeys.isNotEmpty()) {
                             item {
 
                                 Box(
@@ -365,8 +378,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        val itemCount =
-                            if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) 4 else 3
+                        val itemCount =     listState.layoutInfo.totalItemsCount
 
 
                         for (i in 0 until itemCount) {
@@ -374,11 +386,14 @@ fun HomePage(
                                 i < listState.firstVisibleItemIndex -> 0.3f
                                 i == listState.firstVisibleItemIndex -> {
                                     val scrollFraction =
-                                        listState.firstVisibleItemScrollOffset / 200f
-                                    1f - scrollFraction.coerceIn(0f, 0.7f)
+                                        listState.firstVisibleItemScrollOffset / widthScreen
+                                    1f - scrollFraction.coerceIn(0f, 0.5f)
+                                }
+                                i > listState.firstVisibleItemIndex+2 -> {
+                          0.5f
                                 }
 
-                                else -> 1f
+                                else -> {1f}
                             }
 
                             Box(
@@ -394,6 +409,7 @@ fun HomePage(
 
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(top = 32.dp, start = 10.dp, end = 10.dp),
@@ -410,143 +426,200 @@ fun HomePage(
                         )
                     }
 
+                    if (state.last5DaysKeys.isNotEmpty()) {
+                        state.last5DaysKeys.forEachIndexed { index, day ->
+                            val groupMuscles = state.muscleRateOfEachDay[day]
+                                ?.keys
+                                ?.mapNotNull { muscleId ->
+                                    val muscle = state.masterDataMaps?.muscleMap?.get(muscleId)
+                                    state.masterDataMaps?.musclesGroupMap?.get(muscle?.idMuscularGroup)
+                                }
+                                ?.toSet()
+                                ?: emptySet()
 
-                    state.last5DaysKeys.forEachIndexed { index, day ->
-                        val groupMuscles = state.muscleRateOfEachDay[day]
-                            ?.keys
-                            ?.mapNotNull { muscleId ->
-                                val muscle = state.masterDataMaps?.muscleMap?.get(muscleId)
-                                state.masterDataMaps?.musclesGroupMap?.get(muscle?.idMuscularGroup)
-                            }
-                            ?.toSet()
-                            ?: emptySet()
+                            CardWithContent(
+                                modifier = Modifier.padding(8.dp, 2.dp),
+                                text = groupMuscles.joinToString(", "),
+                                day,
+                                onExpandChange = { expanded ->
+                                    homeViewModel.expandSeance(if (expanded) index else null)
+                                },
+                                canExtend = true,
+                                expanded = state.expandedSeance == index,
 
-                        CardWithContent(
-                            modifier = Modifier.padding(8.dp, 2.dp),
-                            text = groupMuscles.joinToString(", "),
-                            day,
-                            onExpandChange = { expanded ->
-                                homeViewModel.expandSeance(if (expanded) index else null)
-                            },
-                            canExtend = true,
-                            expanded = state.expandedSeance == index,
-
-                            componentRight = {
-                                Icon(
-                                    if (state.expandedSeance == index) {
-                                        Icons.Default.ArrowDropUp
-                                    } else {
-                                        Icons.Default.ArrowDropDown
-                                    },
-                                    contentDescription = stringResource(
-                                        if (state.expandedSeance == index) R.string.show_less else R.string.show_more
+                                componentRight = {
+                                    Icon(
+                                        if (state.expandedSeance == index) {
+                                            Icons.Default.ArrowDropUp
+                                        } else {
+                                            Icons.Default.ArrowDropDown
+                                        },
+                                        contentDescription = stringResource(
+                                            if (state.expandedSeance == index) R.string.show_less else R.string.show_more
+                                        )
                                     )
-                                )
-                            },
-                            leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[day]),
-                            hasLineShadowBetweenMainAndChildren = true,
-                            childrenForExtend = {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        modifier = Modifier
+                                },
+                                leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[day]),
+                                hasLineShadowBetweenMainAndChildren = true,
+                                childrenForExtend = {
+                                    Column(
+                                        Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 12.dp, bottom = 8.dp)
+                                            .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
                                     ) {
-                                        Text(
-                                            pluralStringResource(R.plurals.muscle, 2),
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f)
-                                        )
-                                        Text(
-                                            pluralStringResource(R.plurals.exercise, 2),
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Text(
-                                            pluralStringResource(R.plurals.set, 2),
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Spacer(modifier = Modifier.width(24.dp))
-                                    }
-
-                                    state.muscleRateOfEachDay[day]?.entries?.forEachIndexed { index, (key, value) ->
-                                        val isLast =
-                                            index == state.muscleRateOfEachDay[day]!!.size - 1
                                         Row(
                                             horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(30.dp)
+                                                .padding(top = 12.dp, bottom = 8.dp)
                                         ) {
                                             Text(
-                                                state.masterDataMaps?.muscleMap?.get(key)
-                                                    ?.getName(language) ?: "Not found",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                pluralStringResource(R.plurals.muscle, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .weight(1f)
                                             )
                                             Text(
-                                                value.numberExercise.toString(),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.weight(1f),
-                                                textAlign = TextAlign.Center
-                                            )
-                                            Text(
-                                                value.numberSet.toString(),
-                                                style = MaterialTheme.typography.bodySmall,
+                                                pluralStringResource(R.plurals.exercise, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .weight(1f),
                                                 textAlign = TextAlign.Center
                                             )
-                                            if (isLast) {
-                                                IconButton(
-                                                    onClick = { navController.navigate("seance?dayKey=$day") },
-                                                    modifier = Modifier.size(24.dp)
-                                                ) { Icon(Icons.Default.Fullscreen, "go to seance") }
-                                            } else {
-                                                Spacer(modifier = Modifier.width(24.dp))
+                                            Text(
+                                                pluralStringResource(R.plurals.set, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .weight(1f),
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.width(24.dp))
+                                        }
+
+                                        state.muscleRateOfEachDay[day]?.entries?.forEachIndexed { index, (key, value) ->
+                                            val isLast =
+                                                index == state.muscleRateOfEachDay[day]!!.size - 1
+                                            Row(
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(30.dp)
+                                            ) {
+                                                Text(
+                                                    state.masterDataMaps?.muscleMap?.get(key)
+                                                        ?.getName(language) ?: "Not found",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .weight(1f)
+                                                )
+                                                Text(
+                                                    value.numberExercise.toString(),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.weight(1f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Text(
+                                                    value.numberSet.toString(),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .weight(1f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                if (isLast) {
+                                                    IconButton(
+                                                        onClick = { navController.navigate("seance?dayKey=$day") },
+                                                        modifier = Modifier.size(24.dp)
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Default.Fullscreen,
+                                                            "go to seance"
+                                                        )
+                                                    }
+                                                } else {
+                                                    Spacer(modifier = Modifier.width(24.dp))
+                                                }
                                             }
                                         }
+
                                     }
 
+                                })
 
-                                }
+                        }
 
-                            }
+
+
+                        CustomButton(
+                            stringResource(R.string.view_workouts),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp, start = 10.dp, end = 10.dp),
+                            variant = VariantType.OUTLINED,
+                            emphasis = EmphasisType.SECONDARY,
+                            onClick = { navController.navigate("seance") }
                         )
-
-
                     }
-
                 }
             }
+
+            if (state.last5DaysKeys.isEmpty()) {
             item {
-                CustomButton(
-                    stringResource(R.string.view_workouts),
+
+
+                Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, start = 10.dp, end = 10.dp),
-                    variant = VariantType.OUTLINED,
-                    emphasis = EmphasisType.SECONDARY,
-                    onClick = { navController.navigate("seance") }
-                )
+                        .fillMaxWidth().padding(top = 4.dp, start = 16.dp, end = 16.dp)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(8.dp),
+                            ambientColor = Color.Black.copy(alpha = 0.25f),
+                            spotColor = Color.Black.copy(alpha = 0.25f)
+                        ),
+
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+
+                        )
+
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
+                    ) {
+                        Text(
+                            "Aucune séance pour le moment",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            "Prêt à relevé le défi ? Commencer votre première séance et suivez votre progression en temps réel.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = secondaryTextColor,
+                            textAlign = TextAlign.Center
+                        )
+                        CustomButton(
+                            "Commencer ma première séance",
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                            onClick = { navController.navigate("seance") }
+                        )
+                    }
+                }
+            }
+
+
+
             }
             item {
                 Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {

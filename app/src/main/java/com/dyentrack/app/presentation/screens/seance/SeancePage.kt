@@ -1,10 +1,11 @@
 package com.dyentrack.app.presentation.screens.seance
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -59,13 +62,13 @@ import com.dyentrack.app.domain.model.enum.SaveType
 import com.dyentrack.app.domain.model.enum.SectionSelectType
 import com.dyentrack.app.domain.model.enum.VariantType
 import com.dyentrack.app.presentation.components.AdaptiveAdBanner
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.globalViewModel.AdViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
@@ -316,52 +319,14 @@ fun SeancePage(
                                 exercises,
                                 key = { _, ex -> ex.exerciseId }) { _, exInSeance ->
                                 var offsetY by remember { mutableFloatStateOf(0f) }
-
+                                var cardHeightPx by remember { mutableIntStateOf(0) }
                                 Box(
                                     modifier = Modifier
                                         .padding(10.dp, 4.dp)
                                         .offset { IntOffset(0, offsetY.roundToInt()) }
-                                        .then(
-                                            if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
-                                                Modifier.pointerInput(exInSeance) {
-                                                    detectDragGestures(
-                                                        onDragStart = { },
-                                                        onDrag = { change, dragAmount ->
-                                                            offsetY += dragAmount.y
-                                                            change.consume()
-                                                            val threshold = 70.dp.toPx()
-                                                            val lastIndex = exercises.lastIndex
-
-
-                                                            val currentIndex =
-                                                                exercises.indexOf(exInSeance)
-
-                                                            if (offsetY > threshold && currentIndex < lastIndex) {
-                                                                viewModel.swapExercise(
-                                                                    currentIndex,
-                                                                    currentIndex + 1
-                                                                )
-                                                                offsetY = 0f
-                                                            } else if (offsetY < -threshold && currentIndex > 0) {
-                                                                viewModel.swapExercise(
-                                                                    currentIndex,
-                                                                    currentIndex - 1
-                                                                )
-                                                                offsetY = 0f
-                                                            }
-                                                        },
-                                                        onDragEnd = {
-                                                            offsetY = 0f
-
-                                                        },
-                                                        onDragCancel = {
-                                                            offsetY = 0f
-
-                                                        }
-                                                    )
-                                                }
-                                            } else Modifier
-                                        )
+                                        .onSizeChanged { size ->
+                                            cardHeightPx = size.height
+                                        }
                                 ) {
                                     ExerciseCard(
                                         exInSeance,
@@ -369,7 +334,28 @@ fun SeancePage(
                                         viewModel,
                                         navController,
                                         userUnit,
+                                        infoMapUser[exInSeance.exerciseId],
+                                    presets.find { it.idLocal == todaySeance?.idPreset?.localId || todaySeance?.idPreset?.apiId == it.idPreset },
+                                            dragModifier = if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                            Modifier.draggable(
+                                                orientation = Orientation.Vertical,
+                                                state = rememberDraggableState { delta ->
+                                                    offsetY += delta
+                                                    val threshold = cardHeightPx
+                                                    val currentIndex = exercises.indexOf(exInSeance)
 
+                                                    if (offsetY > threshold && currentIndex < exercises.lastIndex) {
+                                                        viewModel.swapExercise(currentIndex, currentIndex + 1)
+                                                        offsetY = 0f
+                                                    } else if (offsetY < -threshold && currentIndex > 0) {
+                                                        viewModel.swapExercise(currentIndex, currentIndex - 1)
+                                                        offsetY = 0f
+                                                    }
+                                                },
+                                                onDragStopped = { offsetY = 0f
+                                                    viewModel.changeSaveStatus(SaveType.NOTSAVE)}
+                                            )
+                                        } else Modifier
                                         )
                                 }
                             }
@@ -484,7 +470,7 @@ fun SeancePage(
 
             viewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
             if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
-                viewModel.addExerciseFromPresetForDaySelected(presets);
+                viewModel.addExerciseFromPresetForDaySelected(presets)
             } else {
                 activeMenu = ActiveMenu(
                     title =addPresetExercisesTitle,
@@ -492,7 +478,7 @@ fun SeancePage(
                     content = listOf(
                         MenuItemData(associateOnlyText, onClick = { activeMenu = null }),
                         MenuItemData(yesText, onClick = {
-                            viewModel.addExerciseFromPresetForDaySelected(presets);
+                            viewModel.addExerciseFromPresetForDaySelected(presets)
                             activeMenu = null
                         })
                     )
