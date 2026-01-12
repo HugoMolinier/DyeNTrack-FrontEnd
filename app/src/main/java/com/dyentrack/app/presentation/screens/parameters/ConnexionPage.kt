@@ -41,7 +41,7 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.TopNavigationBar
@@ -83,8 +83,7 @@ fun ConnexionPage(
             detectTapGestures(onTap = {
                 focusManager.clearFocus()
             })
-        }
-    ) {
+        }) {
         Column {
             TopNavigationBar(
                 stringResource(R.string.login),
@@ -115,7 +114,8 @@ fun ConnexionPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = email, variant = VariantType.OUTLINED,
+                            text = email,
+                            variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.email_placeholder)
                         )
                     }
@@ -156,10 +156,8 @@ fun ConnexionPage(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = errorText,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 12.sp
+                                text = errorText, style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.Red, fontSize = 12.sp
                                 )
                             )
                         }
@@ -168,7 +166,9 @@ fun ConnexionPage(
                 }
                 item {
                     CustomButton(
-                        label = if (isLoading) stringResource(R.string.logging_in) else stringResource(R.string.login),
+                        label = if (isLoading) stringResource(R.string.logging_in) else stringResource(
+                            R.string.login
+                        ),
                         onClick = { authViewModel.login(email.value.text, password.value.text) },
                         modifier = Modifier.fillMaxWidth(),
                         isLoading = isLoading,
@@ -182,12 +182,11 @@ fun ConnexionPage(
                             .padding(top = 28.dp, start = 8.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(
-                            12.dp,
-                            Alignment.CenterHorizontally
+                            12.dp, Alignment.CenterHorizontally
                         )
                     ) {
                         Text(
-                            text =stringResource(R.string.no_account),
+                            text = stringResource(R.string.no_account),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = secondaryTextColor,
                             )
@@ -195,9 +194,11 @@ fun ConnexionPage(
                         Text(
                             text = stringResource(R.string.signup_here),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.clickable(onClick = { navController.navigate("inscription") {
-                                popUpTo("connexion") { inclusive = true }
-                            } })
+                            modifier = Modifier.clickable(onClick = {
+                                navController.navigate("inscription") {
+                                    popUpTo("connexion") { inclusive = true }
+                                }
+                            })
                         )
                     }
 

@@ -5,9 +5,9 @@ import com.dyentrack.app.data.local.database.AppDatabase
 import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.AuthStatus
-import com.dyentrack.app.domain.model.TypeOfAction
+import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
-import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enums.SaveType
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +37,7 @@ class DayDataRepositoryImpl @Inject constructor(
 
         _apiFetchStatus.value = SaveType.LocalSAVE
         // 2. récupère l'API
-        if(userConnectionRepositoryImpl.isValideToken()==AuthStatus.CONNECTED) {
+        if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
             try {
                 val apiResponse = api.getAllDayDataByDay()
                 if (apiResponse.status == 200) {
@@ -56,9 +56,6 @@ class DayDataRepositoryImpl @Inject constructor(
 
         }
     }
-
-
-
 
 
     private suspend fun mergeLocalAndApiByTimestamp( // a ajouter verif id telephone pour eviter le cas que sur un autre tel le healthsync date change la date avec seance vide donc api detecte que local>api donc importe seance vide
@@ -106,7 +103,7 @@ class DayDataRepositoryImpl @Inject constructor(
             if (localHealthTime < apiTime || localSeanceTime < apiTime) {
                 updateToLocal(
                     merged.copy(
-                        seanceTrack = merged.seanceTrack?.copy(presetLocalId = localDay.seanceTrack?.presetLocalId )
+                        seanceTrack = merged.seanceTrack?.copy(presetLocalId = localDay.seanceTrack?.presetLocalId)
                     ),
                     apiDay.lastUpdate,
                     TypeOfAction.UPDATEBOTH
@@ -120,40 +117,44 @@ class DayDataRepositoryImpl @Inject constructor(
         val localDays = local.map { it.dayData }.toSet()
         api.filter { it.dayData !in localDays }.forEach {
             result.add(it)
-            updateToLocal(it,it.lastUpdate, TypeOfAction.UPDATEBOTH)
+            updateToLocal(it, it.lastUpdate, TypeOfAction.UPDATEBOTH)
         }
         return result
     }
 
-    override suspend fun getDayLocal(day:String): DayDataRequest? {
+    override suspend fun getDayLocal(day: String): DayDataRequest? {
         return seanceDao.getSeanceByDay(day)
     }
 
     override suspend fun updateToApi(dayData: DayDataRequest): Int {
         return try {
             val response = api.saveDayData(dayData)
-            Log.d("ResponseApi","${response}")
             if (response.status in listOf(200, 201)) {
                 200
             } else {
-                Log.d("Api response Error","$response")
+                Log.d("Api response Error", "$response")
                 100
             }
         } catch (e: Exception) {
-            Log.d("Api response Error","$e")
+            Log.d("Api response Error", "$e")
             100
         }
     }
 
 
-    override suspend fun updateToLocal(dayData: DayDataRequest, dateSave: String?,typeOfAction: TypeOfAction ) {
-        seanceDao.saveOrUpdateSeanceWithoutReplaceNull( dayData,dateSave,typeOfAction)
+    override suspend fun updateToLocal(
+        dayData: DayDataRequest,
+        dateSave: String?,
+        typeOfAction: TypeOfAction
+    ) {
+        seanceDao.saveOrUpdateSeanceWithoutReplaceNull(dayData, dateSave, typeOfAction)
         seanceDao.getSeanceByDay(dayData.dayData)?.let { day ->
-            _dayDataFlow.value = (_dayDataFlow.value.orEmpty().filter { it.dayData != day.dayData } + day.copy())
+            _dayDataFlow.value =
+                (_dayDataFlow.value.orEmpty().filter { it.dayData != day.dayData } + day.copy())
         }
     }
 
-    override suspend fun cleanDB(){
+    override suspend fun cleanDB() {
         db.clearAllTables()
         _dayDataFlow.value = emptyList()
     }

@@ -37,7 +37,7 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.TopNavigationBar
@@ -77,8 +77,7 @@ fun RegisterPage(
             detectTapGestures(onTap = {
                 focusManager.clearFocus()
             })
-        }
-    ) {
+        }) {
         Column {
             TopNavigationBar(
                 stringResource(R.string.signup),
@@ -110,7 +109,8 @@ fun RegisterPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = email, variant = VariantType.OUTLINED,
+                            text = email,
+                            variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.email_placeholder)
                         )
                     }
@@ -126,7 +126,8 @@ fun RegisterPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = pseudo, variant = VariantType.OUTLINED,
+                            text = pseudo,
+                            variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.pseudo_placeholder)
                         )
                     }
@@ -166,10 +167,8 @@ fun RegisterPage(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = errorText,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 12.sp
+                                text = errorText, style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.Red, fontSize = 12.sp
                                 )
                             )
                         }
@@ -179,12 +178,12 @@ fun RegisterPage(
                 }
                 item {
                     CustomButton(
-                        label = if (isLoading) stringResource(R.string.registering) else stringResource(R.string.finish_registration),
+                        label = if (isLoading) stringResource(R.string.registering) else stringResource(
+                            R.string.finish_registration
+                        ),
                         onClick = {
                             authViewModel.register(
-                                email.value.text,
-                                password.value.text,
-                                pseudo.value.text
+                                email.value.text, password.value.text, pseudo.value.text
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -199,12 +198,11 @@ fun RegisterPage(
                             .padding(top = 28.dp, start = 8.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(
-                            12.dp,
-                            Alignment.CenterHorizontally
+                            12.dp, Alignment.CenterHorizontally
                         )
                     ) {
                         Text(
-                            text =stringResource(R.string.already_account),
+                            text = stringResource(R.string.already_account),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = secondaryTextColor,
                             )
@@ -212,9 +210,11 @@ fun RegisterPage(
                         Text(
                             text = stringResource(R.string.login_here),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.clickable(onClick = { navController.navigate("connexion") {
-                                popUpTo("inscription") { inclusive = true }
-                            } })
+                            modifier = Modifier.clickable(onClick = {
+                                navController.navigate("connexion") {
+                                    popUpTo("inscription") { inclusive = true }
+                                }
+                            })
                         )
                     }
 

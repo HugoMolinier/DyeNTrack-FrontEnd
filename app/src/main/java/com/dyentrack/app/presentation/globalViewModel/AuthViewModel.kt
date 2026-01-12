@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -41,6 +40,7 @@ class AuthViewModel @Inject constructor(
     fun clearRequestState() {
         _requestState.value = RequestState.Idle
     }
+
     fun login(email: String, password: String) = viewModelScope.launch {
         _requestState.value = RequestState.Loading
         _requestState.value = loginUserUseCase(email, password)
@@ -51,10 +51,11 @@ class AuthViewModel @Inject constructor(
         _requestState.value = registerUserUseCase(email, password, pseudo)
     }
 
-    fun updateUser(pseudo: String, height: Int?, sexe: Boolean?, birthDate: String?) = viewModelScope.launch {
-        _requestState.value = RequestState.Loading
-        _requestState.value = updateUserUseCase(pseudo, height, sexe, birthDate)
-    }
+    fun updateUser(pseudo: String, height: Int?, sexe: Boolean?, birthDate: String?) =
+        viewModelScope.launch {
+            _requestState.value = RequestState.Loading
+            _requestState.value = updateUserUseCase(pseudo, height, sexe, birthDate)
+        }
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {

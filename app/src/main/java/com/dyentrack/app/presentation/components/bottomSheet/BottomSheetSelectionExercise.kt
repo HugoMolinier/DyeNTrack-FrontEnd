@@ -33,10 +33,10 @@ import com.dyentrack.app.domain.mapper.toSearchKey
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.exercise.Exercise
-import com.dyentrack.app.domain.model.enum.ExerciseTypeFilter
+import com.dyentrack.app.domain.model.enums.ExerciseTypeFilter
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.components.FavoriteIconButton

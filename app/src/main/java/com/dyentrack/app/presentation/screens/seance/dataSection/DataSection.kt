@@ -42,23 +42,20 @@ fun DataSection(
     val autorisationNeed by healthViewModel.autorisationNeed.collectAsState()
 
     Column(
-        modifier = Modifier.padding(10.dp, 4.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        modifier = Modifier.padding(10.dp, 4.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         NutritionBox(viewModel, state, lockInput, day, isAutoSync)
 
-        PhysioBox(viewModel, state, lockInput, day, isAutoSync, userUnit  )
+        PhysioBox(viewModel, state, lockInput, day, isAutoSync, userUnit)
 
         if (autorisationNeed?.isNotEmpty() == true) {
             HealthConnectPermissionsScreen(
-                healthConnectPermissionsNeeded = autorisationNeed!!,
-                viewModel = healthViewModel
+                healthConnectPermissionsNeeded = autorisationNeed!!, viewModel = healthViewModel
             )
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
@@ -71,9 +68,7 @@ fun DataSection(
                         Icons.Default.Sync,
                         "sync ",
                         tint = secondaryTextColor,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .padding(4.dp)
+                        modifier = Modifier.size(28.dp).padding(4.dp)
                     )
                 }
                 Text(

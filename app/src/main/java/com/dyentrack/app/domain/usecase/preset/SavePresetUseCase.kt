@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SavePresetUseCase @Inject constructor(private val repo: PresetRepository) {
-    suspend operator fun invoke(preset: Preset):Preset? = repo.save(preset)
+    suspend operator fun invoke(preset: Preset): Preset? = repo.save(preset)
 
-    suspend fun localOnly(preset: Preset):Preset? = repo.saveLocalOnly(preset)
+    suspend fun localOnly(preset: Preset): Preset? = repo.saveLocalOnly(preset)
 }

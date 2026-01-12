@@ -28,8 +28,8 @@ fun convertGrammeOz(value: Double?, sourceUnit: MesureUnit, finalUnit: MesureUni
 }
 
 fun LocalDate.toIsoDate(): String = this.format(DateTimeFormatter.ISO_DATE)
-fun LocalDate.toAbbreviatedDate(userLangue : LANGUAGE): String {
-    val locale = when(userLangue) {
+fun LocalDate.toAbbreviatedDate(userLangue: LANGUAGE): String {
+    val locale = when (userLangue) {
         LANGUAGE.FR -> Locale.FRENCH
         LANGUAGE.EN -> Locale.ENGLISH
     }

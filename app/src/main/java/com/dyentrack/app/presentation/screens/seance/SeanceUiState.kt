@@ -6,13 +6,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.PresetId
+import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import com.dyentrack.app.domain.model.dayData.PhysioTrack
-import com.dyentrack.app.domain.model.SetData
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.model.enum.ExerciseMode
-import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.domain.model.enum.SectionSelectType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
+import com.dyentrack.app.domain.model.enums.SaveType
+import com.dyentrack.app.domain.model.enums.SectionSelectType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
@@ -25,7 +25,7 @@ data class SeanceUiState(
     val expandedExerciseId: Long? = null,
     val isBottomSheetVisible: BottomSheetVisibleType = BottomSheetVisibleType.NO,
 
-    val sectionSelect: SectionSelectType?=SectionSelectType.SEANCE,
+    val sectionSelect: SectionSelectType? = SectionSelectType.SEANCE,
 
     val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
 
@@ -38,9 +38,10 @@ data class SeanceUiState(
 
 )
 
-enum class ExpandSection(){
-    ANALYSE,NONE,COMMENT
+enum class ExpandSection() {
+    ANALYSE, NONE, COMMENT
 }
+
 data class SeanceDuJour(
     //séparé pouur éviter les recomposition
     val nutritionTrack: NutritionTrack = NutritionTrack(),
@@ -49,6 +50,6 @@ data class SeanceDuJour(
     val exercisesInSceance: SnapshotStateList<ExerciseInSeance> = mutableStateListOf(),
     val saveAPI: SaveType = SaveType.NOTSAVE,
     val setsMap: SnapshotStateMap<Long, SnapshotStateList<SetData>> = mutableStateMapOf(),
-    val idPreset: PresetId?= PresetId(null,null), //API, Local
+    val idPreset: PresetId? = PresetId(null, null), //API, Local
 
-    )
+)

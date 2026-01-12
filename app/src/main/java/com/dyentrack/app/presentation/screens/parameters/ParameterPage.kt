@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material.icons.filled.Close
@@ -41,9 +40,9 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.SizeType
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.SizeType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.TopNavigationBar
@@ -52,7 +51,8 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ParameterPage(
-    modifier: Modifier = Modifier, navController: NavController,
+    modifier: Modifier = Modifier,
+    navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
 ) {
 
@@ -62,8 +62,7 @@ fun ParameterPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.parameter),
-                rightSide = {
+                stringResource(R.string.parameter), rightSide = {
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
@@ -75,8 +74,7 @@ fun ParameterPage(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(start = 12.dp, end = 12.dp, top = 8.dp)
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
                 //debut composant
@@ -90,7 +88,8 @@ fun ParameterPage(
                             Text(
                                 stringResource(R.string.signup_prompt),
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
                             )
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -142,16 +141,14 @@ fun ParameterPage(
                                     stringResource(R.string.signup),
                                     modifier = modifier.fillMaxWidth(),
                                     size = SizeType.MEDIUM,
-                                    onClick = { navController.navigate("inscription") }
-                                )
+                                    onClick = { navController.navigate("inscription") })
                                 CustomButton(
                                     stringResource(R.string.login),
                                     variant = VariantType.OUTLINED,
                                     emphasis = EmphasisType.SECONDARY,
                                     modifier = modifier.fillMaxWidth(),
                                     size = SizeType.MEDIUM,
-                                    onClick = { navController.navigate("connexion") }
-                                )
+                                    onClick = { navController.navigate("connexion") })
                             }
                             HorizontalDivider(
                                 color = secondaryTextColor.copy(alpha = 0.15f),
@@ -215,13 +212,11 @@ fun ParameterPage(
                                     { navController.navigate("mesureUnit") },
                                     stringResource(R.string.measurement_unit),
                                     ParameterIcon.Vector(Icons.Outlined.Straighten)
-                                ),
-                                ParameterItem(
+                                ), ParameterItem(
                                     { navController.navigate("language") },
                                     stringResource(R.string.language),
                                     ParameterIcon.Vector(Icons.Default.Translate)
-                                ),
-                                ParameterItem(
+                                ), ParameterItem(
                                     { navController.navigate("advanceParam") },
                                     stringResource(R.string.advanced),
                                     ParameterIcon.Vector(Icons.Outlined.Memory)
@@ -243,22 +238,24 @@ fun ParameterPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        ParameterBox( listOf(
-                            /* ParameterItem(
-                                 { }, stringResource(R.string.accessibility),
-                                 ParameterIcon.Vector(Icons.Outlined.Accessibility)
-                             ),*/
-                            ParameterItem(
-                                { navController.navigate("privacy") },
-                                stringResource(R.string.privacy),
-                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
-                            ),
-                            ParameterItem(
-                                { navController.navigate("legal") },
-                                stringResource(R.string.legal_notices),
-                                ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
-                            ),
-                        ))
+                        ParameterBox(
+                            listOf(
+                                /* ParameterItem(
+                                     { }, stringResource(R.string.accessibility),
+                                     ParameterIcon.Vector(Icons.Outlined.Accessibility)
+                                 ),*/
+                                ParameterItem(
+                                    { navController.navigate("privacy") },
+                                    stringResource(R.string.privacy),
+                                    ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
+                                ),
+                                ParameterItem(
+                                    { navController.navigate("legal") },
+                                    stringResource(R.string.legal_notices),
+                                    ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
+                                ),
+                            )
+                        )
                     }
 
 

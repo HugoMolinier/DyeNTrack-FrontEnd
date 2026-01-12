@@ -17,15 +17,12 @@ class UserPreferenceViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
-                scope = viewModelScope,
-                started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
-                initialValue = null
-            )
-
-    fun fetchUserPreference() {
-        fetchUserPreferenceUseCase.invoke()
-    }
+    val userPreference: StateFlow<UserPreference?> =
+        fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            initialValue = null
+        )
 
 
     fun updateUserPreference(newPref: UserPreference) {

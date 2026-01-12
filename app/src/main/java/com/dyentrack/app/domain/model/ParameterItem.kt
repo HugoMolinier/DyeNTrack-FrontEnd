@@ -5,11 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class ParameterItem(
-    val onClick: (() -> Unit)?=null,
+    val onClick: (() -> Unit)? = null,
     val label: String = "",
-    val icon: ParameterIcon?=null,
+    val icon: ParameterIcon? = null,
     val composableRight: (@Composable () -> Unit)? = null,
-    val sublabel:String?=null,
+    val sublabel: String? = null,
 )
 
 sealed class ParameterIcon {

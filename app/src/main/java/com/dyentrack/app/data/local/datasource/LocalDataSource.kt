@@ -11,4 +11,6 @@ interface LocalDataSource {
     fun getUserPreference(): UserPreference?
 
     fun saveUserPreference(userPreference:UserPreference)
+
+
 }

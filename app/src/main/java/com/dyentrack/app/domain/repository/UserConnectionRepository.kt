@@ -15,20 +15,14 @@ interface UserConnectionRepository {
 
 
     suspend fun loginUser(
-        email: String,
-        password: String
+        email: String, password: String
     ): RequestState
 
     suspend fun registerUser(
-        email: String,
-        password: String,
-        pseudo: String
+        email: String, password: String, pseudo: String
     ): RequestState
 
     suspend fun updateUser(
-        pseudo: String,
-        height: Int?,
-        sexe: Boolean?,
-        birthDate: String?
+        pseudo: String, height: Int?, sexe: Boolean?, birthDate: String?
     ): RequestState
 }

@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
-import com.dyentrack.app.domain.model.enum.ExerciseMode
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.ExerciceInPropertyType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
 import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
@@ -29,7 +29,11 @@ class PresetPageViewModel @Inject constructor(
     ) : ViewModel() {
 
 
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
+    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null
+    )
     private val _uiState = MutableStateFlow(PresetUiState())
     val uiState: StateFlow<PresetUiState> = _uiState
 
@@ -44,21 +48,25 @@ class PresetPageViewModel @Inject constructor(
     }
 
 
-
     fun setPreset(preset: Preset) {
-        _uiState.update { it.copy(originalPreset = preset,
-            currentPreset = preset) }
+        _uiState.update {
+            it.copy(
+                originalPreset = preset, currentPreset = preset
+            )
+        }
     }
+
     fun addExerciseToSeance() {
         val newExercises = _uiState.value.exerciseToAdd.map { exerciseId ->
-            val existing  = _uiState.value.currentPreset?.presetSeanceExerciseVO?.find { it.idExercise == exerciseId }
+            val existing =
+                _uiState.value.currentPreset?.presetSeanceExerciseVO?.find { it.idExercise == exerciseId }
             val exercise = _uiState.value.masterDataMaps!!.exerciseMap[exerciseId]
             ExerciceInPreset(
                 idExercise = exerciseId,
-                nbSet = existing?.nbSet?:1,
+                nbSet = existing?.nbSet ?: 1,
                 rangeRepInf = existing?.rangeRepInf,
-                rangeRepSup = existing?.rangeRepSup ,
-                idLateralite = existing?.idLateralite?:1L ,
+                rangeRepSup = existing?.rangeRepSup,
+                idLateralite = existing?.idLateralite ?: 1L,
                 idEquipment = existing?.idEquipment ?: exercise!!.defaultEquipment!!
             )
         }
@@ -66,14 +74,12 @@ class PresetPageViewModel @Inject constructor(
             state.copy(
                 currentPreset = state.currentPreset?.copy(
                     presetSeanceExerciseVO = newExercises
-                ),
-                exerciseToAdd = emptyList(),
-                isBottomSheetVisible = BottomSheetVisibleType.NO
+                ), exerciseToAdd = emptyList(), isBottomSheetVisible = BottomSheetVisibleType.NO
             )
         }
     }
 
-    fun swapExercise( fromIndex: Int, toIndex: Int) {
+    fun swapExercise(fromIndex: Int, toIndex: Int) {
         val currentPreset = _uiState.value.currentPreset ?: return
         val exercises = currentPreset.presetSeanceExerciseVO?.toMutableList() ?: return
 
@@ -93,10 +99,8 @@ class PresetPageViewModel @Inject constructor(
     }
 
 
-
     private fun updateExercise(
-        exerciseId: Long,
-        updater: (ExerciceInPreset) -> ExerciceInPreset
+        exerciseId: Long, updater: (ExerciceInPreset) -> ExerciceInPreset
     ) {
         _uiState.update { state ->
             val preset = state.currentPreset ?: return@update state
@@ -109,7 +113,7 @@ class PresetPageViewModel @Inject constructor(
                 )
             )
         }
-        Log.d("state","${_uiState.value.currentPreset}")
+        Log.d("state", "${_uiState.value.currentPreset}")
     }
 
     fun changeNbSet(exerciseId: Long, delta: Int) {
@@ -120,22 +124,15 @@ class PresetPageViewModel @Inject constructor(
     }
 
 
-
-
-
-
-
-
     fun toggleBottomSheet(show: BottomSheetVisibleType) {
         _uiState.update { it.copy(isBottomSheetVisible = show) }
     }
 
     fun toggleExerciseSelection(exerciseId: Long) {
         _uiState.update { state ->
-            val updatedList = if (exerciseId in state.exerciseToAdd)
-                state.exerciseToAdd - exerciseId
-            else
-                state.exerciseToAdd + exerciseId
+            val updatedList =
+                if (exerciseId in state.exerciseToAdd) state.exerciseToAdd - exerciseId
+                else state.exerciseToAdd + exerciseId
 
             state.copy(exerciseToAdd = updatedList)
         }
@@ -144,24 +141,20 @@ class PresetPageViewModel @Inject constructor(
     fun toggleMode(newMode: ExerciseMode) {
         _uiState.update { current ->
             when {
-                current.exerciseMode == newMode ->
-                    current.copy(exerciseMode = ExerciseMode.LOCK)
-                newMode == ExerciseMode.CHANGE_ORDER ->
-                    current.copy(
-                        exerciseMode = newMode,
-                        expandedExerciseId = null
-                    )
-                else ->
-                    current.copy(exerciseMode = newMode)
+                current.exerciseMode == newMode -> current.copy(exerciseMode = ExerciseMode.LOCK)
+                newMode == ExerciseMode.CHANGE_ORDER -> current.copy(
+                    exerciseMode = newMode, expandedExerciseId = null
+                )
+
+                else -> current.copy(exerciseMode = newMode)
             }
         }
     }
+
     fun updateExerciseRange(
-        exerciseId: Long,
-        rangeRepInf: Int? = null,
-        rangeRepSup: Int? = null
+        exerciseId: Long, rangeRepInf: Int? = null, rangeRepSup: Int? = null
     ) {
-        Log.d("range","${rangeRepInf}_${rangeRepSup}")
+        Log.d("range", "${rangeRepInf}_${rangeRepSup}")
         updateExercise(exerciseId) { ex ->
             val min = rangeRepInf?.coerceAtLeast(1)
             val max = rangeRepSup?.coerceAtLeast(1)
@@ -169,8 +162,7 @@ class PresetPageViewModel @Inject constructor(
             val correctedMin = if (min != null && max != null && min > max) max else min
             val correctedMax = if (min != null && max != null && min > max) min else max
             ex.copy(
-                rangeRepInf = correctedMin,
-                rangeRepSup = correctedMax
+                rangeRepInf = correctedMin, rangeRepSup = correctedMax
             )
 
         }
@@ -178,11 +170,8 @@ class PresetPageViewModel @Inject constructor(
 
     fun setExerciseToAdd() {
         _uiState.update { state ->
-            state.copy(
-                exerciseToAdd = state.currentPreset?.presetSeanceExerciseVO
-                    ?.map { it.idExercise }
-                    .orEmpty()
-            )
+            state.copy(exerciseToAdd = state.currentPreset?.presetSeanceExerciseVO?.map { it.idExercise }
+                .orEmpty())
         }
     }
 
@@ -190,9 +179,7 @@ class PresetPageViewModel @Inject constructor(
     fun deleteExercice(idExercise: Long) {
         _uiState.update { currentState ->
             val updatedPreset = currentState.currentPreset?.copy(
-                presetSeanceExerciseVO = currentState.currentPreset.presetSeanceExerciseVO
-                    ?.filter { it.idExercise != idExercise }
-            )
+                presetSeanceExerciseVO = currentState.currentPreset.presetSeanceExerciseVO?.filter { it.idExercise != idExercise })
             currentState.copy(
                 currentPreset = updatedPreset,
                 expandedExerciseId = if (currentState.expandedExerciseId == idExercise) null else currentState.expandedExerciseId
@@ -201,9 +188,7 @@ class PresetPageViewModel @Inject constructor(
     }
 
     fun updatePresetProperty(
-        exerciseId: Long,
-        property: ExerciceInPropertyType,
-        valueId: Long
+        exerciseId: Long, property: ExerciceInPropertyType, valueId: Long
     ) {
         updateExercise(exerciseId) { ex ->
             when (property) {
@@ -212,6 +197,7 @@ class PresetPageViewModel @Inject constructor(
             }
         }
     }
+
     fun expandExercise(exerciseId: Long?) {
         _uiState.update { it.copy(expandedExerciseId = exerciseId) }
     }

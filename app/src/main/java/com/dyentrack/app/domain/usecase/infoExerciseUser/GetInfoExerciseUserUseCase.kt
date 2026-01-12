@@ -11,7 +11,9 @@ import javax.inject.Singleton
 class GetInfoExerciseUserUseCase @Inject constructor(
     private val repository: InfoExerciseUserRepository
 ) {
-    val infoExerciseUserFlow: StateFlow<Map<Long, InfoExerciseUser>> = repository.infoExerciseUserFlow
+    val infoExerciseUserFlow: StateFlow<Map<Long, InfoExerciseUser>> =
+        repository.infoExerciseUserFlow
+
     suspend operator fun invoke() {
         return repository.fetchInfoExerciseUser()
     }

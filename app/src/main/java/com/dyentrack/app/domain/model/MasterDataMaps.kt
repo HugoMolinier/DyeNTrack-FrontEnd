@@ -12,6 +12,6 @@ data class MasterDataMaps(
     val equipmentMap: Map<Long, String> = emptyMap()
 ) {
     companion object {
-        fun empty(language: LANGUAGE) = MasterDataMaps()
+        fun empty() = MasterDataMaps()
     }
 }

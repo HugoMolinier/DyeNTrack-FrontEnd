@@ -38,8 +38,7 @@ fun ConfidentialPage(
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
-                        modifier = Modifier.clickable { navController.navigate("home") }
-                    )
+                        modifier = Modifier.clickable { navController.navigate("home") })
                 })
 
             LazyColumn(
@@ -57,8 +56,10 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_1_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_1_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -70,12 +71,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_2_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_2_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_2_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_2_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_2_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_2_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -87,12 +94,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_3_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_3_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_3_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_3_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_3_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_3_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -104,12 +117,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_4_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_4_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_4_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_4_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_4_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_4_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -121,12 +140,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_5_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_5_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_5_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_5_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_5_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_5_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -138,12 +163,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_6_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_6_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_6_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_6_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_6_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_6_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -155,12 +186,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_7_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_7_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_7_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_7_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_7_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_7_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -172,12 +209,18 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_8_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_8_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_8_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_8_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_8_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_8_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -189,29 +232,44 @@ fun ConfidentialPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_9_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_9_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_9_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_9_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_9_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_9_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
                 // Section 10
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 24.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    ) {
                         Text(
                             stringResource(R.string.privacy_heading_10),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.privacy_text_10_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_10_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.privacy_text_10_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.privacy_text_10_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_10_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.privacy_text_10_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
             }

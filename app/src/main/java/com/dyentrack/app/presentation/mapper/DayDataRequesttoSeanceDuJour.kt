@@ -5,25 +5,26 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.dyentrack.app.domain.model.PresetId
+import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import com.dyentrack.app.domain.model.dayData.PhysioTrack
-import com.dyentrack.app.domain.model.SetData
-import com.dyentrack.app.domain.model.SetSide
-import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enums.SaveType
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
 
 
 fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
-    val exercises = this.seanceTrack?.plannedExercises?.sortedBy { it.exerciseOrder }?.map { plannedExercise ->
-        ExerciseInSeance(
-            exerciseId = plannedExercise.exerciseId,
-            laterite = plannedExercise.lateraliteId,
-            equipment = plannedExercise.equipmentId,
+    val exercises =
+        this.seanceTrack?.plannedExercises?.sortedBy { it.exerciseOrder }?.map { plannedExercise ->
+            ExerciseInSeance(
+                exerciseId = plannedExercise.exerciseId,
+                laterite = plannedExercise.lateraliteId,
+                equipment = plannedExercise.equipmentId,
 
-        )
-    }?.toMutableStateList() ?: mutableStateListOf()
+                )
+        }?.toMutableStateList() ?: mutableStateListOf()
 
     val setsMap = mutableStateMapOf<Long, SnapshotStateList<SetData>>()
     this.seanceTrack?.plannedExercises?.forEach { plannedExercise ->
@@ -54,8 +55,7 @@ fun DayDataRequest.toSeanceDuJour(): SeanceDuJour {
                                 rir = it.rir,
                                 side = SetSide.RIGHT
                             )
-                        }
-                    )
+                        })
                     leftSet
                 }
 

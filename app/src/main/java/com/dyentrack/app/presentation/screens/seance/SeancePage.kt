@@ -55,12 +55,12 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.MesureUnit
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.ExerciseMode
-import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.domain.model.enum.SectionSelectType
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
+import com.dyentrack.app.domain.model.enums.SaveType
+import com.dyentrack.app.domain.model.enums.SectionSelectType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.AdaptiveAdBanner
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
@@ -238,25 +238,36 @@ fun SeancePage(
                                                 Row(
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                     verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.padding(horizontal = 4.dp).clickable(
-                                                        onClick = {
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 4.dp)
+                                                        .clickable(
+                                                            onClick = {
 
 
-                                                            activeMenu = ActiveMenu(
-                                                                title = revokePresetTitle,
-                                                                description = revokePresetDescription,
-                                                                content = listOf(
-                                                                    MenuItemData(noText, onClick = { activeMenu = null }),
-                                                                    MenuItemData(yesText, color = Color.Red, onClick = {
-                                                                        viewModel.setPreset(null, null)
-                                                                        activeMenu = null
+                                                                activeMenu =
+                                                                    ActiveMenu(
+                                                                        title = revokePresetTitle,
+                                                                        description = revokePresetDescription,
+                                                                        content = listOf(
+                                                                            MenuItemData(
+                                                                                noText,
+                                                                                onClick = {
+                                                                                    activeMenu =
+                                                                                        null
+                                                                                }),
+                                                                            MenuItemData(
+                                                                                yesText,
+                                                                                color = Color.Red,
+                                                                                onClick = {
+                                                                                    viewModel.setPreset(
+                                                                                        null,
+                                                                                        null
+                                                                                    )
+                                                                                    activeMenu =
+                                                                                        null
 
-                                                                    }
-                                                                    )
-                                                                )
-                                                            )
-                                                        }
-                                                    )
+                                                                                })))
+                                                            })
                                                 ) {
                                                     Icon(
                                                         Icons.Default.Link,
@@ -459,7 +470,7 @@ fun SeancePage(
                     contentDescription = "Swap",
                     modifier = Modifier
                         .size(20.dp)
-                        .clickable {  viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) },
+                        .clickable { viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) },
                     tint = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -503,7 +514,7 @@ fun SeancePage(
                         contentDescription = "Menu",
                         modifier = Modifier
                             .size(20.dp)
-                            .clickable { viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET)},
+                            .clickable { viewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET) },
                         tint = MaterialTheme.colorScheme.onSurface
                     )
             }

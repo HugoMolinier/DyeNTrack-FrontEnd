@@ -50,8 +50,7 @@ fun LanguagePage(
     val activity = context.findActivity()
 
     val languageOptions = listOf(
-        "Français (FR)" to LANGUAGE.FR,
-        "English (EN)" to LANGUAGE.EN
+        "Français (FR)" to LANGUAGE.FR, "English (EN)" to LANGUAGE.EN
     )
 
     key(userPreference?.language) {
@@ -97,32 +96,25 @@ fun LanguagePage(
                             val menu = languageOptions.map { (label, language) ->
                                 val isSelected = userPreference?.language == language
 
-                                ParameterItem(
-                                    onClick = {
-                                        if (!isSelected) {
-                                            userPreferenceViewModel.updateUserPreference(
-                                                UserPreference(language = language)
-                                            )
-                                            activity?.recreate()
-                                        }
-                                    },
-                                    label = label,
-                                    sublabel = null,
-                                    composableRight = {
-                                        SingleCircleSelector(
-                                            isSelected = isSelected,
-                                            onClick = {
-                                                if (!isSelected) {
-                                                    userPreferenceViewModel.updateUserPreference(
-                                                        UserPreference(language = language)
-                                                    )
-                                                    activity?.recreate()
-                                                }
-                                            },
-                                            enabled = !isSelected
+                                ParameterItem(onClick = {
+                                    if (!isSelected) {
+                                        userPreferenceViewModel.updateUserPreference(
+                                            UserPreference(language = language)
                                         )
+                                        activity?.recreate()
                                     }
-                                )
+                                }, label = label, sublabel = null, composableRight = {
+                                    SingleCircleSelector(
+                                        isSelected = isSelected, onClick = {
+                                            if (!isSelected) {
+                                                userPreferenceViewModel.updateUserPreference(
+                                                    UserPreference(language = language)
+                                                )
+                                                activity?.recreate()
+                                            }
+                                        }, enabled = !isSelected
+                                    )
+                                })
                             }
 
                             ParameterBox(menu)

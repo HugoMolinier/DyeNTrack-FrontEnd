@@ -35,7 +35,7 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.MesureUnit
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.domain.model.getDescription
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.FavoriteIconButton
@@ -54,11 +54,11 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 @Composable
 fun ExercisePage(
     modifier: Modifier = Modifier, navController: NavController,
-    exerciseId : Long,
+    exerciseId: Long,
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
     userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
-    infoUserViewModel: InfoUserViewModel=hiltViewModel<InfoUserViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
 ) {
     val context = LocalContext.current
     val textToast = stringResource(R.string.favorite_login_prompt)
@@ -81,8 +81,7 @@ fun ExercisePage(
             detectTapGestures(onTap = {
                 focusManager.clearFocus()
             })
-        }
-    ) {
+        }) {
         Column {
             TopNavigationBar(
                 stringResource(R.string.exercise_detail),
@@ -105,19 +104,16 @@ fun ExercisePage(
                             itemSection = listOf(
                                 MenuItemData(
                                     stringResource(R.string.explanation),
-                                    { exerciseViewModel.changeSection(SectionChose.EXPLAIN) }
-                                ),
+                                    { exerciseViewModel.changeSection(SectionChose.EXPLAIN) }),
                                 MenuItemData(
                                     stringResource(R.string.statistics),
-                                    { exerciseViewModel.changeSection(SectionChose.ANALYSE) }
-                                )
-                            )
+                                    { exerciseViewModel.changeSection(SectionChose.ANALYSE) }))
 
 
                         )
                     }
                 }
-                if (state.sectionChose == SectionChose.EXPLAIN && exercise!=null) {
+                if (state.sectionChose == SectionChose.EXPLAIN && exercise != null) {
                     item {
                         Column {
                             Row(
@@ -131,19 +127,18 @@ fun ExercisePage(
 
                                 FavoriteIconButton(
                                     isFavorite = infoMapState[exercise.idExercise]?.favorite
-                                        ?: false,
-                                    onClick = {
-                                        if(userConnected.isConnected) { val currentFavorite =
-                                            infoMapState[exercise.idExercise]?.favorite ?: false
+                                        ?: false, onClick = {
+                                        if (userConnected.isConnected) {
+                                            val currentFavorite =
+                                                infoMapState[exercise.idExercise]?.favorite ?: false
                                             infoUserViewModel.updateInfoExerciseUser(
-                                            exercise.idExercise,
-                                            !currentFavorite,
-                                            null
-                                        )}else {
-                                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+                                                exercise.idExercise, !currentFavorite, null
+                                            )
+                                        } else {
+                                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT)
+                                                .show()
                                         }
-                                    }
-                                )
+                                    })
                             }
                             Text(
                                 text = stringResource(
@@ -182,7 +177,7 @@ fun ExercisePage(
                                     modifier = Modifier.padding(vertical = 12.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
-                                if (language != LANGUAGE.EN && exercise.nameFR!= exercise.nameEN) {
+                                if (language != LANGUAGE.EN && exercise.nameFR != exercise.nameEN) {
                                     InfoRow(
                                         label = "Aussi Appellé",
                                         value = exercise.getName(LANGUAGE.EN)
@@ -237,12 +232,9 @@ fun ExercisePage(
                                 singleLine = false,
                                 onFocusLost = { finalText ->
                                     infoUserViewModel.updateInfoExerciseUser(
-                                        exercise.idExercise,
-                                        null,
-                                        finalText
+                                        exercise.idExercise, null, finalText
                                     )
-                                }
-                            )
+                                })
 
 
                         }
@@ -276,8 +268,7 @@ fun ExercisePage(
                                 lineValues = exerciseViewModel.getChartLineValues(),
                                 showValueBar = numberSize < 35,
                                 showValueLine = numberSize < 20,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 barLegendLabel = stringResource(R.string.weighted_sum),
                                 lineLegendLabel = stringResource(R.string.fail_set_ratio)
 
@@ -290,8 +281,7 @@ fun ExercisePage(
                             InfoRow(
                                 label = stringResource(R.string.average_weight_5),
                                 value = exerciseViewModel.getAverageWeightFormatted(
-                                    top = 5,
-                                    userUnit = userUnit
+                                    top = 5, userUnit = userUnit
                                 )
                             )
                             val last14Day = exerciseViewModel.getLast14DaysDataDivided()

@@ -2,7 +2,6 @@ package com.dyentrack.app.domain.usecase.masterdata
 
 
 import com.dyentrack.app.domain.model.MasterDataStatic
-import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.repository.MasterDataRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

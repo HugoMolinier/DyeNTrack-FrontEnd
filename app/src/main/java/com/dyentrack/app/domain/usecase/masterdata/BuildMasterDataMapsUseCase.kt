@@ -23,16 +23,13 @@ class BuildMasterDataMapsUseCase @Inject constructor(
     suspend fun execute(language: LANGUAGE): MasterDataMaps {
         cache[language]?.let { return it }
 
-        val data = repository.masterDataFlow
-            .filterNotNull()
-            .first()
+        val data = repository.masterDataFlow.filterNotNull().first()
         return MasterDataMaps(
             exerciseMap = data.officialExercise.associateBy { it.idExercise },
             musclesGroupMap = data.musclesGroup.associate { it.id to it.getName(language) },
             muscleMap = data.muscles.associateBy { it.id },
             lateraliteMap = data.lateralites.associate { it.id to it.getName(language) },
-            equipmentMap = data.equipment.associate { it.id to it.getName(language) }
-        ).also {
+            equipmentMap = data.equipment.associate { it.id to it.getName(language) }).also {
             cache[language] = it
         }
     }

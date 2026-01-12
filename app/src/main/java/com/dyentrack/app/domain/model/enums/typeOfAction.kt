@@ -1,4 +1,4 @@
-package com.dyentrack.app.domain.model
+package com.dyentrack.app.domain.model.enums
 
 enum class TypeOfAction {
     UPDATEHEALTH,
@@ -6,7 +6,6 @@ enum class TypeOfAction {
     UPDATESEANCE,
 
     UPDATEBOTH,
-
 
 
     FORCESEANCEUPDATE // pour le cas Empty Seance vs existingSeance

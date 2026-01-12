@@ -1,4 +1,4 @@
-package com.dyentrack.app.domain.model.enum
+package com.dyentrack.app.domain.model.enums
 
 enum class ExerciseMode { NORMAL, LOCK, CHANGE_ORDER;
 

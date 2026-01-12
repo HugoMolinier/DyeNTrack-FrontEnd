@@ -33,8 +33,7 @@ class Converters {
     @TypeConverter
     fun toNutritionTrack(value: String?): NutritionTrack {
 
-            return  gson.fromJson(value, NutritionTrack::class.java)
-                ?: NutritionTrack()
+        return gson.fromJson(value, NutritionTrack::class.java) ?: NutritionTrack()
 
     }
 
@@ -57,6 +56,7 @@ class Converters {
     fun toSeanceTrack(value: String?): SeanceTrack? {
         return value?.let { gson.fromJson(it, SeanceTrack::class.java) }
     }
+
     @TypeConverter
     fun fromExerciceList(value: List<ExerciceInPreset>?): String {
         return gson.toJson(value)

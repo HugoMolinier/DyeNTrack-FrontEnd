@@ -2,8 +2,8 @@ package com.dyentrack.app
 
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
-import dagger.hilt.android.HiltAndroidApp
 import androidx.work.Configuration
+import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp

@@ -1,8 +1,8 @@
 package com.dyentrack.app.domain.usecase.muscleRate
 
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
 import com.dyentrack.app.domain.model.RateSetSomme
+import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ceil
@@ -29,7 +29,8 @@ class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
             val grouped = sets.groupBy { it.setOrder }
             grouped.forEach { (_, groupedSets) ->
                 val avgReps = groupedSets.map { it.repsNumber }.average()
-                val charge = if (groupedSets.first().charge == 0.0) 1.0 else groupedSets.first().charge
+                val charge =
+                    if (groupedSets.first().charge == 0.0) 1.0 else groupedSets.first().charge
                 sommePond += avgReps * charge
                 numberSet += 1
                 if (groupedSets.first().rir == 0) numberSetFail += 1
@@ -49,12 +50,8 @@ class ComputePlannedExerciseMuscleRateUseCase @Inject constructor() {
 
 
         return MuscleRate(
-            numberExercise = 1,
-            numberSet = numberSet,
-            rateSetSomme = RateSetSomme(
-                numberSetFail = numberSetFail,
-                sommePond = sommePond,
-                numberRep = numberRep
+            numberExercise = 1, numberSet = numberSet, rateSetSomme = RateSetSomme(
+                numberSetFail = numberSetFail, sommePond = sommePond, numberRep = numberRep
             )
         )
     }

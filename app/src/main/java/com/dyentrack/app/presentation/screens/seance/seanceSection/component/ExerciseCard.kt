@@ -48,8 +48,8 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.InfoExerciseUser
 import com.dyentrack.app.domain.model.MesureUnit
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.ExerciseMode
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.model.preset.Preset
@@ -225,15 +225,19 @@ fun ExerciseCard(
                             Icons.Default.QueryStats,
                             contentDescription = "Voir stats",
                             tint = if (state.showExpand== ExpandSection.ANALYSE) MaterialTheme.colorScheme.primary else secondaryTextColor,
-                            modifier = Modifier.size(20.dp).clip(CircleShape).clickable(
-                                onClick = {
-                                    viewModel.toggleShowAnalyseData(ExpandSection.ANALYSE)
-                                    viewModel.getLastExercicePerfBetweenDate(
-                                        state.daySelected,
-                                        LocalDate.parse(state.daySelected).minusDays(90).toIsoDate()
-                                    )
-                                },
-                            )
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.toggleShowAnalyseData(ExpandSection.ANALYSE)
+                                        viewModel.getLastExercicePerfBetweenDate(
+                                            state.daySelected,
+                                            LocalDate.parse(state.daySelected).minusDays(90)
+                                                .toIsoDate()
+                                        )
+                                    },
+                                )
                         )
 
 
@@ -242,11 +246,14 @@ fun ExerciseCard(
 
                             contentDescription = "Ajouter",
                             tint = if (state.showExpand== ExpandSection.COMMENT) MaterialTheme.colorScheme.primary else secondaryTextColor,
-                            modifier = Modifier.size(20.dp).clip(CircleShape).clickable(
-                                onClick = {
-                                    viewModel.toggleShowAnalyseData(ExpandSection.COMMENT)
-                                },
-                            )
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.toggleShowAnalyseData(ExpandSection.COMMENT)
+                                    },
+                                )
                         )
 
                     }
@@ -270,9 +277,15 @@ fun ExerciseCard(
                                 .padding(bottom = 4.dp, top = 4.dp)
                         ) {
                             Spacer(modifier = Modifier.width(24.dp))
-                            Text("rep", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
-                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier.weight(1f)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall, color=secondaryTextColor)
-                            Text("rir", modifier = Modifier.width(65.dp)     .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
+                            Text("rep", modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
+                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall, color=secondaryTextColor)
+                            Text("rir", modifier = Modifier
+                                .width(65.dp)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
                         }
                     }
                     exerciseSets?.forEachIndexed { index, set ->
@@ -298,7 +311,9 @@ fun ExerciseCard(
                                         if (!modeActual.isLock()) {
                                             Modifier.pointerInput(Unit) {
                                                 detectDragGesturesAfterLongPress(
-                                                    onDragStart = { isDragging = true },
+                                                    onDragStart = {
+                                                        isDragging = true
+                                                    },
                                                     onDrag = { change, dragAmount ->
                                                         offsetY += dragAmount.y
                                                         change.consume()
@@ -330,11 +345,9 @@ fun ExerciseCard(
                                                     onDragCancel = {
                                                         offsetY = 0f
                                                         isDragging = false
-                                                    }
-                                                )
+                                                    })
                                             }
-                                        } else Modifier
-                                    )
+                                        } else Modifier)
                             ) {
                                 SetRow(
                                     set,

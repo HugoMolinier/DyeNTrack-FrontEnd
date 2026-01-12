@@ -1,5 +1,4 @@
 package com.dyentrack.app.presentation.components
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -44,9 +43,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dyentrack.app.domain.model.enum.SizeType
-import com.dyentrack.app.domain.model.enum.VariantType
-import com.dyentrack.app.presentation.theme.TertiaOne
+import com.dyentrack.app.domain.model.enums.SizeType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 

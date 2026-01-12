@@ -50,9 +50,8 @@ class InfoExerciseUserRepositoryImpl @Inject constructor(
 
 
     private fun updateMap(id: Long, value: InfoExerciseUser) {
-        _infoExerciseUserFlow.value =
-            _infoExerciseUserFlow.value.toMutableMap().apply {
-                this[id] = value
-            }
+        _infoExerciseUserFlow.value = _infoExerciseUserFlow.value.toMutableMap().apply {
+            this[id] = value
+        }
     }
 }

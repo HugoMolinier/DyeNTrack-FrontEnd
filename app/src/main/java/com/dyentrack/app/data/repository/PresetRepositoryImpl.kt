@@ -14,7 +14,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PresetRepositoryImpl @Inject constructor(
-    private val presetDao: PresetDao, private val api: ApiInterface,
+    private val presetDao: PresetDao,
+    private val api: ApiInterface,
     private val userConnectionRepositoryImpl: UserConnectionRepositoryImpl
 ) : PresetRepository {
 
@@ -47,8 +48,7 @@ class PresetRepositoryImpl @Inject constructor(
     }
 
     suspend fun mergePreset(
-        localp: List<Preset>,
-        apip: List<Preset>
+        localp: List<Preset>, apip: List<Preset>
     ): List<Preset> {
 
         val result = mutableListOf<Preset>()
@@ -69,10 +69,8 @@ class PresetRepositoryImpl @Inject constructor(
                         // Update local avec données API
                         presetDao.saveOrUpdatePreset(
                             apiPreset.copy(
-                                idLocal = localPreset.idLocal,
-                                idPreset = apiPreset.idPreset
-                            ),
-                            dateSave = apiPreset.lastUpdate
+                                idLocal = localPreset.idLocal, idPreset = apiPreset.idPreset
+                            ), dateSave = apiPreset.lastUpdate
                         )
                     }
 
@@ -82,14 +80,13 @@ class PresetRepositoryImpl @Inject constructor(
                         // Synchroniser local → API
                         if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
                             val response = api.savePreset(localPreset)
-                            if (response.status==200) {
+                            if (response.status == 200) {
                                 val presetApiObtain = response.data
                                 presetDao.saveOrUpdatePreset(
                                     presetApiObtain.copy(
                                         idLocal = localPreset.idLocal,
                                         idPreset = presetApiObtain.idPreset
-                                    ),
-                                    dateSave = presetApiObtain.lastUpdate
+                                    ), dateSave = presetApiObtain.lastUpdate
                                 )
                             }
                         }
@@ -105,14 +102,12 @@ class PresetRepositoryImpl @Inject constructor(
                 result.add(localPreset)
                 if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
                     val response = api.savePreset(localPreset)
-                    if (response.status==200) {
+                    if (response.status == 200) {
                         val presetApiObtain = response.data
                         presetDao.saveOrUpdatePreset(
                             presetApiObtain.copy(
-                                idLocal = localPreset.idLocal,
-                                idPreset = presetApiObtain.idPreset
-                            ),
-                            dateSave = presetApiObtain.lastUpdate
+                                idLocal = localPreset.idLocal, idPreset = presetApiObtain.idPreset
+                            ), dateSave = presetApiObtain.lastUpdate
                         )
                     }
                 }
@@ -123,7 +118,7 @@ class PresetRepositoryImpl @Inject constructor(
         val localIds = localp.mapNotNull { it.idPreset }.toSet()
         for (apiOnly in apip) {
             if (apiOnly.idPreset != null && apiOnly.idPreset !in localIds) {
-                if(presetDao.getPresetByIdApi(apiOnly.idPreset)?.isDelete!=true) {
+                if (presetDao.getPresetByIdApi(apiOnly.idPreset)?.isDelete != true) {
                     result.add(apiOnly)
                     presetDao.saveOrUpdatePreset(apiOnly)
                 }
@@ -145,10 +140,9 @@ class PresetRepositoryImpl @Inject constructor(
             if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
                 val apiPreset = api.savePreset(preset)
                 if (apiPreset.status == 200) {
-                    Log.d("apiResponsePreset","${apiPreset}")
+                    Log.d("apiResponsePreset", "${apiPreset}")
                     val updatedLocal = localPreset?.copy(
-                        idPreset = apiPreset.data.idPreset,
-                        lastUpdate = apiPreset.data.lastUpdate
+                        idPreset = apiPreset.data.idPreset, lastUpdate = apiPreset.data.lastUpdate
                     )
                     presetDao.updatePreset(updatedLocal!!)
                     resultPreset = updatedLocal
@@ -179,7 +173,7 @@ class PresetRepositoryImpl @Inject constructor(
         if (preset.idPreset != null) {
             if (userConnectionRepositoryImpl.isValideToken() == AuthStatus.CONNECTED) {
                 val response = api.deletePreset(preset.idPreset)
-                Log.d("apiDeleterespons","${response}")
+                Log.d("apiDeleterespons", "${response}")
                 if (response.status == 200) {
                     presetDao.hardDeleteByApiId(preset.idPreset)
                 }

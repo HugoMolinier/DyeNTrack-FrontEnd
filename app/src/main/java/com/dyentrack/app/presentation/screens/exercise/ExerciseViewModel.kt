@@ -6,15 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.R
 import com.dyentrack.app.core.locale.LocaleManager
-import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.exercise.Exercise
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
-import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.usecase.muscleRate.ComputePlannedExerciseMuscleRateUseCase
 import com.dyentrack.app.presentation.utils.convertWeight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.collections.joinToString
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
@@ -35,12 +34,14 @@ class ExerciseViewModel @Inject constructor(
     private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
 
-) : ViewModel() {
+    ) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState
-    val masterData= getMasterDataStaticUseCase.masterDataFlow.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
+    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
+        viewModelScope, started = SharingStarted.Eagerly, initialValue = null
+    )
     private val _currentExercise = MutableStateFlow<Exercise?>(null)
     val currentExercise: StateFlow<Exercise?> = _currentExercise
 
@@ -52,7 +53,7 @@ class ExerciseViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val maps = buildMasterDataMapsUseCase.execute(languageUser)
-            _uiState.update { it.copy(masterDataMaps=maps)}
+            _uiState.update { it.copy(masterDataMaps = maps) }
             launch {
                 _currentExercise.collect { exercise ->
                     dayDataFlow.value?.let { dayDataList ->
@@ -86,11 +87,9 @@ class ExerciseViewModel @Inject constructor(
 
         dayDataFlow.value?.forEach { it ->
             it.seanceTrack?.plannedExercises?.forEach { itPlannedExercise ->
-                if (itPlannedExercise.exerciseId == currentExercise.value?.idExercise)
-                    muscleRateMap.put(
-                        it.dayData,
-                        computePlannedExerciseMuscleRateUseCase.execute(itPlannedExercise)
-                    )
+                if (itPlannedExercise.exerciseId == currentExercise.value?.idExercise) muscleRateMap.put(
+                    it.dayData, computePlannedExerciseMuscleRateUseCase.execute(itPlannedExercise)
+                )
             }
         }
         _uiState.update { it.copy(allDataExercise = muscleRateMap) }
@@ -98,9 +97,7 @@ class ExerciseViewModel @Inject constructor(
     }
 
     fun getAveragePerSet(top: Int? = null, skip: Int = 0): String {
-        val allData = _uiState.value.allDataExercise
-            .toSortedMap(reverseOrder())
-            .values.toList()
+        val allData = _uiState.value.allDataExercise.toSortedMap(reverseOrder()).values.toList()
 
         if (allData.isEmpty()) return "0.0"
 
@@ -111,13 +108,14 @@ class ExerciseViewModel @Inject constructor(
         val totalPond = selected.sumOf { it.rateSetSomme?.sommePond ?: 0.0 }
         val totalRep = selected.sumOf { it.rateSetSomme?.numberRep ?: 0.0 }
 
-        val avg = if (totalRep > 0) totalPond / totalRep else "0.0"
-        return String.format(Locale.getDefault(),"%.1f", avg)
+        val avg = if (totalRep > 0) totalPond / totalRep else 0.0
+        return String.format(Locale.getDefault(), "%.1f", avg)
     }
 
     fun getAverageWeightFormatted(top: Int = 5, skip: Int = 0, userUnit: MesureUnit): String {
         val avg = getAveragePerSet(top, skip).toDoubleOrNull() ?: 0.0
-        return String.format(Locale.getDefault(),
+        return String.format(
+            Locale.getDefault(),
             "%.1f%s",
             convertWeight(avg, MesureUnit.KG, userUnit) ?: 0.0,
             userUnit.toString().lowercase()
@@ -159,23 +157,26 @@ class ExerciseViewModel @Inject constructor(
     }
 
     fun getMuscleUsedNames(exercise: Exercise): Set<String> {
-        return exercise.muscleInfos
-            ?.mapNotNull { muscleInfo ->
-                uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)?.getName(languageUser)
+        return exercise.muscleInfos?.mapNotNull { muscleInfo ->
+                uiState.value.masterDataMaps?.muscleMap?.get(muscleInfo.idMuscle)
+                    ?.getName(languageUser)
             }?.toSet() ?: emptySet()
     }
+
     fun getPrimaryMuscleName(exercise: Exercise): String {
-        return uiState.value.masterDataMaps?.muscleMap?.get(exercise.mainMuscle)?.getName(languageUser) ?: "NaN"
+        return uiState.value.masterDataMaps?.muscleMap?.get(exercise.mainMuscle)
+            ?.getName(languageUser) ?: "NaN"
     }
 
     fun getEquipmentNames(): String {
         return currentExercise.value?.equipmentInfo?.joinToString(", ") { eq ->
-                uiState.value.masterDataMaps?.equipmentMap[eq.idEquipment]?: "NaN"
-            }?:"NaN"
+            uiState.value.masterDataMaps?.equipmentMap[eq.idEquipment] ?: "NaN"
+        } ?: "NaN"
     }
 
     fun getLateralities(): String {
-        return masterData.value?.lateralites?.joinToString(", ") { it.getName(languageUser) } ?: "NaN"
+        return masterData.value?.lateralites?.joinToString(", ") { it.getName(languageUser) }
+            ?: "NaN"
     }
 
     @Composable

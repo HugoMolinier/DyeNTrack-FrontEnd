@@ -40,15 +40,15 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.RequestState
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.VariantType
+import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.DatePickerInput
 import com.dyentrack.app.presentation.components.InputCustom
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.VariantType
-import com.dyentrack.app.presentation.components.CenterMenu
-import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
 @Composable
@@ -79,7 +79,7 @@ fun InformationPage(
 
 
     val errorText = when ((requestState as? RequestState.Error)?.error) {
-        AuthError.NOT_PASSWORD ->     stringResource(R.string.error_invalid_password)
+        AuthError.NOT_PASSWORD -> stringResource(R.string.error_invalid_password)
         AuthError.NOT_EMAILFORMAT -> stringResource(R.string.error_invalid_email)
         AuthError.UNAUTHORIZED -> stringResource(R.string.error_email_used)
         AuthError.INVALID_ARGUMENT -> stringResource(R.string.error_email_used)
@@ -112,58 +112,51 @@ fun InformationPage(
             detectTapGestures(onTap = {
                 focusManager.clearFocus()
             })
-        }
-    ) {
+        }) {
         Column {
 
             TopNavigationBar(
 
                 stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClickLeft = { if(originalPseudo.value != pseudo.value.text ||
-                    originalHeight.value != height.value.text  ||
-                    originalBirthday.value != birthday.value  ||
-                    originalSexe.value != sexe.value){
+                onClickLeft = {
+                    if (originalPseudo.value != pseudo.value.text || originalHeight.value != height.value.text || originalBirthday.value != birthday.value || originalSexe.value != sexe.value) {
 
 
-                    activeMenu = ActiveMenu(
-                        title =unsavedTitle,
-                        description = unsavedDescription,
-                        content = listOf(
-                            MenuItemData(noLabel, onClick = { activeMenu = null }),
-                            MenuItemData(yesLabel, color = Color.Red, onClick = {
-                                navController.popBackStack()
+                        activeMenu = ActiveMenu(
+                            title = unsavedTitle,
+                            description = unsavedDescription,
+                            content = listOf(
+                                MenuItemData(noLabel, onClick = { activeMenu = null }),
+                                MenuItemData(yesLabel, color = Color.Red, onClick = {
+                                    navController.popBackStack()
 
-                            }
-                            )
-                        )
-                    )
+                                })))
 
-                }else { navController.popBackStack()} },
+                    } else {
+                        navController.popBackStack()
+                    }
+                },
                 rightSide = {
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = {
-                            if(originalPseudo.value != pseudo.value.text ||
-                                originalHeight.value != height.value.text  ||
-                                originalBirthday.value != birthday.value  ||
-                                originalSexe.value != sexe.value){
+                            if (originalPseudo.value != pseudo.value.text || originalHeight.value != height.value.text || originalBirthday.value != birthday.value || originalSexe.value != sexe.value) {
 
                                 activeMenu = ActiveMenu(
                                     title = "Modification non sauvegarder",
                                     description = "Revenir quand meme sans sauvegarder les changements?",
                                     content = listOf(
-                                        MenuItemData("Non", onClick = { activeMenu = null }),
+                                        MenuItemData(
+                                            "Non",
+                                            onClick = { activeMenu = null }),
                                         MenuItemData("Oui", color = Color.Red, onClick = {
                                             navController.navigate("home")
 
-                                        }
-                                        )
-                                    )
-                                )
+                                        })))
 
-                            }else {
+                            } else {
                                 navController.navigate("home")
                             }
 
@@ -188,7 +181,8 @@ fun InformationPage(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         InputCustom(
-                            text = pseudo, variant = VariantType.OUTLINED,
+                            text = pseudo,
+                            variant = VariantType.OUTLINED,
                             placeholder = stringResource(R.string.pseudo_label),
                             enabled = isEditing.value || isLoading
                         )
@@ -265,8 +259,7 @@ fun InformationPage(
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodySmall
+                                        text = label, style = MaterialTheme.typography.bodySmall
                                     )
                                     SingleCircleSelector(
                                         isSelected = sexe.value == value,
@@ -295,10 +288,8 @@ fun InformationPage(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = errorText,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
-                                    fontSize = 12.sp
+                                text = errorText, style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.Red, fontSize = 12.sp
                                 )
                             )
                         }
@@ -334,7 +325,9 @@ fun InformationPage(
                             enable = requestState !is RequestState.Loading
                         )
                         CustomButton(
-                            label = if (isLoading) stringResource(R.string.applying) else stringResource(R.string.apply),
+                            label = if (isLoading) stringResource(R.string.applying) else stringResource(
+                                R.string.apply
+                            ),
                             onClick = {
                                 authViewModel.updateUser(
                                     pseudo.value.text,
@@ -351,13 +344,10 @@ fun InformationPage(
                 } else {
                     Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                         CustomButton(
-                            label = stringResource(R.string.edit_info),
-                            onClick = {
+                            label = stringResource(R.string.edit_info), onClick = {
 
                                 isEditing.value = true
-                            },
-                            emphasis = EmphasisType.SECONDARY,
-                            modifier = Modifier.weight(1f)
+                            }, emphasis = EmphasisType.SECONDARY, modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -369,9 +359,7 @@ fun InformationPage(
         CenterMenu(
             onDismiss = { activeMenu = null },
 
-            title = menu.title,
-            descrition = menu.description,
-            items = menu.content
+            title = menu.title, descrition = menu.description, items = menu.content
 
 
         )

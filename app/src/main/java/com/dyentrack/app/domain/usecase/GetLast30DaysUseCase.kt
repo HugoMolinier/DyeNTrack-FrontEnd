@@ -4,7 +4,6 @@ import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -26,7 +25,11 @@ class GetDaysRangeUseCase @Inject constructor() {
      * Étend la liste existante vers le passé jusqu'à newMinDate.
      * Si newMinDate est déjà inclus dans existingDays, rien n'est ajouté.
      */
-    fun extendDaysIfNeeded(existingDays: Set<DayInfo>, newMinDate: LocalDate,userLangue: LANGUAGE): List<DayInfo> {
+    fun extendDaysIfNeeded(
+        existingDays: Set<DayInfo>,
+        newMinDate: LocalDate,
+        userLangue: LANGUAGE
+    ): List<DayInfo> {
         if (existingDays.isEmpty()) return emptyList()
 
         val currentMin = LocalDate.parse(existingDays.first().dateFormat)
@@ -40,7 +43,7 @@ class GetDaysRangeUseCase @Inject constructor() {
     }
 
     private fun LocalDate.toDayInfo(userLangue: LANGUAGE): DayInfo {
-        val locale = when(userLangue) {
+        val locale = when (userLangue) {
             LANGUAGE.FR -> Locale.FRENCH
             LANGUAGE.EN -> Locale.ENGLISH
         }

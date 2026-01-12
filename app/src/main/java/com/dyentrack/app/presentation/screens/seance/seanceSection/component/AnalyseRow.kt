@@ -42,24 +42,29 @@ import java.time.temporal.ChronoUnit
 
 
 @Composable
-fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,userUnit: MesureUnit,userLANGUAGE: LANGUAGE) {
+fun AnalyseRow(
+    viewModel: SeanceViewModel = viewModel(),
+    state: SeanceUiState,
+    userUnit: MesureUnit,
+    userLANGUAGE: LANGUAGE
+) {
 
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, top = 4.dp)    ,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp, top = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         reverseLayout = true,
     ) {
         state.analyseData.forEach { (date, sets) ->
             if (date != state.daySelected) {
-                val dateFormat= LocalDate.parse(date)
+                val dateFormat = LocalDate.parse(date)
                 item {
                     Box(
                         modifier = Modifier
                             .shadow(
-                                elevation = 4.dp,
-                                shape = RoundedCornerShape(8.dp),
-                                clip = true
+                                elevation = 4.dp, shape = RoundedCornerShape(8.dp), clip = true
                             )
                             .background(TertiaOne, shape = RoundedCornerShape(8.dp))
                             .fillMaxWidth(0.8f)
@@ -91,19 +96,20 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,us
                                 }
 
                                 Text(
-                                    "J -"+ ChronoUnit.DAYS.between(dateFormat,LocalDate.parse(state.daySelected)),
-                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                    "J -" + ChronoUnit.DAYS.between(
+                                        dateFormat,
+                                        LocalDate.parse(state.daySelected)
+                                    ), style = MaterialTheme.typography.bodyMedium.copy(
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.Medium
                                     )
                                 )
                                 Text(
-                                    ": "+dateFormat.toAbbreviatedDate(userLANGUAGE) ,
-                                    style = MaterialTheme.typography.bodySmall
-                                        .copy(
-                                        color = secondaryTextColor,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    ": " + dateFormat.toAbbreviatedDate(userLANGUAGE),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                            color = secondaryTextColor,
+                                            fontWeight = FontWeight.Medium
+                                        )
                                 )
                             }
 
@@ -135,15 +141,17 @@ fun AnalyseRow(viewModel: SeanceViewModel = viewModel(), state: SeanceUiState,us
                                                 else -> MaterialTheme.colorScheme.background
                                             },
                                         )
-                                        Text(
-                                            "${set.reps}${set.linkedRightSet?.let { "/${it.reps}" } ?: ""} x ${
-                                                set.charge?.let {
-                                                    val converted = convertWeight(it, MesureUnit.KG, userUnit)
-                                                    if (converted != null) String.format("%.1f", converted) else ""
-                                                } ?: ""
-                                            }${userUnit.toString().lowercase()}",
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
-                                        )
+                                        Text("${set.reps}${set.linkedRightSet?.let { "/${it.reps}" } ?: ""} x ${
+                                            set.charge?.let {
+                                                val converted =
+                                                    convertWeight(it, MesureUnit.KG, userUnit)
+                                                if (converted != null) String.format(
+                                                    "%.1f",
+                                                    converted
+                                                ) else ""
+                                            } ?: ""
+                                        }${userUnit.toString().lowercase()}",
+                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor))
 
                                     }
                                 }

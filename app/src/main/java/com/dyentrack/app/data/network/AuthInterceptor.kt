@@ -3,7 +3,6 @@ package com.dyentrack.app.data.network
 import android.util.Log
 import com.dyentrack.app.BuildConfig
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
-import com.dyentrack.app.domain.model.ApiResponse
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import okhttp3.Interceptor
@@ -16,16 +15,13 @@ class AuthInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
 
-        val token =  secureSessionDataSource.getTokenAuthInterceptor()
-        val request  = chain.request().newBuilder()
-            .addHeader("X-API-KEY", BuildConfig.API_KEY)
-            .addHeader("Accept", "application/json")
-            .apply {
+        val token = secureSessionDataSource.getTokenAuthInterceptor()
+        val request = chain.request().newBuilder().addHeader("X-API-KEY", BuildConfig.API_KEY)
+            .addHeader("Accept", "application/json").apply {
                 if (!token.isNullOrBlank()) {
                     addHeader("Authorization", "Bearer $token")
                 }
-            }
-            .build()
+            }.build()
 
         Log.d("AuthInterceptor", "request: ${request}")
 

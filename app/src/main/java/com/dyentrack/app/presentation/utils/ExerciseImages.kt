@@ -26,5 +26,5 @@ object ExerciseImages {
         28L to R.drawable.exercise_curlmarteau,
 
 
-    )
+        )
 }

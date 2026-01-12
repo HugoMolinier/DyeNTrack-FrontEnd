@@ -13,15 +13,13 @@ import javax.inject.Inject
 class InfoUserViewModel @Inject constructor(
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
     private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
-)  : ViewModel(){
+) : ViewModel() {
 
     //Flow à la vue
-    val infoExerciseUserFlow =getInfoExerciseUserUseCase.infoExerciseUserFlow
+    val infoExerciseUserFlow = getInfoExerciseUserUseCase.infoExerciseUserFlow
 
     fun updateInfoExerciseUser(
-        idExercise: Long,
-        favorite: Boolean?,
-        note: String?
+        idExercise: Long, favorite: Boolean?, note: String?
     ) {
         viewModelScope.launch {
             val info = InfoExerciseUser(idExercise = idExercise, favorite = favorite, note = note)

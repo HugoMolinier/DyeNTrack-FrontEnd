@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import com.dyentrack.app.domain.model.enum.EmphasisType
+import com.dyentrack.app.domain.model.enums.EmphasisType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.TertiaThree
 import com.dyentrack.app.presentation.theme.secondaryTextColor

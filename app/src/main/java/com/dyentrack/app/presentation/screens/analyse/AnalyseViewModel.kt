@@ -11,7 +11,7 @@ import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.usecase.GetRadarDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
@@ -40,24 +40,20 @@ class AnalyseViewModel @Inject constructor(
     private val computePlannedExerciseMuscleRateUseCase: ComputePlannedExerciseMuscleRateUseCase,
     private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
     private val getRadarDataUseCase: GetRadarDataUseCase,
-    ) : ViewModel() {
+) : ViewModel() {
 
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(AnalyseUiState())
     val uiState: StateFlow<AnalyseUiState> = _uiState
     val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = null
+        viewModelScope, started = SharingStarted.Eagerly, initialValue = null
     )
 
 
     private val allSeanceByDay = mutableMapOf<String, Pair<SeanceTrack, LocalDate>>()
     val userPreference: StateFlow<UserPreference?> =
         fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
+            scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null
         )
     val languageUser = LocaleManager.getCurrentLanguage()
 
@@ -111,13 +107,12 @@ class AnalyseViewModel @Inject constructor(
 
 
     fun moyenneSetParEx(global: MuscleRate): Double =
-        if (global.numberExercise > 0)
-            ((global.numberSet.toDouble() / global.numberExercise) * 100).roundToInt() / 100.0
+        if (global.numberExercise > 0) ((global.numberSet.toDouble() / global.numberExercise) * 100).roundToInt() / 100.0
         else 0.0
 
     fun proportionSetFail(global: MuscleRate): Double =
-        if (global.numberSet > 0)
-            (global.rateSetSomme?.numberSetFail ?: 0).toDouble() / global.numberSet * 100
+        if (global.numberSet > 0) (global.rateSetSomme?.numberSetFail
+            ?: 0).toDouble() / global.numberSet * 100
         else 0.0
 
     fun calculateMuscleSetPercentage(
@@ -136,14 +131,11 @@ class AnalyseViewModel @Inject constructor(
         // Normalisation sur 100%
         return muscleTotals.mapValues { (_, value) ->
             if (totalSets > 0f) value / totalSets else 0f
-        }.toList().sortedByDescending { it.second }
-            .toMap(linkedMapOf())
+        }.toList().sortedByDescending { it.second }.toMap(linkedMapOf())
     }
 
     fun getFilteredMuscleRateByDay(
-        start: LocalDate,
-        end: LocalDate,
-        notIncludeGroupMuscle: Set<Long>? = emptySet()
+        start: LocalDate, end: LocalDate, notIncludeGroupMuscle: Set<Long>? = emptySet()
     ): Map<String, DayExerciseData> {
 
         val excludedGroups = notIncludeGroupMuscle.orEmpty()
@@ -152,14 +144,13 @@ class AnalyseViewModel @Inject constructor(
         return _uiState.value.muscleRateByDay.mapNotNull { (dayStr, dayData) ->
 
             //  Filtre date
-            allSeanceByDay[dayStr]?.second
-                ?.takeIf { !it.isBefore(start) && !it.isAfter(end) }
+            allSeanceByDay[dayStr]?.second?.takeIf { !it.isBefore(start) && !it.isAfter(end) }
                 ?: return@mapNotNull null
 
             //  Filtre exercices
             val filteredExercises = dayData.perExerciseStat.filterKeys { exerciseId ->
-                masterMaps.exerciseMap[exerciseId]?.mainMuscle
-                    ?.let { masterMaps.muscleMap[it]?.idMuscularGroup !in excludedGroups } ?: true
+                masterMaps.exerciseMap[exerciseId]?.mainMuscle?.let { masterMaps.muscleMap[it]?.idMuscularGroup !in excludedGroups }
+                    ?: true
             }
 
 
@@ -216,8 +207,9 @@ class AnalyseViewModel @Inject constructor(
             )
         }
     }
-    fun applyDateRange(recentDate: LocalDate,oldDate: LocalDate){
-        val nbday = ChronoUnit.DAYS.between(recentDate, oldDate)+1
+
+    fun applyDateRange(recentDate: LocalDate, oldDate: LocalDate) {
+        val nbday = ChronoUnit.DAYS.between(recentDate, oldDate) + 1
         _uiState.update {
             it.copy(
                 dateRange = it.dateRange.copy(rangeInDays = nbday, recentDate = oldDate)//refresh
@@ -246,23 +238,25 @@ class AnalyseViewModel @Inject constructor(
                 perExerciseStat[exerciseVO.exerciseId] = muscleRate
 
                 // Stats globales
-                 totalDayRate = totalDayRate.plus(muscleRate)
+                totalDayRate = totalDayRate.plus(muscleRate)
 
                 // Stats par muscle et groupe musculaire
                 val exercise = masterDataMaps.exerciseMap[exerciseVO.exerciseId] ?: return@forEach
 
-                    val muscle = masterDataMaps.muscleMap[exercise.mainMuscle] ?: return@forEach
-                    val groupId = muscle.idMuscularGroup ?: 0L
-                    perMuscleStat[muscle.id] =
-                        perMuscleStat[muscle.id]?.plus(muscleRate) ?: muscleRate
+                val muscle = masterDataMaps.muscleMap[exercise.mainMuscle] ?: return@forEach
+                val groupId = muscle.idMuscularGroup ?: 0L
+                perMuscleStat[muscle.id] = perMuscleStat[muscle.id]?.plus(muscleRate) ?: muscleRate
 
-                    perGroupMuscularStat[groupId] =
-                        perGroupMuscularStat[groupId]?.plus(muscleRate) ?: muscleRate
+                perGroupMuscularStat[groupId] =
+                    perGroupMuscularStat[groupId]?.plus(muscleRate) ?: muscleRate
 
             }
 
             muscleRateByDay[dayStr] = DayExerciseData(
-                presetId = PresetId(apiId = seanceTrack.presetSeanceId, localId = seanceTrack.presetLocalId),
+                presetId = PresetId(
+                    apiId = seanceTrack.presetSeanceId,
+                    localId = seanceTrack.presetLocalId
+                ),
                 perExerciseStat = perExerciseStat,
                 AllStat = totalDayRate,
                 perMuscleStat = perMuscleStat,
@@ -298,30 +292,24 @@ class AnalyseViewModel @Inject constructor(
     }
 
     fun getRadarData(
-        data: Map<String, Map<Long, MuscleRate>>,
-        labelsMap: Map<Long, String>
+        data: Map<String, Map<Long, MuscleRate>>, labelsMap: Map<Long, String>
     ): Triple<List<String>, List<Float>, List<Float>> {
-        return getRadarDataUseCase(data,labelsMap)
+        return getRadarDataUseCase(data, labelsMap)
     }
 
 
     fun computeGlobalMuscleRate(data: Map<String, DayExerciseData>): MuscleRate =
-        data.values
-            .map { it.AllStat }
-            .fold(MuscleRate()) { acc, stat -> acc.plus(stat) }
-
+        data.values.map { it.AllStat }.fold(MuscleRate()) { acc, stat -> acc.plus(stat) }
 
 
     private fun MuscleRate.plus(other: MuscleRate) = MuscleRate(
         numberExercise = numberExercise + other.numberExercise,
         numberSet = numberSet + other.numberSet,
         rateSetSomme = RateSetSomme(
-            numberSetFail = (rateSetSomme?.numberSetFail ?: 0)
-                    + (other.rateSetSomme?.numberSetFail ?: 0),
-            sommePond = (rateSetSomme?.sommePond ?: 0.0)
-                    + (other.rateSetSomme?.sommePond ?: 0.0),
-            numberRep = (rateSetSomme?.numberRep ?: 0.0)
-                    + (other.rateSetSomme?.numberRep ?: 0.0)
+            numberSetFail = (rateSetSomme?.numberSetFail ?: 0) + (other.rateSetSomme?.numberSetFail
+                ?: 0),
+            sommePond = (rateSetSomme?.sommePond ?: 0.0) + (other.rateSetSomme?.sommePond ?: 0.0),
+            numberRep = (rateSetSomme?.numberRep ?: 0.0) + (other.rateSetSomme?.numberRep ?: 0.0)
         )
     )
 

@@ -5,12 +5,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetRadarDataUseCase  @Inject constructor(){
+class GetRadarDataUseCase @Inject constructor() {
 
 
     operator fun invoke(
-        data: Map<String, Map<Long, MuscleRate>>,
-        labelsMap: Map<Long, String>
+        data: Map<String, Map<Long, MuscleRate>>, labelsMap: Map<Long, String>
     ): Triple<List<String>, List<Float>, List<Float>> {
         val totalSets = mutableMapOf<Long, Float>()
         val totalExercises = mutableMapOf<Long, Float>()

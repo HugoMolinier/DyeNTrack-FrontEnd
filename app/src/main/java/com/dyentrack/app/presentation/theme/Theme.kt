@@ -7,12 +7,12 @@ import androidx.compose.runtime.Composable
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryColor,
     background = BackGroundColor,
-     onBackground = PrimaryTextColor,
+    onBackground = PrimaryTextColor,
 
-     surface = TertiaTwo,  // cartes
+    surface = TertiaTwo,  // cartes
     onSurface = PrimaryTextColor,
 
-)
+    )
 
 
 @Composable

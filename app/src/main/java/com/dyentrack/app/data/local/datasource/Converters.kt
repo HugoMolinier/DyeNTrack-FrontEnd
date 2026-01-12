@@ -30,5 +30,5 @@ fun Token.toLocal(): SessionLocal {
         tokenType = tokenType,
         expirationTime = expirationTime,
 
-    )
+        )
 }

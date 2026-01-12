@@ -38,8 +38,7 @@ fun LegalNoticesPage(
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
-                        modifier = Modifier.clickable { navController.navigate("home") }
-                    )
+                        modifier = Modifier.clickable { navController.navigate("home") })
                 })
 
             LazyColumn(
@@ -57,8 +56,10 @@ fun LegalNoticesPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.legal_text_1_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.legal_text_1_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -70,10 +71,14 @@ fun LegalNoticesPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.legal_text_2_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.legal_text_2_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.legal_text_2_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.legal_text_2_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
@@ -85,25 +90,36 @@ fun LegalNoticesPage(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.legal_text_3_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.legal_text_3_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
 
                 // Section 4
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(bottom = 24.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    ) {
                         Text(
                             stringResource(R.string.legal_heading_4),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
                         )
-                        Text(stringResource(R.string.legal_text_4_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.legal_text_4_2),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
-                        Text(stringResource(R.string.legal_text_4_3),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+                        Text(
+                            stringResource(R.string.legal_text_4_1),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.legal_text_4_2),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
+                        Text(
+                            stringResource(R.string.legal_text_4_3),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                        )
                     }
                 }
             }

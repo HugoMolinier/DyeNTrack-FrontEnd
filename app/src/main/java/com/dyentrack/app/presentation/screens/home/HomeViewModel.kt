@@ -7,7 +7,7 @@ import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 import com.dyentrack.app.domain.usecase.GetRadarDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
@@ -39,9 +39,7 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
     val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = null
+        viewModelScope, started = SharingStarted.Eagerly, initialValue = null
     )
     val languageUser = LocaleManager.getCurrentLanguage()
 
@@ -92,8 +90,7 @@ class HomeViewModel @Inject constructor(
                     current.copy(
                         mapSeance = tempMap,
                         todaySeance = todaySeance,
-                        last5DaysKeys = last5DaysSorted.map { it.toIsoDate() }
-                    )
+                        last5DaysKeys = last5DaysSorted.map { it.toIsoDate() })
                 }
                 muscleRateOfEachDay()
             }
@@ -104,12 +101,10 @@ class HomeViewModel @Inject constructor(
 
     fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
         if (seance == null) return LeftIcon.Single(R.drawable.logotransparent)
-        val first3Icons = seance.plannedExercises
-            .asSequence()                     // lazy
+        val first3Icons = seance.plannedExercises.asSequence()                     // lazy
             .sortedBy { it.exerciseOrder }
             .map { ExerciseImages.map[it.exerciseId] ?: R.drawable.logotransparent } // map
-            .take(3)
-            .toMutableList()
+            .take(3).toMutableList()
 
         if (seance.plannedExercises.size > 3) {
             first3Icons.add(R.drawable.point)
@@ -122,8 +117,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getRadarData(
-        data: Map<String, Map<Long, MuscleRate>>,
-        labelsMap: Map<Long, String>
+        data: Map<String, Map<Long, MuscleRate>>, labelsMap: Map<Long, String>
     ): Triple<List<String>, List<Float>, List<Float>> {
         return getRadarDataUseCase(data, labelsMap)
     }
@@ -176,8 +170,7 @@ class HomeViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(
-                muscleRateOfEachDay = muscleRateByDay,
-                groupRateOfEachDay = groupRateByDay
+                muscleRateOfEachDay = muscleRateByDay, groupRateOfEachDay = groupRateByDay
             )
         }
     }

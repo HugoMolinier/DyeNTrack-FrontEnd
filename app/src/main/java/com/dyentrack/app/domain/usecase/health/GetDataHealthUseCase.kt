@@ -4,20 +4,18 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import java.time.Instant
 import javax.inject.Inject
-import androidx.health.connect.client.request.ReadRecordsRequest
 import javax.inject.Singleton
 
 @Singleton
 class GetDataHealthUseCase @Inject constructor() {
 
     suspend fun aggregateSteps(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): Long {
         return try {
             val response = healthConnectClient.aggregate(
@@ -34,9 +32,7 @@ class GetDataHealthUseCase @Inject constructor() {
 
 
     suspend fun getNutritionRecords(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): List<NutritionRecord> {
         val records: List<NutritionRecord> = try {
             val request = ReadRecordsRequest(
@@ -54,9 +50,7 @@ class GetDataHealthUseCase @Inject constructor() {
 
 
     suspend fun nutritionData(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): NutritionTrack {
         val records = getNutritionRecords(healthConnectClient, startTime, endTime)
 

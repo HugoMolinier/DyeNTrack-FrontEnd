@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dyentrack.app.domain.model.enum.SaveType
+import com.dyentrack.app.domain.model.enums.SaveType
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.addColor
@@ -54,8 +54,7 @@ fun DateSelectorRange(
     LaunchedEffect(selectedIndex) {
         if (selectedIndex >= 0) {
             listState.animateScrollToItem(
-                index = selectedIndex,
-                scrollOffset = -450 // ajuste pour centrer approximativement
+                index = selectedIndex, scrollOffset = -450 // ajuste pour centrer approximativement
             )
         }
     }
@@ -79,15 +78,14 @@ fun DateSelectorRange(
             val dotColor = when {
                 !hasSeance -> null
                 saveStatus == SaveType.APISAVE && fetchStatus == SaveType.APISAVE -> MaterialTheme.colorScheme.primary // vert : tout OK
-                saveStatus == SaveType.LocalSAVE || fetchStatus == SaveType.LocalSAVE -> Color(0xFFFFC107) // jaune : local seulement
+                saveStatus == SaveType.LocalSAVE || fetchStatus == SaveType.LocalSAVE -> Color(
+                    0xFFFFC107
+                ) // jaune : local seulement
                 saveStatus == SaveType.NOTSAVE || fetchStatus == SaveType.NOTSAVE -> addColor.setEch // rouge : échec
                 else -> null
             }
             val (borderColor, backgroundColor, textColor) = remember(
-                isSelected,
-                hasSeance,
-                isToday,
-                isAfterToday
+                isSelected, hasSeance, isToday, isAfterToday
             ) {
                 val border =
                     if (isSelected || isToday || hasSeance) colorsheme.primary else Color.Transparent
@@ -112,12 +110,9 @@ fun DateSelectorRange(
             ) {
 
                 Text(
-                    text = day.shortDay,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = if (isSelected)
-                            colorsheme.primary
-                        else
-                            secondaryTextColor
+                    text = day.shortDay, style = MaterialTheme.typography.bodySmall.copy(
+                        color = if (isSelected) colorsheme.primary
+                        else secondaryTextColor
                     )
                 )
 
@@ -129,7 +124,7 @@ fun DateSelectorRange(
                         .clickable { viewModel.changeDaySelected(day.dateFormat) },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (dotColor != null ) {
+                    if (dotColor != null) {
                         Box(
                             modifier = Modifier
                                 .size(4.dp)

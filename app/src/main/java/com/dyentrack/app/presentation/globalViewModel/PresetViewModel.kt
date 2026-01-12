@@ -21,7 +21,8 @@ class PresetViewModel @Inject constructor(
     private val deletePresetUseCase: DeletePresetUseCase
 ) : ViewModel() {
     //
-    val presetFlow = getPresetUseCase.presetFlow.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val presetFlow =
+        getPresetUseCase.presetFlow.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _navigateToPreset = MutableSharedFlow<Preset?>()
     val navigateToPreset = _navigateToPreset.asSharedFlow()
@@ -34,6 +35,7 @@ class PresetViewModel @Inject constructor(
             savePresetUseCase(preset)
         }
     }
+
     fun createPreset(name: String) {
         viewModelScope.launch {
             val preset = savePresetUseCase.localOnly(

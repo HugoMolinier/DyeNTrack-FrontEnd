@@ -2,13 +2,10 @@ package com.dyentrack.app
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -30,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,10 +34,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navOptions
 import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.NavItem
-import com.dyentrack.app.domain.model.enum.NavTransitionType
 import com.dyentrack.app.presentation.globalViewModel.AppViewModel
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
@@ -62,8 +56,6 @@ import com.dyentrack.app.presentation.screens.parameters.RegisterPage
 import com.dyentrack.app.presentation.screens.preset.PresetPage
 import com.dyentrack.app.presentation.screens.seance.SeancePage
 import com.dyentrack.app.presentation.theme.DyeNTrackTheme
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -81,6 +73,7 @@ class MainActivity : ComponentActivity() {
             LocaleManager.updateContext(newBase)
         )
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         installSplashScreen()
@@ -104,20 +97,19 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
 
     val navItemsList = listOf(
-        NavItem(stringResource(R.string.home),Icons.Default.Home,route= "home"),
-        NavItem(stringResource(R.string.workout), Icons.Default.Analytics,"seance"),
-        NavItem(stringResource(R.string.analysis), Icons.Default.Settings,"analyse"),
+        NavItem(stringResource(R.string.home), Icons.Default.Home, route = "home"),
+        NavItem(stringResource(R.string.workout), Icons.Default.Analytics, "seance"),
+        NavItem(stringResource(R.string.analysis), Icons.Default.Settings, "analyse"),
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    Scaffold (
+    Scaffold(
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
                 navItemsList.forEach { item ->
@@ -146,27 +138,24 @@ fun MyApp() {
                 }
             }
 
-        }
-    ) { innerPadding ->
-        NavHost(navController, startDestination = "home",
+        }) { innerPadding ->
+        NavHost(
+            navController,
+            startDestination = "home",
             modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
             composable("home") { HomePage(navController = navController) }
             composable(
                 route = "seance?dayKey={dayKey}&section={section}",
-                arguments = listOf(
-                    navArgument("dayKey") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                    navArgument("section") {
-                        type = NavType.StringType; nullable = true; defaultValue = null
-                    }
-                )
-            ) { backStackEntry ->
+                arguments = listOf(navArgument("dayKey") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }, navArgument("section") {
+                    type = NavType.StringType; nullable = true; defaultValue = null
+                })) { backStackEntry ->
                 val dayKey = backStackEntry.arguments?.getString("dayKey") // null si non fourni
                 val section = backStackEntry.arguments?.getString("section")
                 SeancePage(navController = navController, daySelected = dayKey, section = section)
@@ -184,18 +173,20 @@ fun MyApp() {
             composable("advanceParam") { AdvanceParamPage(navController = navController) }
 
             composable("inscription") { RegisterPage(navController = navController) }
-            composable("exercise/{exerciseId}",
-                arguments = listOf(
-                    navArgument("exerciseId") { type = NavType.LongType; nullable = false }
-                )) { backStackEntry ->
+            composable(
+                "exercise/{exerciseId}", arguments = listOf(
+                navArgument("exerciseId") {
+                    type = NavType.LongType; nullable = false
+                })) { backStackEntry ->
                 val exerciseId = backStackEntry.arguments!!.getLong("exerciseId")
                 ExercisePage(navController = navController, exerciseId = exerciseId)
             }
 
-            composable("preset/{presetId}",
-                arguments = listOf(
-                    navArgument("presetId") { type = NavType.LongType; nullable = false }
-                )) { backStackEntry ->
+            composable(
+                "preset/{presetId}", arguments = listOf(
+                navArgument("presetId") {
+                    type = NavType.LongType; nullable = false
+                })) { backStackEntry ->
                 val presetId = backStackEntry.arguments!!.getLong("presetId")
                 PresetPage(navController = navController, idLocal = presetId)
             }

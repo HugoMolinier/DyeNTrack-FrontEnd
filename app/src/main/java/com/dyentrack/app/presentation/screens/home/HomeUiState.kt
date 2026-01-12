@@ -1,19 +1,19 @@
 package com.dyentrack.app.presentation.screens.home
 
-import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 
 data class HomeUiState(
-    val mapSeance:Map<String, SeanceTrack> = emptyMap(),
-    val muscleRateOfEachDay:Map<String, Map<Long, MuscleRate>> = emptyMap(), //{day:{idMuscle:{}}
+    val mapSeance: Map<String, SeanceTrack> = emptyMap(),
+    val muscleRateOfEachDay: Map<String, Map<Long, MuscleRate>> = emptyMap(), //{day:{idMuscle:{}}
     val expandedSeance: Int? = null,
-    val isBottomSheetVisible: BottomSheetVisibleType =BottomSheetVisibleType.NO,
+    val isBottomSheetVisible: BottomSheetVisibleType = BottomSheetVisibleType.NO,
     val groupRateOfEachDay: Map<String, Map<Long, MuscleRate>> = emptyMap(),
-    val todaySeance: DayDataRequest?=null,
+    val todaySeance: DayDataRequest? = null,
     val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
-    val last5DaysKeys: List<String> =emptyList()
+    val last5DaysKeys: List<String> = emptyList()
 )
 

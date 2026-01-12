@@ -22,28 +22,23 @@ import javax.inject.Singleton
 
 @Singleton
 class UserConnectionRepositoryImpl @Inject constructor(
-    private val api: ApiInterface,
-    private val secureSessionDataSource: SecureSessionDataSource
+    private val api: ApiInterface, private val secureSessionDataSource: SecureSessionDataSource
 ) : UserConnectionRepository {
 
     private val _authState = MutableStateFlow(
         AuthState(
-            isConnected = isValideToken() == AuthStatus.CONNECTED,
-            user = getUser()
+            isConnected = isValideToken() == AuthStatus.CONNECTED, user = getUser()
         )
     )
     override val authState: StateFlow<AuthState> = _authState
 
     override suspend fun updateUser(
-        pseudo: String,
-        height: Int?,
-        sexe: Boolean?,
-        birthDate: String?
+        pseudo: String, height: Int?, sexe: Boolean?, birthDate: String?
     ): RequestState {
-        if(!isValidPseudo(pseudo)){
+        if (!isValidPseudo(pseudo)) {
             return RequestState.Error(AuthError.NOT_PSEUDOFORMAT)
         }
-        if(height != null && !isValidHeight(height)){
+        if (height != null && !isValidHeight(height)) {
             return RequestState.Error(AuthError.NOT_HEIGHTFORMAT)
         }
         val date = birthDate?.let {
@@ -59,33 +54,28 @@ class UserConnectionRepositoryImpl @Inject constructor(
             val user = response.data
 
             secureSessionDataSource.updateUserInfo(
-                user.pseudo,
-                user.birthdate,
-                user.height,
-                user.sexeMale
+                user.pseudo, user.birthdate, user.height, user.sexeMale
             )
 
             updateAuthState()
             return RequestState.Success
-        }catch (e: HttpException) {
+        } catch (e: HttpException) {
             RequestState.Error(
-                if (e.code() == 401)
-                    AuthError.UNAUTHORIZED
-                else
-                    AuthError.ERROR_API
+                if (e.code() == 401) AuthError.UNAUTHORIZED
+                else AuthError.ERROR_API
             )
         } catch (_: Exception) {
             RequestState.Error(AuthError.ERROR_API)
         }
     }
 
-    override suspend fun loginUser(email: String, password: String): RequestState  {
-            if (!isValideMail(email)) {
-                return RequestState.Error(AuthError.NOT_EMAILFORMAT)
-            }
-            if (!isValidPassword(password)) {
-                return RequestState.Error(AuthError.NOT_PASSWORD)
-            }
+    override suspend fun loginUser(email: String, password: String): RequestState {
+        if (!isValideMail(email)) {
+            return RequestState.Error(AuthError.NOT_EMAILFORMAT)
+        }
+        if (!isValidPassword(password)) {
+            return RequestState.Error(AuthError.NOT_PASSWORD)
+        }
         return try {
             val response = api.loginUser(IdentificationRequest(email, password))
             val data = response.data
@@ -99,7 +89,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
 
             updateAuthState()
             return RequestState.Success
-        }catch (e: HttpException) {
+        } catch (e: HttpException) {
             RequestState.Error(
                 if (e.code() == 401) AuthError.UNAUTHORIZED else AuthError.ERROR_API
             )
@@ -108,25 +98,25 @@ class UserConnectionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerUser(email: String, password: String,pseudo:String): RequestState {
-        if (!isValideMail(email)|| email.length>100) {
+    override suspend fun registerUser(
+        email: String, password: String, pseudo: String
+    ): RequestState {
+        if (!isValideMail(email) || email.length > 100) {
             return RequestState.Error(AuthError.NOT_EMAILFORMAT)
         }
-        if(!isValidPseudo(pseudo)){
+        if (!isValidPseudo(pseudo)) {
             return RequestState.Error(AuthError.NOT_PSEUDOFORMAT)
         }
-        if (!isValidPassword(password)|| password.length>60) {
+        if (!isValidPassword(password) || password.length > 60) {
             return RequestState.Error(AuthError.NOT_PASSWORD)
         }
         return try {
             val data = api.registerUser(
-                IdentificationRequest(email, password,pseudo)
+                IdentificationRequest(email, password, pseudo)
             ).data
 
-            val user = data.userDTO
-                ?: return RequestState.Error(AuthError.ERROR_API)
-            val token = data.token
-                ?: return RequestState.Error(AuthError.ERROR_API)
+            val user = data.userDTO ?: return RequestState.Error(AuthError.ERROR_API)
+            val token = data.token ?: return RequestState.Error(AuthError.ERROR_API)
 
 
             secureSessionDataSource.saveUser(user.toLocal())
@@ -138,19 +128,16 @@ class UserConnectionRepositoryImpl @Inject constructor(
 
         } catch (e: HttpException) {
             RequestState.Error(
-                if (e.code() == 401)
-                    AuthError.UNAUTHORIZED
-                else
-                    AuthError.ERROR_API
+                if (e.code() == 401) AuthError.UNAUTHORIZED
+                else AuthError.ERROR_API
             )
         } catch (_: Exception) {
             RequestState.Error(AuthError.ERROR_API)
         }
     }
 
-     fun isValideToken(): AuthStatus {
-        val session = secureSessionDataSource.getSession()
-            ?: return AuthStatus.NOT_CONNECTED
+    fun isValideToken(): AuthStatus {
+        val session = secureSessionDataSource.getSession() ?: return AuthStatus.NOT_CONNECTED
 
         return if (System.currentTimeMillis() > session.expirationTime) {
             secureSessionDataSource.clearSession()
@@ -159,6 +146,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
             AuthStatus.CONNECTED
         }
     }
+
     override fun getToken(): String {
         return if (isValideToken() == AuthStatus.CONNECTED) {
             secureSessionDataSource.getSession()?.token.orEmpty()
@@ -203,8 +191,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
 
     private fun updateAuthState() {
         _authState.value = AuthState(
-            isConnected = isValideToken() == AuthStatus.CONNECTED,
-            user = getUser()
+            isConnected = isValideToken() == AuthStatus.CONNECTED, user = getUser()
         )
     }
 }

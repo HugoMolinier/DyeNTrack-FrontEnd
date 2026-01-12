@@ -38,7 +38,6 @@ fun BottomSheetContent(
     showBottomSheet: Boolean = false,
     onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    onTitleClick:  () -> Unit= {},
     isfullScreen:Boolean=true,
     dragZoneComponent: @Composable (() -> Unit)? = null,
 ) {

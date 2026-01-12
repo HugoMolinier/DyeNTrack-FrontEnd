@@ -9,5 +9,7 @@ import javax.inject.Singleton
 class DeletePresetUseCase @Inject constructor(
     private val repository: PresetRepository
 ) {
-    suspend operator fun invoke(preset: Preset) { repository.delete(preset) }
+    suspend operator fun invoke(preset: Preset) {
+        repository.delete(preset)
+    }
 }

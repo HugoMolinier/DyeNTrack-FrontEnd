@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.local.database
 
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -22,11 +21,12 @@ interface PresetDao {
 
     @Query("SELECT * FROM preset WHERE isDelete = 1")
     suspend fun getDeletedPresets(): List<Preset>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPreset(preset: Preset):Long
+    suspend fun insertPreset(preset: Preset): Long
 
     @Update
-    suspend fun updatePreset(preset: Preset):Int
+    suspend fun updatePreset(preset: Preset): Int
 
 
     @Query("DELETE FROM preset WHERE idPreset = :idApi")
@@ -41,7 +41,7 @@ interface PresetDao {
 
     @Query("SELECT * FROM preset WHERE idPreset = :idApi")
     suspend fun getPresetByIdApi(idApi: Long): Preset?
-    suspend fun saveOrUpdatePreset(preset: Preset,dateSave: String? = null):Preset? {
+    suspend fun saveOrUpdatePreset(preset: Preset, dateSave: String? = null): Preset? {
 
 
         val saveDate = dateSave ?: Instant.now().toString()

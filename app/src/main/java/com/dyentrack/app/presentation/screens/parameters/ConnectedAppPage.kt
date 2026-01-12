@@ -31,11 +31,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.SizeType
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.SizeType
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectEtat
 import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
@@ -92,7 +92,9 @@ fun ConnectedAppPage(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
@@ -101,7 +103,8 @@ fun ConnectedAppPage(
                                 modifier = Modifier.size(30.dp)
                             )
                             Text(
-                                text =stringResource(R.string.health_connect), modifier = Modifier.padding(start = 8.dp)
+                                text = stringResource(R.string.health_connect),
+                                modifier = Modifier.padding(start = 8.dp)
                             )
                         }
 
@@ -111,7 +114,7 @@ fun ConnectedAppPage(
                             size = SizeType.SMALL,
                             emphasis = EmphasisType.SECONDARY,
                             onClick = { healthViewModel.onButtonClick(context) },
-                            contentPadding = PaddingValues(12.dp,4.dp)
+                            contentPadding = PaddingValues(12.dp, 4.dp)
                         )
                     }
 
@@ -123,13 +126,13 @@ fun ConnectedAppPage(
                             stringResource(R.string.information),
                             style = MaterialTheme.typography.bodyLarge,
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(32.dp)){
+                        Column(verticalArrangement = Arrangement.spacedBy(32.dp)) {
 
 
-                        Text(
-                            stringResource(R.string.info_text_1),
-                            style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
-                        )
+                            Text(
+                                stringResource(R.string.info_text_1),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
+                            )
                             Text(
                                 stringResource(R.string.info_text_2),
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
@@ -141,7 +144,8 @@ fun ConnectedAppPage(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = stringResource(R.string.auto_sync),style = MaterialTheme.typography.bodyLarge
+                            text = stringResource(R.string.auto_sync),
+                            style = MaterialTheme.typography.bodyLarge
                         )
 
                         Row(

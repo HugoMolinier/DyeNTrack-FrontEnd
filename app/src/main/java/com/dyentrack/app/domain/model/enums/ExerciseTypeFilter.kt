@@ -1,4 +1,4 @@
-package com.dyentrack.app.domain.model.enum
+package com.dyentrack.app.domain.model.enums
 
 import android.content.Context
 import androidx.annotation.StringRes

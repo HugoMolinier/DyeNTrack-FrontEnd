@@ -47,13 +47,13 @@ fun SetRow(
 ) {
     val chargeState = remember {
         mutableStateOf(
-            TextFieldValue(
-                text = set.charge
-                    ?.let { convertWeight(it, MesureUnit.KG, userUnit) }
-                    ?.let { String.format("%.1f", it) }
-                    ?: ""
-            )
-        )
+            TextFieldValue(text = set.charge?.let {
+                    convertWeight(
+                        it,
+                        MesureUnit.KG,
+                        userUnit
+                    )
+                }?.let { String.format("%.1f", it) } ?: ""))
     }
 
     val rirState = remember {
@@ -138,8 +138,7 @@ fun SetRow(
         )
 
         Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
 
 
@@ -160,8 +159,7 @@ fun SetRow(
                         rightSet = false,
                         unilateral = set.linkedRightSet != null
                     )
-                }
-            )
+                })
 
             if (set.linkedRightSet != null) {
                 InputCustom(
@@ -180,8 +178,7 @@ fun SetRow(
                             rightSet = true,
                             unilateral = true
                         )
-                    }
-                )
+                    })
 
             }
         }
@@ -196,18 +193,12 @@ fun SetRow(
             keyboardType = KeyboardType.Decimal,
             onValueChange = {
                 viewModel.updateSet(
-                    exerciseId = exerciseId,
-                    index = index,
-                    newValue = SetField.Charge(
+                    exerciseId = exerciseId, index = index, newValue = SetField.Charge(
                         convertWeight(
-                            chargeState.value.text.toDoubleOrNull(),
-                            userUnit,
-                            MesureUnit.KG
+                            chargeState.value.text.toDoubleOrNull(), userUnit, MesureUnit.KG
                         )
 
-                    ),
-                    rightSet = false,
-                    unilateral = set.linkedRightSet != null
+                    ), rightSet = false, unilateral = set.linkedRightSet != null
                 )
             }
 
@@ -230,8 +221,7 @@ fun SetRow(
                     rightSet = false,
                     unilateral = set.linkedRightSet != null
                 )
-            }
-        )
+            })
 
 
     }

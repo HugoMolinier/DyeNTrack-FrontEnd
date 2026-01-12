@@ -15,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class MasterDataRepositoryImpl @Inject constructor(
     private val api: ApiInterface,
-    private val localDataSource: LocalDataSource
+    private val localDataSource: LocalDataSource,
 ) : MasterDataRepository {
     private var cachedMasterData: MasterDataStatic? = null
     private val _masterDataFlow = MutableStateFlow<MasterDataStatic?>(null)
@@ -25,16 +25,18 @@ class MasterDataRepositoryImpl @Inject constructor(
         //cache
         cachedMasterData?.let {
             _masterDataFlow.value = it
-            //return
+            return
         }
 
         //local
+
         localDataSource.getMasterData()?.let {
             cachedMasterData = it
             _masterDataFlow.value = it
 
-            val diffDays = Duration.between(Instant.parse(it.dateEnregistement), Instant.now()).toDays()
-            //if (diffDays < 2) return
+            val diffDays =
+                Duration.between(Instant.parse(it.dateEnregistement), Instant.now()).toDays()
+            if (diffDays < 1) return
         }
         //api
 
@@ -46,21 +48,32 @@ class MasterDataRepositoryImpl @Inject constructor(
                     dateEnregistement = response.timestamp.toString()
                 )
 
-                if (
-                    response.data.officialExercise.isNotEmpty() &&
-                    response.data.muscles.isNotEmpty() &&
-                    response.data.musclesGroup.isNotEmpty()
-                ) {
+                if (response.data.officialExercise.isNotEmpty() && response.data.muscles.isNotEmpty() && response.data.musclesGroup.isNotEmpty()) {
                     localDataSource.saveMasterData(masterData)
                 }
 
                 cachedMasterData = masterData
                 _masterDataFlow.value = masterData
             }
+
         } catch (_: Exception) {
 
         }
+
+
+        val fallbackData = getFallbackMasterData()
+        cachedMasterData = fallbackData
+        _masterDataFlow.value = fallbackData
     }
 
 
+    private fun getFallbackMasterData(): MasterDataStatic {
+        return MasterDataStatic(
+            musclesGroup = MasterDataFallback.muscleGroups,
+            muscles = MasterDataFallback.muscles,
+            lateralites = MasterDataFallback.lateralities,
+            equipment = MasterDataFallback.equipments,
+            officialExercise = MasterDataFallback.officialExercises
+        )
+    }
 }

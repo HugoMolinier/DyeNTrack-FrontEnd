@@ -37,11 +37,10 @@ class HealthConnectViewModel @Inject constructor(
     val etat: StateFlow<HealthConnectEtat> = _etat
 
     //seulement au démarage pour le sync donc 0 collect
-    val userPreference: StateFlow<UserPreference?> = fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = null
-    )
+    val userPreference: StateFlow<UserPreference?> =
+        fetchUserPreferenceUseCase.userPreferenceFlow.stateIn(
+            scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null
+        )
 
 
     private val syncGranded: Boolean = userPreference.value?.autoSync ?: true
@@ -57,21 +56,23 @@ class HealthConnectViewModel @Inject constructor(
                 is HealthConnectStatus.NotAvailable -> _etat.value = HealthConnectEtat.INSTALLER
                 is HealthConnectStatus.Available -> {
                     client = status.client
-                    val granted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(status.client)
+                    val granted =
+                        requestHealthConnectPermissionsUseCase.arePermissionsGranted(status.client)
                     if (granted) {
                         _etat.value = HealthConnectEtat.OPERATIONNEL
-                        if(syncGranded){
+                        if (syncGranded) {
                             syncHealthData()
                             syncHealthData(LocalDate.now().minusDays(1L))
                             syncHealthData(LocalDate.now().minusDays(2L))
 
 
-                        };
+                        }
                     } else {
                         _etat.value = HealthConnectEtat.AUTORISER
                     }
                 }
-                is HealthConnectStatus.NeedsUpdate ->_etat.value = HealthConnectEtat.METTRE_A_JOUR
+
+                is HealthConnectStatus.NeedsUpdate -> _etat.value = HealthConnectEtat.METTRE_A_JOUR
                 else -> _etat.value = HealthConnectEtat.NON_DISPONIBLE
             }
         }
@@ -81,9 +82,7 @@ class HealthConnectViewModel @Inject constructor(
         when (_etat.value) {
             HealthConnectEtat.INSTALLER, HealthConnectEtat.METTRE_A_JOUR -> openPlayStore(context)
             HealthConnectEtat.AUTORISER -> requestPermissions()
-            HealthConnectEtat.OPERATIONNEL,
-            HealthConnectEtat.VERIFICATION,
-            HealthConnectEtat.NON_DISPONIBLE -> {} // rien à faire
+            HealthConnectEtat.OPERATIONNEL, HealthConnectEtat.VERIFICATION, HealthConnectEtat.NON_DISPONIBLE -> {} // rien à faire
         }
     }
 
@@ -98,26 +97,29 @@ class HealthConnectViewModel @Inject constructor(
     private fun requestPermissions() {
         client?.let {
             viewModelScope.launch {
-                _autorisationNeed.value = requestHealthConnectPermissionsUseCase.getRequiredPermissions()
+                _autorisationNeed.value =
+                    requestHealthConnectPermissionsUseCase.getRequiredPermissions()
             }
         }
     }
 
 
-    fun syncHealthData(daySelected: LocalDate= LocalDate.now()) {
+    fun syncHealthData(daySelected: LocalDate = LocalDate.now()) {
         client?.let { client ->
             viewModelScope.launch {
-                val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
+                val permissionsGranted =
+                    requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
                 if (permissionsGranted) {
-                    syncHealthDataUseCase(client,daySelected)
+                    syncHealthDataUseCase(client, daySelected)
                 }
             }
         }
     }
+
     fun onPermissionsResult(allGranted: Boolean) {
         if (allGranted) {
             _etat.value = HealthConnectEtat.OPERATIONNEL
-            if(syncGranded) syncHealthData()
+            if (syncGranded) syncHealthData()
         } else {
             _etat.value = HealthConnectEtat.AUTORISER
         }

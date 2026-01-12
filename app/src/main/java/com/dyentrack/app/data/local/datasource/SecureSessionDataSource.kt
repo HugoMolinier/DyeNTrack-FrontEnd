@@ -3,6 +3,7 @@ package com.dyentrack.app.data.local.datasource
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dyentrack.app.data.local.entities.SessionLocal
@@ -11,10 +12,6 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.security.GeneralSecurityException
 
 @Singleton
 class SecureSessionDataSource @Inject constructor(
@@ -25,11 +22,11 @@ class SecureSessionDataSource @Inject constructor(
     private val prefs: SharedPreferences by lazy {
         createEncryptedPrefs()
     }
+
     private fun createEncryptedPrefs(): SharedPreferences {
         return try {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
+            val masterKey =
+                MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
 
             EncryptedSharedPreferences.create(
                 context,
@@ -57,18 +54,12 @@ class SecureSessionDataSource @Inject constructor(
     }
 
     fun updateUserInfo(
-        pseudo: String,
-        birthdate: String?,
-        height: Int?,
-        sexe: Boolean?
+        pseudo: String, birthdate: String?, height: Int?, sexe: Boolean?
     ) {
         val currentUser = getUser() ?: return
 
         val updatedUser = currentUser.copy(
-            pseudo = pseudo,
-            birthdate = birthdate,
-            height = height,
-            sexe = sexe
+            pseudo = pseudo, birthdate = birthdate, height = height, sexe = sexe
         )
 
         saveUser(updatedUser)
@@ -90,9 +81,11 @@ class SecureSessionDataSource @Inject constructor(
     }
 
     fun getSession(): SessionLocal? {
-        return prefs.getString(KEY_SESSION, null)?.let { gson.fromJson(it, SessionLocal::class.java) }
+        return prefs.getString(KEY_SESSION, null)
+            ?.let { gson.fromJson(it, SessionLocal::class.java) }
 
     }
+
     fun getTokenAuthInterceptor(): String? {
         val session = prefs.getString(KEY_SESSION, null)?.let {
             gson.fromJson(it, SessionLocal::class.java)
@@ -110,13 +103,14 @@ class SecureSessionDataSource @Inject constructor(
 
         return null
     }
+
     fun clearSession() {
-        Log.d("clear","cleaejkiozrjz")
+        Log.d("clear", "cleaejkiozrjz")
         prefs.edit { remove(KEY_SESSION) }
     }
 
     fun clearAll() {
-        Log.d("clearall","cleaejkiozrjz")
+        Log.d("clearall", "cleaejkiozrjz")
         prefs.edit { clear() }
     }
 }

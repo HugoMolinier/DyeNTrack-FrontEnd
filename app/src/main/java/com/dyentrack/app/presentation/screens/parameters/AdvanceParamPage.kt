@@ -26,7 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.UserPreference
-import com.dyentrack.app.domain.model.enum.SyncPerformanceMode
+import com.dyentrack.app.domain.model.enums.SyncPerformanceMode
 import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
@@ -56,8 +56,7 @@ fun AdvanceParamPage(
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
-                        modifier = Modifier.clickable { navController.navigate("home") }
-                    )
+                        modifier = Modifier.clickable { navController.navigate("home") })
                 })
 
             LazyColumn(
@@ -99,18 +98,15 @@ fun AdvanceParamPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.bodySmall
+                                    text = label, style = MaterialTheme.typography.bodySmall
                                 )
 
                                 SingleCircleSelector(
-                                    isSelected = isSelected,
-                                    onClick = {
+                                    isSelected = isSelected, onClick = {
                                         userPreferenceViewModel.updateUserPreference(
                                             UserPreference(syncPerformanceMode = mode)
                                         )
-                                    },
-                                    enabled = !isSelected
+                                    }, enabled = !isSelected
                                 )
                             }
                         }
@@ -130,7 +126,7 @@ fun AdvanceParamPage(
                             style = MaterialTheme.typography.bodyLarge
                         )
 
-                        Column (verticalArrangement = Arrangement.spacedBy(4.dp)){
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
                                 "1. " + stringResource(R.string.all),
                                 style = MaterialTheme.typography.bodySmall,
@@ -143,7 +139,7 @@ fun AdvanceParamPage(
                             )
                         }
 
-                        Column (verticalArrangement = Arrangement.spacedBy(4.dp)){
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
                                 "2. " + stringResource(R.string.sync_option_preset_only),
                                 style = MaterialTheme.typography.bodySmall,

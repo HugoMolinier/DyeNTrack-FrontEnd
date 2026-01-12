@@ -28,7 +28,6 @@ abstract class RepositoryModule {
         impl: InfoExerciseUserRepositoryImpl
     ): InfoExerciseUserRepository
 
-
     @Binds
     @Singleton
     abstract fun bindDayDataRepository(

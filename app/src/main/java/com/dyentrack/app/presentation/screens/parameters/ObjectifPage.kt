@@ -34,12 +34,12 @@ import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.domain.model.enums.SizeType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.TopNavigationBar
-import com.dyentrack.app.domain.model.enum.SizeType
-import com.dyentrack.app.domain.model.enum.VariantType
-import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.components.ParameterBox
+import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 
 @Composable
 fun ObjectifPage(
@@ -102,7 +102,10 @@ fun ObjectifPage(
                 verticalArrangement = Arrangement.spacedBy(48.dp)
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.padding(top = 12.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 12.dp)
+                    ) {
                         Text(
                             stringResource(R.string.define_goals),
                             style = MaterialTheme.typography.bodyLarge,
@@ -111,34 +114,31 @@ fun ObjectifPage(
 
                         val menu1 = listOfNotNull(
                             ParameterItem(
-                                null,
-                                stringResource(R.string.calories),
-                                ParameterIcon.Resource(R.drawable.icon_cal),
-                                {
-                                    InputCustom(
-                                        modifier = Modifier.width(80.dp),
-                                        text = calorieText,
-                                        placeholder = "0",
-                                        maxCaracter = 5,
-                                        centerText = true,
+                            null,
+                            stringResource(R.string.calories),
+                            ParameterIcon.Resource(R.drawable.icon_cal),
+                            {
+                                InputCustom(
+                                    modifier = Modifier.width(80.dp),
+                                    text = calorieText,
+                                    placeholder = "0",
+                                    maxCaracter = 5,
+                                    centerText = true,
 
-                                        keyboardType = KeyboardType.Number,
-                                        variant = VariantType.EMPTY,
-                                        size = SizeType.SMALL,
-                                        onValueChange = { value ->
-                                            val intValue =
-                                                value.toIntOrNull()?.coerceAtMost(9999) ?: 0
-                                            userPreferenceViewModel.updateUserPreference(
-                                                UserPreference(objCalorie = intValue)
-                                            )
-                                            calorieText.value = calorieText.value.copy(
-                                                text = if (intValue != 0) intValue.toString() else ""
-                                            )
-                                        }
-                                    )
+                                    keyboardType = KeyboardType.Number,
+                                    variant = VariantType.EMPTY,
+                                    size = SizeType.SMALL,
+                                    onValueChange = { value ->
+                                        val intValue = value.toIntOrNull()?.coerceAtMost(9999) ?: 0
+                                        userPreferenceViewModel.updateUserPreference(
+                                            UserPreference(objCalorie = intValue)
+                                        )
+                                        calorieText.value = calorieText.value.copy(
+                                            text = if (intValue != 0) intValue.toString() else ""
+                                        )
+                                    })
 
-                                }
-                            ),
+                            }),
 
                             ParameterItem(
                                 null,
@@ -163,11 +163,9 @@ fun ObjectifPage(
                                             )
                                             stepText.value =
                                                 stepText.value.copy(text = if (intValue != 0) intValue.toString() else "")
-                                        }
-                                    )
+                                        })
 
-                                }
-                            ),
+                                }),
 
                             ParameterItem(
                                 null,
@@ -197,11 +195,9 @@ fun ObjectifPage(
                                                 text = if (value.isBlank() || value == ".") "" else limitedValue?.toString()
                                                     ?: ""
                                             )
-                                        }
-                                    )
+                                        })
 
-                                }
-                            )
+                                })
 
                         )
                         ParameterBox(menu1)

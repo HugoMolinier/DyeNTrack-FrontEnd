@@ -3,21 +3,15 @@ package com.dyentrack.app.presentation.screens.home
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.content.MediaType.Companion.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,8 +33,6 @@ import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -68,17 +60,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.VariantType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
 import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
@@ -130,13 +122,11 @@ fun HomePage(
         }
         p
     }
-    val configuration = LocalConfiguration.current
-    val widthScreen = configuration.screenWidthDp.toFloat()
+    val widthScreen = LocalConfiguration.current.screenWidthDp.toFloat()
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             item {
                 Row(
@@ -157,8 +147,7 @@ fun HomePage(
                         )
                     }
                     IconButton(
-                        { navController.navigate("parametre") }, modifier = Modifier
-                            .size(36.dp)
+                        { navController.navigate("parametre") }, modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
@@ -177,8 +166,7 @@ fun HomePage(
                             .fillMaxWidth()
                             .padding(start = 20.dp, top = 20.dp, end = 20.dp)
                             .background(
-                                MaterialTheme.colorScheme.surface,
-                                MaterialTheme.shapes.medium
+                                MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium
                             )
                             .height(
                                 IntrinsicSize.Min
@@ -200,8 +188,7 @@ fun HomePage(
                                 "Connectez-vous ou Inscrivez-vous pour sauvegarder vos données",
                                 color = secondaryTextColor,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier
-                                    .padding(bottom = 16.dp)
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
 
                         }
@@ -254,7 +241,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if ((state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null)&& state.last5DaysKeys.isNotEmpty()) {
+                        if ((state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) && state.last5DaysKeys.isNotEmpty()) {
                             item {
 
                                 Box(
@@ -378,7 +365,7 @@ fun HomePage(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        val itemCount =     listState.layoutInfo.totalItemsCount
+                        val itemCount = listState.layoutInfo.totalItemsCount
 
 
                         for (i in 0 until itemCount) {
@@ -389,11 +376,14 @@ fun HomePage(
                                         listState.firstVisibleItemScrollOffset / widthScreen
                                     1f - scrollFraction.coerceIn(0f, 0.5f)
                                 }
-                                i > listState.firstVisibleItemIndex+2 -> {
-                          0.5f
+
+                                i > listState.firstVisibleItemIndex + 2 -> {
+                                    0.5f
                                 }
 
-                                else -> {1f}
+                                else -> {
+                                    1f
+                                }
                             }
 
                             Box(
@@ -428,14 +418,11 @@ fun HomePage(
 
                     if (state.last5DaysKeys.isNotEmpty()) {
                         state.last5DaysKeys.forEachIndexed { index, day ->
-                            val groupMuscles = state.muscleRateOfEachDay[day]
-                                ?.keys
-                                ?.mapNotNull { muscleId ->
+                            val groupMuscles =
+                                state.muscleRateOfEachDay[day]?.keys?.mapNotNull { muscleId ->
                                     val muscle = state.masterDataMaps?.muscleMap?.get(muscleId)
                                     state.masterDataMaps?.musclesGroupMap?.get(muscle?.idMuscularGroup)
-                                }
-                                ?.toSet()
-                                ?: emptySet()
+                                }?.toSet() ?: emptySet()
 
                             CardWithContent(
                                 modifier = Modifier.padding(8.dp, 2.dp),
@@ -453,8 +440,7 @@ fun HomePage(
                                             Icons.Default.ArrowDropUp
                                         } else {
                                             Icons.Default.ArrowDropDown
-                                        },
-                                        contentDescription = stringResource(
+                                        }, contentDescription = stringResource(
                                             if (state.expandedSeance == index) R.string.show_less else R.string.show_more
                                         )
                                     )
@@ -543,8 +529,7 @@ fun HomePage(
                                                         modifier = Modifier.size(24.dp)
                                                     ) {
                                                         Icon(
-                                                            Icons.Default.Fullscreen,
-                                                            "go to seance"
+                                                            Icons.Default.Fullscreen, "go to seance"
                                                         )
                                                     }
                                                 } else {
@@ -568,56 +553,56 @@ fun HomePage(
                                 .padding(top = 12.dp, start = 10.dp, end = 10.dp),
                             variant = VariantType.OUTLINED,
                             emphasis = EmphasisType.SECONDARY,
-                            onClick = { navController.navigate("seance") }
-                        )
+                            onClick = { navController.navigate("seance") })
                     }
                 }
             }
 
             if (state.last5DaysKeys.isEmpty()) {
-            item {
+                item {
 
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth().padding(top = 4.dp, start = 16.dp, end = 16.dp)
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(8.dp),
-                            ambientColor = Color.Black.copy(alpha = 0.25f),
-                            spotColor = Color.Black.copy(alpha = 0.25f)
-                        ),
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, start = 16.dp, end = 16.dp)
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                ambientColor = Color.Black.copy(alpha = 0.25f),
+                                spotColor = Color.Black.copy(alpha = 0.25f)
+                            ),
 
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
 
-                        )
+                            )
 
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     ) {
-                        Text(
-                            "Aucune séance pour le moment",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            "Prêt à relevé le défi ? Commencer votre première séance et suivez votre progression en temps réel.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = secondaryTextColor,
-                            textAlign = TextAlign.Center
-                        )
-                        CustomButton(
-                            "Commencer ma première séance",
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                            onClick = { navController.navigate("seance") }
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(20.dp),
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
+                        ) {
+                            Text(
+                                "Aucune séance pour le moment",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                "Prêt à relevé le défi ? Commencer votre première séance et suivez votre progression en temps réel.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryTextColor,
+                                textAlign = TextAlign.Center
+                            )
+                            CustomButton(
+                                "Commencer ma première séance",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                onClick = { navController.navigate("seance") })
+                        }
                     }
                 }
-            }
-
 
 
             }
@@ -642,8 +627,7 @@ fun HomePage(
                     }
                     Text(
                         "" + state.mapSeance.count() + " / 14 " + pluralStringResource(
-                            R.plurals.days,
-                            2
+                            R.plurals.days, 2
                         ),
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
@@ -696,14 +680,14 @@ fun HomePage(
                                     shape = MaterialTheme.shapes.medium
                                 )
                         ) {
-                            val radarMuscleData = homeViewModel.getRadarData(
-                                data = state.muscleRateOfEachDay,
-                                labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
-                                    it.value.getName(
-                                        language
-                                    )
-                                } ?: emptyMap()
-                            )
+                            val radarMuscleData =
+                                homeViewModel.getRadarData(
+                                    data = state.muscleRateOfEachDay,
+                                    labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
+                                        it.value.getName(
+                                            language
+                                        )
+                                    } ?: emptyMap())
 
                             RadarChartMP(
                                 modifier = modifier,
@@ -739,8 +723,7 @@ fun HomePage(
                                         tint = secondaryTextColor.copy(0.1f)
                                     )
                                 },
-                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) }
-                            )
+                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) })
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             CardWithContent(
@@ -776,9 +759,7 @@ fun HomePage(
         },
         onClickFavorite = {
             if (authState.isConnected) infoUserViewModel.updateInfoExerciseUser(
-                it,
-                !(infoMapUser[it]?.favorite ?: false),
-                null
+                it, !(infoMapUser[it]?.favorite ?: false), null
             ) else {
                 Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
             }
@@ -803,7 +784,7 @@ fun HomePage(
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { value ->
             homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
-            presetViewModel.createPreset(value);
+            presetViewModel.createPreset(value)
         },
         title = "Nouveau Preset",
         buttonText = "Crée",

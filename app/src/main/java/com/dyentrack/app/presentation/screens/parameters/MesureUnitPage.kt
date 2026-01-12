@@ -46,8 +46,7 @@ fun MesureUnitPage(
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
     val unitOptions = listOf(
-        "Kilo (kg)" to MesureUnit.KG,
-        "Pound (lbs)" to MesureUnit.LBS
+        "Kilo (kg)" to MesureUnit.KG, "Pound (lbs)" to MesureUnit.LBS
     )
 
 
@@ -78,7 +77,10 @@ fun MesureUnitPage(
                 verticalArrangement = Arrangement.spacedBy(48.dp)
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp),modifier = Modifier.padding(top = 12.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 12.dp)
+                    ) {
 
                         Text(
                             stringResource(R.string.set_display_unit),
@@ -89,30 +91,23 @@ fun MesureUnitPage(
                         val menu = unitOptions.map { (label, unit) ->
                             val isSelected = userPreference?.mesureUnit == unit
 
-                            ParameterItem(
-                                onClick = {
-                                    if (!isSelected) {
-                                        userPreferenceViewModel.updateUserPreference(
-                                            UserPreference(mesureUnit = unit)
-                                        )
-                                    }
-                                },
-                                label = label,
-                                sublabel = null,
-                                composableRight = {
-                                    SingleCircleSelector(
-                                        isSelected = isSelected,
-                                        onClick = {
-                                            if (!isSelected) {
-                                                userPreferenceViewModel.updateUserPreference(
-                                                    UserPreference(mesureUnit = unit)
-                                                )
-                                            }
-                                        },
-                                        enabled = !isSelected
+                            ParameterItem(onClick = {
+                                if (!isSelected) {
+                                    userPreferenceViewModel.updateUserPreference(
+                                        UserPreference(mesureUnit = unit)
                                     )
                                 }
-                            )
+                            }, label = label, sublabel = null, composableRight = {
+                                SingleCircleSelector(
+                                    isSelected = isSelected, onClick = {
+                                        if (!isSelected) {
+                                            userPreferenceViewModel.updateUserPreference(
+                                                UserPreference(mesureUnit = unit)
+                                            )
+                                        }
+                                    }, enabled = !isSelected
+                                )
+                            })
                         }
                         ParameterBox(menu)
 
@@ -128,7 +123,7 @@ fun MesureUnitPage(
                             stringResource(R.string.information),
                             style = MaterialTheme.typography.bodyLarge,
                         )
-                        Column{
+                        Column {
                             Text(
                                 stringResource(R.string.info_measure_unit_1),
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
@@ -140,7 +135,7 @@ fun MesureUnitPage(
                             Text(
                                 stringResource(R.string.info_measure_unit_3),
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor),
-                                modifier= Modifier.padding(top=12.dp)
+                                modifier = Modifier.padding(top = 12.dp)
                             )
 
                         }
@@ -148,14 +143,14 @@ fun MesureUnitPage(
                         Row(modifier = Modifier.padding(start = 24.dp, top = 4.dp)) {
                             Text("• ", color = secondaryTextColor)
                             Text(
-                                "Pound -> Kilo : "+stringResource(R.string.weight)+" x 0.45359237",
+                                "Pound -> Kilo : " + stringResource(R.string.weight) + " x 0.45359237",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                             )
                         }
                         Row(modifier = Modifier.padding(start = 24.dp, bottom = 2.dp)) {
                             Text("• ", color = secondaryTextColor)
                             Text(
-                                "Kilo -> Pound : "+stringResource(R.string.weight)+" x 2.20462262185",
+                                "Kilo -> Pound : " + stringResource(R.string.weight) + " x 2.20462262185",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                             )
                         }

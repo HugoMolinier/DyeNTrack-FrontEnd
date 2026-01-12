@@ -52,16 +52,17 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.ChipDropDownFlowRow
 import com.dyentrack.app.presentation.components.DateRangePickerDialog
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetText
 import com.dyentrack.app.presentation.components.chart.CombinedChartMP
 import com.dyentrack.app.presentation.components.chart.PieChartMP
 import com.dyentrack.app.presentation.components.chart.RadarChartMP
@@ -89,8 +90,7 @@ fun AnalysePage(
     val userPref by userPreferenceViewModel.userPreference.collectAsState()
     val allPreset by presetViewModel.presetFlow.collectAsState()
     LaunchedEffect(allPreset) {
-        if (allPreset.isNotEmpty())
-            analyseViewModel.choseThisPreset(allPreset.firstOrNull())
+        if (allPreset.isNotEmpty()) analyseViewModel.choseThisPreset(allPreset.firstOrNull())
     }
     val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
     var inputIndex by remember { mutableIntStateOf(0) }
@@ -102,8 +102,7 @@ fun AnalysePage(
     val filteredData by remember(state.dateRange, state.notIncludeGroupMuscle) {
         mutableStateOf(
             analyseViewModel.getFilteredMuscleRateByDay(
-                state.dateRange.oldDate, state.dateRange.recentDate,
-                state.notIncludeGroupMuscle
+                state.dateRange.oldDate, state.dateRange.recentDate, state.notIncludeGroupMuscle
             )
         )
     }
@@ -121,7 +120,7 @@ fun AnalysePage(
     val moyenneSetParEx = analyseViewModel.moyenneSetParEx(globalMuscleRate)
     val proportionSetFail = analyseViewModel.proportionSetFail(globalMuscleRate)
     val sommePondUserUnit =
-        convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?:0.0
+        convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit) ?: 0.0
     Column(modifier = modifier.fillMaxWidth()) {
         TopNavigationBar(stringResource(R.string.full_analysis))
         LazyColumn(
@@ -141,49 +140,36 @@ fun AnalysePage(
                             itemSection = listOf(
                                 MenuItemData(
                                     stringResource(R.string.two_weeks),
-                                    { analyseViewModel.applyDateRange(14L);inputIndex = 0 }
-                                ),
+                                    { analyseViewModel.applyDateRange(14L);inputIndex = 0 }),
                                 MenuItemData(
                                     stringResource(R.string.month),
-                                    { analyseViewModel.applyDateRange(30L);inputIndex = 1 }
-                                ),
+                                    { analyseViewModel.applyDateRange(30L);inputIndex = 1 }),
                                 MenuItemData(
                                     stringResource(R.string.all),
-                                    { analyseViewModel.applyDateRange(-1L);inputIndex = 2 }
-                                )
-                            ))
+                                    { analyseViewModel.applyDateRange(-1L);inputIndex = 2 })))
                     }
                     val isSelected = inputIndex == 3
                     Box(
                         modifier = Modifier
                             .background(
-                                TertiaOne,
-                                shape = RoundedCornerShape(6.dp)
+                                TertiaOne, shape = RoundedCornerShape(6.dp)
                             )
                             .clickable(
-                                enabled = true,
-                                onClick = { showRangePicker = true;inputIndex = 3 }
-                            )
+                                enabled = true, onClick = { showRangePicker = true;inputIndex = 3 })
                             .padding(2.dp)
                             .background(
-                                if (isSelected)
-                                    MaterialTheme.colorScheme.background
-                                else
-                                    Color.Transparent,
-                                shape = RoundedCornerShape(4.dp)
+                                if (isSelected) MaterialTheme.colorScheme.background
+                                else Color.Transparent, shape = RoundedCornerShape(4.dp)
                             )
-                            .padding(horizontal = 8.dp, vertical = 8.dp)
-                    ) {
+                            .padding(horizontal = 8.dp, vertical = 8.dp)) {
                         Icon(
                             Icons.Outlined.SettingsInputComponent,
                             contentDescription = stringResource(R.string.custom_section),
                             modifier = Modifier
                                 .size(18.dp)
                                 .padding(2.dp),
-                            tint = if (isSelected)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                         )
 
                     }
@@ -199,14 +185,11 @@ fun AnalysePage(
                 ) {
 
                     Text(
-                        state.dateRange.oldDate.toAbbreviatedDate(userLANGUAGE) +
-                                if (state.dateRange.oldDate.year != state.dateRange.recentDate.year) {
-                                    " ${state.dateRange.oldDate.year} - "
-                                } else {
-                                    " - "
-                                } +
-                                state.dateRange.recentDate.toAbbreviatedDate(userLANGUAGE) +
-                                " ${state.dateRange.recentDate.year}",
+                        state.dateRange.oldDate.toAbbreviatedDate(userLANGUAGE) + if (state.dateRange.oldDate.year != state.dateRange.recentDate.year) {
+                            " ${state.dateRange.oldDate.year} - "
+                        } else {
+                            " - "
+                        } + state.dateRange.recentDate.toAbbreviatedDate(userLANGUAGE) + " ${state.dateRange.recentDate.year}",
                         style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                     )
                 }
@@ -263,18 +246,23 @@ fun AnalysePage(
                                     stringResource(R.string.number_of_sessions),
                                     style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                                 )
-                                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
                                     Text(
                                         "${filteredData.count { it.value.perExerciseStat.isNotEmpty() }}",
                                         style = MaterialTheme.typography.bodyLarge
                                     )
-                                    Text(" / ",
+                                    Text(
+                                        " / ",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color=secondaryTextColor)
+                                        color = secondaryTextColor
+                                    )
                                     Text(
                                         "${state.dateRange.numberBetweenDate}",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color=secondaryTextColor
+                                        color = secondaryTextColor
                                     )
                                 }
                             }
@@ -335,14 +323,18 @@ fun AnalysePage(
                                         Icons.Default.Info,
                                         "voir info",
                                         tint = secondaryTextColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clickable {
+                                                analyseViewModel.toggleBottomSheet(
+                                                    BottomSheetVisibleType.TEXT
+                                                )
+                                            })
                                 }
 
                                 Text(
                                     sommePondUserUnit?.toInt().toString() + userUnit.toString()
-                                        .lowercase(),
-                                    style = MaterialTheme.typography.bodyLarge
+                                        .lowercase(), style = MaterialTheme.typography.bodyLarge
                                 )
 
                             }
@@ -445,8 +437,7 @@ fun AnalysePage(
                                     data = filteredData.mapValues { it.value.perMuscleStat }, // <-- ici on prend directement perMuscleStat
                                     labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
                                         it.value.getName(userLANGUAGE)
-                                    } ?: emptyMap()
-                                )
+                                    } ?: emptyMap())
                             }
                             RadarChartMP(
                                 modifier = modifier,
@@ -480,8 +471,7 @@ fun AnalysePage(
                             ) {
                                 Text(
                                     state.masterDataMaps?.muscleMap?.get(key)?.getName(userLANGUAGE)
-                                        ?: "N/A",
-                                    style = MaterialTheme.typography.bodySmall
+                                        ?: "N/A", style = MaterialTheme.typography.bodySmall
                                 )
 
                                 Text(
@@ -551,14 +541,12 @@ fun AnalysePage(
                             }
                         }
                         val presetData = state.presetChose?.let { preset ->
-                            filteredData
-                                .filter { it.value.presetId?.localId == preset.idLocal || it.value.presetId?.apiId == preset.idPreset }
+                            filteredData.filter { it.value.presetId?.localId == preset.idLocal || it.value.presetId?.apiId == preset.idPreset }
                                 .mapValues { it.value.AllStat }
                         } ?: emptyMap()
 
                         val chartDataPreset = analyseViewModel.getCombinedChartData(
-                            data = presetData,
-                            userUnit = userUnit
+                            data = presetData, userUnit = userUnit
                         )
                         CombinedChartMP(
                             labels = chartDataPreset.labels,
@@ -566,8 +554,7 @@ fun AnalysePage(
                             lineValues = chartDataPreset.lineValues,
                             showValueBar = chartDataPreset.showValueBar,
                             showValueLine = chartDataPreset.showValueLine,
-                            modifier = Modifier
-                                .fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(),
                             barLegendLabel = stringResource(R.string.weighted_sum),
                             lineLegendLabel = stringResource(R.string.fail_set_ratio)
                         )
@@ -592,16 +579,13 @@ fun AnalysePage(
                         // Presets existants
                         allPreset.forEach { preset ->
                             val count = filteredData.count {
-                                it.value.presetId?.localId == preset.idLocal ||
-                                        it.value.presetId?.apiId == preset.idPreset
+                                it.value.presetId?.localId == preset.idLocal || it.value.presetId?.apiId == preset.idPreset
                             }
                             if (count > 0) {
                                 usedCount += count
                                 usageList.add(
                                     Triple(
-                                        preset.name,
-                                        count,
-                                        count.toFloat() / total * 100f
+                                        preset.name, count, count.toFloat() / total * 100f
                                     )
                                 )
                             }
@@ -657,13 +641,11 @@ fun AnalysePage(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    name,
-                                    style = MaterialTheme.typography.bodySmall
+                                    name, style = MaterialTheme.typography.bodySmall
                                 )
 
                                 Text(
-                                    "$count",
-                                    style = MaterialTheme.typography.bodySmall.copy(
+                                    "$count", style = MaterialTheme.typography.bodySmall.copy(
                                         color = secondaryTextColor
                                     )
                                 )
@@ -715,8 +697,7 @@ fun AnalysePage(
                     ) {
                         Text(
                             text = state.masterDataMaps?.exerciseMap?.get(state.exerciceChose)
-                                ?.getName(userLANGUAGE)
-                                ?: stringResource(R.string.no_exercise),
+                                ?.getName(userLANGUAGE) ?: stringResource(R.string.no_exercise),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         IconButton(onClick = {
@@ -734,15 +715,12 @@ fun AnalysePage(
                     }
 
                     // Construire les données par date pour le graphique
-                    val allDataExercise = filteredData
-                        .mapNotNull { (day, dayData) ->
-                            dayData.perExerciseStat[state.exerciceChose]
-                                ?.let { day to it }
+                    val allDataExercise = filteredData.mapNotNull { (day, dayData) ->
+                            dayData.perExerciseStat[state.exerciceChose]?.let { day to it }
                         }.toMap()
 
                     val chartDataExercise = analyseViewModel.getCombinedChartData(
-                        data = allDataExercise,
-                        userUnit = userUnit
+                        data = allDataExercise, userUnit = userUnit
                     )
 
                     CombinedChartMP(
@@ -790,9 +768,7 @@ fun AnalysePage(
         },
         onClickFavorite = {
             infoUserViewModel.updateInfoExerciseUser(
-                it,
-                !(infoMapUser[it]?.favorite ?: false),
-                null
+                it, !(infoMapUser[it]?.favorite ?: false), null
             )
         },
         userlanguage = userLANGUAGE,
@@ -801,27 +777,30 @@ fun AnalysePage(
 
     if (showRangePicker) {
         DateRangePickerDialog(
-            startDate= state.dateRange.oldDate,
-            endDate= state.dateRange.recentDate,
+            startDate = state.dateRange.oldDate,
+            endDate = state.dateRange.recentDate,
             onDismiss = { showRangePicker = false },
             onRangeSelected = { (startMillis, endMillis) ->
                 startMillis?.let { st ->
                     endMillis?.let { en ->
-                        val startDate = Instant.ofEpochMilli(st)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        val endDate = Instant.ofEpochMilli(en)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
+                        val startDate =
+                            Instant.ofEpochMilli(st).atZone(ZoneId.systemDefault()).toLocalDate()
+                        val endDate =
+                            Instant.ofEpochMilli(en).atZone(ZoneId.systemDefault()).toLocalDate()
 
                         analyseViewModel.applyDateRange(startDate, endDate)
                     }
                 }
 
 
-            }
-        )
+            })
     }
+    BottomSheetText(
+        title = "Information",
+        onClose = { BottomSheetVisibleType.NO },
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.TEXT,
+        text = "On ne prend pas en compte votre poids dans les exercises en poids du corps."
+    )
 
 
 }

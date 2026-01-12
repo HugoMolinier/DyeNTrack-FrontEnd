@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -73,15 +72,12 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.ParameterItem
-import com.dyentrack.app.domain.model.enum.BottomSheetVisibleType
-import com.dyentrack.app.domain.model.enum.EmphasisType
-import com.dyentrack.app.domain.model.enum.ExerciceInPropertyType
-import com.dyentrack.app.domain.model.enum.ExerciseMode
-import com.dyentrack.app.domain.model.enum.SaveType
-import com.dyentrack.app.domain.model.enum.SizeType
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.ExerciceInPropertyType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
+import com.dyentrack.app.domain.model.enums.SizeType
 import com.dyentrack.app.domain.model.getName
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
-import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.ChipDropDown
@@ -91,6 +87,8 @@ import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.TopNavigationBar
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
 import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
@@ -131,15 +129,15 @@ fun PresetPage(
 
     DisposableEffect(Unit) {
         onDispose {
-            if ( state.currentPreset != null && state.isModified) {
+            if (state.currentPreset != null && state.isModified) {
                 presetViewModel.savePreset(state.currentPreset!!)
             }
         }
     }
     BackHandler {
-            if ( state.currentPreset != null && state.isModified) {
-                presetViewModel.savePreset(state.currentPreset!!)
-            }
+        if (state.currentPreset != null && state.isModified) {
+            presetViewModel.savePreset(state.currentPreset!!)
+        }
         navController.popBackStack()
     }
 
@@ -150,69 +148,54 @@ fun PresetPage(
                 detectTapGestures(onTap = {
                     focusManager.clearFocus()
                 })
-            }
-    ) {
+            }) {
         Column {
-            TopNavigationBar(
-                "Preset",
-                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                rightSide = {
-                    Box {
-                        IconButton(onClick = { expanded = true }) {
-                            Icon(Icons.Default.MoreVert, "", tint = secondaryTextColor)
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Changer le nom") },
-                                onClick = {
-                                    presetPageViewModel.toggleBottomSheet(
-                                        BottomSheetVisibleType.INPUTPRESET
-                                    )
-                                    expanded = false
-                                }
+            TopNavigationBar("Preset", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, rightSide = {
+                Box {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Default.MoreVert, "", tint = secondaryTextColor)
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        onDismissRequest = { expanded = false }) {
+                        DropdownMenuItem(text = { Text("Changer le nom") }, onClick = {
+                            presetPageViewModel.toggleBottomSheet(
+                                BottomSheetVisibleType.INPUTPRESET
                             )
-                            DropdownMenuItem(
-                                text = { Text("Supprimer") },
-                                colors = MenuDefaults.itemColors(
-                                    textColor = Color.Red
-                                ),
-                                onClick = {
-                                    expanded = false
-                                    activeMenu = ActiveMenu(
-                                        title = "Supprimer le preset",
-                                        description = "Cela dissociera tout les presets des seances associé ?",
-                                        content = listOf(
-                                            MenuItemData("Non", onClick = { activeMenu = null }),
-                                            MenuItemData("Oui", color = Color.Red, onClick = {
-                                                presetViewModel.deletePreset(state.currentPreset!!)
-                                                activeMenu = null
-                                                navController.popBackStack()
+                            expanded = false
+                        })
+                        DropdownMenuItem(
+                            text = { Text("Supprimer") }, colors = MenuDefaults.itemColors(
+                                textColor = Color.Red
+                            ), onClick = {
+                                expanded = false
+                                activeMenu = ActiveMenu(
+                                    title = "Supprimer le preset",
+                                    description = "Cela dissociera tout les presets des seances associé ?",
+                                    content = listOf(
+                                        MenuItemData(
+                                            "Non",
+                                            onClick = { activeMenu = null }),
+                                        MenuItemData("Oui", color = Color.Red, onClick = {
+                                            presetViewModel.deletePreset(state.currentPreset!!)
+                                            activeMenu = null
+                                            navController.popBackStack()
 
-                                            }
-                                            )
-                                        )
-                                    )
-                                }
-                            )
-                        }
+                                        })))
+                            })
                     }
-                },
-                onClickLeft = {
-                    if ( state.currentPreset != null && state.isModified) {
-                        presetViewModel.savePreset(state.currentPreset!!)
-                    }
-                    navController.popBackStack()
                 }
-            )
+            }, onClickLeft = {
+                if (state.currentPreset != null && state.isModified) {
+                    presetViewModel.savePreset(state.currentPreset!!)
+                }
+                navController.popBackStack()
+            })
 
 
             LazyColumn(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
             ) {
 
                 state.currentPreset?.let { currentPreset ->
@@ -232,8 +215,7 @@ fun PresetPage(
                                         width = 1.dp,
                                         color = secondaryTextColor,
                                         shape = MaterialTheme.shapes.extraLarge
-                                    ),
-                                contentAlignment = Alignment.Center
+                                    ), contentAlignment = Alignment.Center
                             ) {}
                             Column(
                                 modifier
@@ -243,8 +225,7 @@ fun PresetPage(
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    currentPreset.name,
-                                    style = MaterialTheme.typography.titleMedium
+                                    currentPreset.name, style = MaterialTheme.typography.titleMedium
                                 )
 
                                 Text(
@@ -262,8 +243,7 @@ fun PresetPage(
                                             ?: 0
                                     Text(
                                         text = ("$sumSet " + pluralStringResource(
-                                            R.plurals.set,
-                                            sumSet
+                                            R.plurals.set, sumSet
                                         )),
                                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                     )
@@ -272,8 +252,7 @@ fun PresetPage(
                                     Text(
                                         text = " ≈ ${totalMinutes / 60}h${
                                             String.format(
-                                                "%02d",
-                                                totalMinutes % 60
+                                                "%02d", totalMinutes % 60
                                             )
                                         }",
                                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
@@ -306,8 +285,7 @@ fun PresetPage(
                                 IconButton(
                                     onClick = {
                                         presetPageViewModel.toggleMode(ExerciseMode.NORMAL)
-                                    }
-                                ) {
+                                    }) {
                                     Icon(
                                         Icons.Outlined.Edit,
                                         contentDescription = "Voir stats",
@@ -336,44 +314,35 @@ fun PresetPage(
 
                     if (exercises?.isNotEmpty() == true) {
                         itemsIndexed(
-                            exercises,
-                            key = { _, ex -> ex.idExercise }) { _, exInPreset ->
+                            exercises, key = { _, ex -> ex.idExercise }) { _, exInPreset ->
                             var offsetY by remember { mutableFloatStateOf(0f) }
                             var cardHeightPx by remember { mutableIntStateOf(0) }
                             Box(
                                 modifier = Modifier
-                                    .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
+                                    .padding(
+                                        start = 12.dp, end = 12.dp, bottom = 8.dp
+                                    )
                                     .offset { IntOffset(0, offsetY.roundToInt()) }
                                     .onSizeChanged { size ->
                                         cardHeightPx = size.height
-                                    }
-                            ) {
-                                val exercise = state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
+                                    }) {
+                                val exercise =
+                                    state.masterDataMaps?.exerciseMap?.get(exInPreset.idExercise)
 
                                 CardWithContent(
                                     modifier = Modifier.padding(
-                                        start = 10.dp,
-                                        bottom = 4.dp,
-                                        top = 4.dp
+                                        start = 10.dp, bottom = 4.dp, top = 4.dp
                                     ),
-                                    exercise
-                                        ?.getName(language) ?: "",
-                                    subText = exInPreset.formatSubtitle(
-                                        setPlural = { count ->
-                                            context.resources.getQuantityString(
-                                                R.plurals.set,
-                                                count,
-                                                count
-                                            )
-                                        },
-                                        repPlural = { count ->
-                                            context.resources.getQuantityString(
-                                                R.plurals.rep,
-                                                count,
-                                                count
-                                            )
-                                        }
-                                    ),
+                                    exercise?.getName(language) ?: "",
+                                    subText = exInPreset.formatSubtitle(setPlural = { count ->
+                                        context.resources.getQuantityString(
+                                            R.plurals.set, count, count
+                                        )
+                                    }, repPlural = { count ->
+                                        context.resources.getQuantityString(
+                                            R.plurals.rep, count, count
+                                        )
+                                    }),
                                     leftIcon = LeftIcon.Single(
                                         ExerciseImages.map[exInPreset.idExercise]
                                             ?: R.drawable.logotransparent
@@ -382,8 +351,8 @@ fun PresetPage(
                                     menuOnLongClick = listOf(
                                         MenuItemData(
                                             stringResource(R.string.exercise_view),
-                                            { navController.navigate("exercise/${exInPreset.idExercise}") }
-                                        ), MenuItemData(
+                                            { navController.navigate("exercise/${exInPreset.idExercise}") }),
+                                        MenuItemData(
                                             "Supprimer",
                                             { presetPageViewModel.deleteExercice(exInPreset.idExercise) },
                                             MaterialTheme.typography.bodyMedium,
@@ -405,27 +374,35 @@ fun PresetPage(
                                             Box(
                                                 modifier = Modifier
                                                     .fillMaxHeight()
-                                                    .width(80.dp).then( if(state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
-                                                    Modifier.draggable(
-                                                        orientation = Orientation.Vertical,
-                                                        state = rememberDraggableState { delta ->
-                                                            offsetY += delta
-                                                            val threshold = cardHeightPx
-                                                            val currentIndex = exercises.indexOf(exInPreset)
+                                                    .width(80.dp)
+                                                    .then(
+                                                        if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                                            Modifier.draggable(
+                                                                orientation = Orientation.Vertical,
+                                                                state = rememberDraggableState { delta ->
+                                                                    offsetY += delta
+                                                                    val threshold = cardHeightPx
+                                                                    val currentIndex =
+                                                                        exercises.indexOf(exInPreset)
 
-                                                            if (offsetY > threshold && currentIndex < exercises.lastIndex) {
-                                                                presetPageViewModel.swapExercise(currentIndex, currentIndex + 1)
-                                                                offsetY = 0f
-                                                            } else if (offsetY < -threshold && currentIndex > 0) {
-                                                                presetPageViewModel.swapExercise(currentIndex, currentIndex - 1)
-                                                                offsetY = 0f
-                                                            }
-                                                        },
-                                                        onDragStopped = { offsetY = 0f }
-                                                    )
-                                                } else Modifier),
-                                                contentAlignment = Alignment.CenterEnd
-                                            ) {
+                                                                    if (offsetY > threshold && currentIndex < exercises.lastIndex) {
+                                                                        presetPageViewModel.swapExercise(
+                                                                            currentIndex,
+                                                                            currentIndex + 1
+                                                                        )
+                                                                        offsetY = 0f
+                                                                    } else if (offsetY < -threshold && currentIndex > 0) {
+                                                                        presetPageViewModel.swapExercise(
+                                                                            currentIndex,
+                                                                            currentIndex - 1
+                                                                        )
+                                                                        offsetY = 0f
+                                                                    }
+                                                                },
+                                                                onDragStopped = { offsetY = 0f })
+                                                        } else Modifier
+                                                    ),
+                                                contentAlignment = Alignment.CenterEnd) {
                                                 Icon(
                                                     Icons.Outlined.Reorder,
                                                     contentDescription = "Déplacer l'exercice",
@@ -443,8 +420,7 @@ fun PresetPage(
                                                         Icons.Outlined.KeyboardArrowUp
                                                     } else {
                                                         Icons.Outlined.KeyboardArrowDown
-                                                    },
-                                                    "", modifier = Modifier.size(20.dp)
+                                                    }, "", modifier = Modifier.size(20.dp)
                                                 )
                                                 Icon(
                                                     Icons.Default.MoreVert,
@@ -477,8 +453,7 @@ fun PresetPage(
                                         }
                                         val list = listOf(
                                             ParameterItem(
-                                                label = "Nombre de série",
-                                                composableRight = {
+                                                label = "Nombre de série", composableRight = {
                                                     Row(
                                                         modifier.height(40.dp),
                                                         verticalAlignment = Alignment.CenterVertically
@@ -491,8 +466,7 @@ fun PresetPage(
                                                             enable = (modeActual.isNormal() && (exInPreset.nbSet) > 1),
                                                             onClick = {
                                                                 presetPageViewModel.changeNbSet(
-                                                                    exInPreset.idExercise,
-                                                                    -1
+                                                                    exInPreset.idExercise, -1
                                                                 )
                                                             })
                                                         Text(
@@ -508,16 +482,13 @@ fun PresetPage(
                                                             enable = (modeActual.isNormal() && (exInPreset.nbSet) < 20),
                                                             onClick = {
                                                                 presetPageViewModel.changeNbSet(
-                                                                    exInPreset.idExercise,
-                                                                    +1
+                                                                    exInPreset.idExercise, +1
                                                                 )
                                                             })
 
                                                     }
-                                                }),
-                                            ParameterItem(
-                                                label = "Fourchette de rep",
-                                                composableRight = {
+                                                }), ParameterItem(
+                                                label = "Fourchette de rep", composableRight = {
                                                     Row(
                                                         modifier = Modifier.height(40.dp),
                                                         verticalAlignment = Alignment.CenterVertically
@@ -540,8 +511,7 @@ fun PresetPage(
 
                                                                 )
                                                                 val updatedEx =
-                                                                    presetPageViewModel.uiState.value.currentPreset?.presetSeanceExerciseVO
-                                                                        ?.find { it.idExercise == exInPreset.idExercise }
+                                                                    presetPageViewModel.uiState.value.currentPreset?.presetSeanceExerciseVO?.find { it.idExercise == exInPreset.idExercise }
 
                                                                 repMinState.value = TextFieldValue(
                                                                     (updatedEx?.rangeRepInf
@@ -551,8 +521,7 @@ fun PresetPage(
                                                                     (updatedEx?.rangeRepSup
                                                                         ?: "").toString()
                                                                 )
-                                                            }
-                                                        )
+                                                            })
 
                                                         Text(
                                                             "à",
@@ -576,8 +545,7 @@ fun PresetPage(
                                                                     rangeRepSup = value.toIntOrNull(),
                                                                 )
                                                                 val updatedEx =
-                                                                    presetPageViewModel.uiState.value.currentPreset?.presetSeanceExerciseVO
-                                                                        ?.find { it.idExercise == exInPreset.idExercise }
+                                                                    presetPageViewModel.uiState.value.currentPreset?.presetSeanceExerciseVO?.find { it.idExercise == exInPreset.idExercise }
 
                                                                 repMinState.value = TextFieldValue(
                                                                     (updatedEx?.rangeRepInf
@@ -587,8 +555,7 @@ fun PresetPage(
                                                                     (updatedEx?.rangeRepSup
                                                                         ?: "").toString()
                                                                 )
-                                                            }
-                                                        )
+                                                            })
                                                     }
                                                 })
                                         )
@@ -598,8 +565,7 @@ fun PresetPage(
                                                 .padding(start = 16.dp, end = 16.dp)
                                         ) {
                                             Row(
-                                                Modifier
-                                                    .fillMaxWidth(),
+                                                Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.End,
                                                 verticalAlignment = Alignment.CenterVertically
 
@@ -623,13 +589,13 @@ fun PresetPage(
                                                             lateriteId
                                                         )
                                                     }
-                                                    ChipDropDown(
-                                                        listOfSelectableItem = exercise?.equipmentInfo
-                                                            ?.mapNotNull { idEquipment -> state.masterDataMaps?.equipmentMap?.get(idEquipment.idEquipment) }
-                                                            ?: emptyList(),
+                                                    ChipDropDown(listOfSelectableItem = exercise?.equipmentInfo?.mapNotNull { idEquipment ->
+                                                            state.masterDataMaps?.equipmentMap?.get(
+                                                                idEquipment.idEquipment
+                                                            )
+                                                        } ?: emptyList(),
                                                         defaultSelected = state.masterDataMaps?.equipmentMap[exInPreset.idEquipment],
-                                                        canChange = modeActual.isNormal()
-                                                    ) { selectedName ->
+                                                        canChange = modeActual.isNormal()) { selectedName ->
                                                         val equipmentId =
                                                             state.masterDataMaps?.equipmentMap?.entries?.firstOrNull { it.value == selectedName }?.key
                                                                 ?: 1L
@@ -645,28 +611,23 @@ fun PresetPage(
                                             }
 
                                             ParameterBox(
-                                                list,
-                                                PaddingValues(
-                                                    bottom = 16.dp,
-                                                    end = 4.dp,
-                                                    start = 4.dp
-                                                ),
-                                                hasBorder = false
+                                                list, PaddingValues(
+                                                    bottom = 16.dp, end = 4.dp, start = 4.dp
+                                                ), hasBorder = false
                                             )
 
                                         }
-                                    }
-                                )
+                                    })
                             }
                         }
 
-                    }
-                    else {
+                    } else {
                         item {
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
-                                    .fillMaxWidth().fillMaxHeight()
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
                                     .padding(horizontal = 20.dp, vertical = 120.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
@@ -727,9 +688,7 @@ fun PresetPage(
         infoMapUser = infoMapUser,
         onClickFavorite = {
             if (authState.isConnected) infoUserViewModel.updateInfoExerciseUser(
-                it,
-                !(infoMapUser[it]?.favorite ?: false),
-                null
+                it, !(infoMapUser[it]?.favorite ?: false), null
             ) else {
                 Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
             }
@@ -747,13 +706,11 @@ fun PresetPage(
                 label = stringResource(R.string.cancel),
                 emphasis = EmphasisType.SECONDARY,
                 modifier = Modifier.weight(1f),
-                onClick = { presetPageViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) }
-            )
+                onClick = { presetPageViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) })
             CustomButton(
                 label = stringResource(R.string.add),
                 modifier = Modifier.weight(1f),
-                onClick = { presetPageViewModel.addExerciseToSeance() }
-            )
+                onClick = { presetPageViewModel.addExerciseToSeance() })
         }
     }
     BottomSheetInput(
@@ -774,9 +731,7 @@ fun PresetPage(
         CenterMenu(
             onDismiss = { activeMenu = null },
 
-            title = menu.title,
-            descrition = menu.description,
-            items = menu.content
+            title = menu.title, descrition = menu.description, items = menu.content
 
 
         )

@@ -32,11 +32,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.enum.NutritionField
-import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
-import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
+import com.dyentrack.app.domain.model.enums.NutritionField
 import com.dyentrack.app.presentation.screens.seance.SeanceDuJour
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
+import com.dyentrack.app.presentation.screens.seance.dataSection.component.NutrientRow
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -45,7 +45,7 @@ fun NutritionBox(
     state: SeanceUiState,
     lockInput: Boolean = false,
     day: String,
-    isAutoSync:Boolean
+    isAutoSync: Boolean
 ) {
     val currentSeance = state.seancesParJour[day] ?: SeanceDuJour()
     val nutritionTrack = currentSeance.nutritionTrack
@@ -60,22 +60,28 @@ fun NutritionBox(
 
     // --- Met à jour les TextFieldValues uniquement si la valeur change réellement ---
     LaunchedEffect(nutritionTrack) {
-        val newCarbs = if ((nutritionTrack.carbohydrates ?: 0) == 0) "" else nutritionTrack.carbohydrates.toString()
+        val newCarbs = if ((nutritionTrack.carbohydrates
+                ?: 0) == 0
+        ) "" else nutritionTrack.carbohydrates.toString()
         if (carbs.value.text != newCarbs) carbs.value = TextFieldValue(newCarbs)
 
-        val newProts = if ((nutritionTrack.proteins ?: 0) == 0) "" else nutritionTrack.proteins.toString()
+        val newProts =
+            if ((nutritionTrack.proteins ?: 0) == 0) "" else nutritionTrack.proteins.toString()
         if (prots.value.text != newProts) prots.value = TextFieldValue(newProts)
 
-        val newFats = if ((nutritionTrack.lipids ?: 0) == 0) "" else nutritionTrack.lipids.toString()
+        val newFats =
+            if ((nutritionTrack.lipids ?: 0) == 0) "" else nutritionTrack.lipids.toString()
         if (fats.value.text != newFats) fats.value = TextFieldValue(newFats)
 
         val newFiber = if ((nutritionTrack.fiber ?: 0) == 0) "" else nutritionTrack.fiber.toString()
         if (fiber.value.text != newFiber) fiber.value = TextFieldValue(newFiber)
 
-        val newCafeine = if ((nutritionTrack.cafeins ?: 0) == 0) "" else nutritionTrack.cafeins.toString()
+        val newCafeine =
+            if ((nutritionTrack.cafeins ?: 0) == 0) "" else nutritionTrack.cafeins.toString()
         if (cafeine.value.text != newCafeine) cafeine.value = TextFieldValue(newCafeine)
 
-        val newCalories = if ((nutritionTrack.calories ?: 0) == 0) "" else nutritionTrack.calories.toString()
+        val newCalories =
+            if ((nutritionTrack.calories ?: 0) == 0) "" else nutritionTrack.calories.toString()
         if (calories.value.text != newCalories) calories.value = TextFieldValue(newCalories)
     }
 
@@ -83,161 +89,160 @@ fun NutritionBox(
         Modifier
             .fillMaxWidth()
             .background(
-                MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(8.dp)
+                MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp)
             )
     ) {
 
-            Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
+        Column(Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
 
-                // --- Ligne supérieure avec calories ---
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .drawBehind {
-                            val strokeWidth = 1.dp.toPx()
-                            val y = size.height - strokeWidth / 2
-                            drawLine(
-                                color = secondaryTextColor.copy(alpha = 0.2f),
-                                start = Offset(0f, y),
-                                end = Offset(size.width, y),
-                                strokeWidth = strokeWidth
-                            )
+            // --- Ligne supérieure avec calories ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawBehind {
+                        val strokeWidth = 1.dp.toPx()
+                        val y = size.height - strokeWidth / 2
+                        drawLine(
+                            color = secondaryTextColor.copy(alpha = 0.2f),
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = strokeWidth
+                        )
+                    }, horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    Modifier.padding(end = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    NutrientRow(
+                        label = "",
+                        valueState = calories,
+                        isEditable = !lockInput,
+                        unit = "kcal",
+                        modifierInput = Modifier.width(100.dp),
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.CALORIES, value)
+                            }
                         },
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(
-                        Modifier.padding(end = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        NutrientRow(
-                            label = "",
-                            valueState = calories,
-                            isEditable = !lockInput,
-                            unit = "kcal",
-                            modifierInput = Modifier.width(100.dp),
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.CALORIES, value)
-                                }
-                            },
-                            autoSync = isAutoSync
-                        )
-
-                        Row(
-                            Modifier.padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val protsValue = prots.value.text.toFloatOrNull() ?: 0f
-                            val carbsValue = carbs.value.text.toFloatOrNull() ?: 0f
-                            val fatsValue = fats.value.text.toFloatOrNull() ?: 0f
-                            Text(
-                                text = stringResource(R.string.calculated)+" ${(protsValue * 4 + carbsValue * 4 + fatsValue * 9).toInt()} kcal",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = secondaryTextColor.copy(alpha = 0.5f)
-                                )
-                            )
-                            Icon(
-                                Icons.Default.Info,
-                                stringResource(R.string.show_calculation),
-                                modifier = Modifier.size(20.dp),
-                                tint = secondaryTextColor.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                }
-
-                // --- Colonnes nutriments ---
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp)
-                        .height(IntrinsicSize.Max)
-                ) {
-                    // Colonne de gauche
-                    Column(
-                        Modifier
-                            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        NutrientRow(
-                            label = stringResource(R.string.proteins),
-                            valueState = prots,
-                            isEditable = !lockInput,
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.PROTEINS, value)
-                                }
-                            },
-                            autoSync = isAutoSync
-                        )
-                        NutrientRow(
-                            label = stringResource(R.string.carbohydrates),
-                            valueState = carbs,
-                            isEditable = !lockInput,
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.CARBOHYDRATES, value)
-                                }
-                            },
-                            autoSync = isAutoSync
-                        )
-                        NutrientRow(
-                            label = stringResource(R.string.lipids),
-                            valueState = fats,
-                            isEditable = !lockInput,
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.LIPIDS, value)
-                                }
-                            },
-                            autoSync = isAutoSync
-                        )
-                    }
-
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp)
-                            .background(secondaryTextColor.copy(alpha = 0.2f))
+                        autoSync = isAutoSync
                     )
 
-                    // Colonne de droite
-                    Column(
-                        Modifier
-                            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    Row(
+                        Modifier.padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        NutrientRow(
-                            label = stringResource(R.string.fiber),
-                            valueState = fiber,
-                            isEditable = !lockInput,
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.FIBER, value)
-                                }
-                            },
-                            autoSync = isAutoSync
+                        val protsValue = prots.value.text.toFloatOrNull() ?: 0f
+                        val carbsValue = carbs.value.text.toFloatOrNull() ?: 0f
+                        val fatsValue = fats.value.text.toFloatOrNull() ?: 0f
+                        Text(
+                            text = stringResource(R.string.calculated) + " ${(protsValue * 4 + carbsValue * 4 + fatsValue * 9).toInt()} kcal",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = secondaryTextColor.copy(alpha = 0.5f)
+                            )
                         )
-                        NutrientRow(
-                            label = stringResource(R.string.caffeine),
-                            valueState = cafeine,
-                            unit = "mg",
-                            isEditable = !lockInput,
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { value ->
-                                    viewModel.updateNutrition(NutritionField.CAFEINS, value)
-                                }
-                            },
-                            autoSync = isAutoSync
+                        Icon(
+                            Icons.Default.Info,
+                            stringResource(R.string.show_calculation),
+                            modifier = Modifier.size(20.dp),
+                            tint = secondaryTextColor.copy(alpha = 0.5f)
                         )
                     }
                 }
             }
+
+            // --- Colonnes nutriments ---
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+                    .height(IntrinsicSize.Max)
+            ) {
+                // Colonne de gauche
+                Column(
+                    Modifier
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    NutrientRow(
+                        label = stringResource(R.string.proteins),
+                        valueState = prots,
+                        isEditable = !lockInput,
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.PROTEINS, value)
+                            }
+                        },
+                        autoSync = isAutoSync
+                    )
+                    NutrientRow(
+                        label = stringResource(R.string.carbohydrates),
+                        valueState = carbs,
+                        isEditable = !lockInput,
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.CARBOHYDRATES, value)
+                            }
+                        },
+                        autoSync = isAutoSync
+                    )
+                    NutrientRow(
+                        label = stringResource(R.string.lipids),
+                        valueState = fats,
+                        isEditable = !lockInput,
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.LIPIDS, value)
+                            }
+                        },
+                        autoSync = isAutoSync
+                    )
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.dp)
+                        .background(secondaryTextColor.copy(alpha = 0.2f))
+                )
+
+                // Colonne de droite
+                Column(
+                    Modifier
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    NutrientRow(
+                        label = stringResource(R.string.fiber),
+                        valueState = fiber,
+                        isEditable = !lockInput,
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.FIBER, value)
+                            }
+                        },
+                        autoSync = isAutoSync
+                    )
+                    NutrientRow(
+                        label = stringResource(R.string.caffeine),
+                        valueState = cafeine,
+                        unit = "mg",
+                        isEditable = !lockInput,
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { value ->
+                                viewModel.updateNutrition(NutritionField.CAFEINS, value)
+                            }
+                        },
+                        autoSync = isAutoSync
+                    )
+                }
+            }
+        }
     }
 }

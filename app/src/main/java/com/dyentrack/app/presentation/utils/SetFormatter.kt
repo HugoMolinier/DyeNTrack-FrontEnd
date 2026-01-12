@@ -13,8 +13,12 @@ fun List<SetData>?.formatForDisplay(userUnit: MesureUnit): String {
         if (stop) break
         if (previousCharge != null && set.charge != previousCharge) {
             sb.append(
-                convertWeight(previousCharge, MesureUnit.KG, userUnit)
-                    ?.let { String.format("%.1f", it) }.orEmpty()
+                convertWeight(previousCharge, MesureUnit.KG, userUnit)?.let {
+                        String.format(
+                            "%.1f",
+                            it
+                        )
+                    }.orEmpty()
             )
             sb.append(userUnit.toString().lowercase())
             sb.append(" | ")
@@ -33,8 +37,12 @@ fun List<SetData>?.formatForDisplay(userUnit: MesureUnit): String {
     }
     if (!stop && previousCharge != null) {
         sb.append(
-            convertWeight(previousCharge, MesureUnit.KG, userUnit)
-                ?.let { String.format("%.1f", it) }.orEmpty()
+            convertWeight(previousCharge, MesureUnit.KG, userUnit)?.let {
+                    String.format(
+                        "%.1f",
+                        it
+                    )
+                }.orEmpty()
         )
         sb.append(userUnit.toString().lowercase())
     }
