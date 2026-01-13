@@ -181,11 +181,11 @@ fun HomePage(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                "Sauvegarder sur le cloud",
+                                stringResource(R.string.cloud_save),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                             Text(
-                                "Connectez-vous ou Inscrivez-vous pour sauvegarder vos données",
+                                stringResource(R.string.cloud_save_desc),
                                 color = secondaryTextColor,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(bottom = 16.dp)
@@ -503,7 +503,7 @@ fun HomePage(
                                             ) {
                                                 Text(
                                                     state.masterDataMaps?.muscleMap?.get(key)
-                                                        ?.getName(language) ?: "Not found",
+                                                        ?.getName(language) ?: "NaN",
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -585,17 +585,17 @@ fun HomePage(
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                         ) {
                             Text(
-                                "Aucune séance pour le moment",
+                                stringResource(R.string.no_session_yet),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                "Prêt à relevé le défi ? Commencer votre première séance et suivez votre progression en temps réel.",
+                                stringResource(R.string.first_session_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = secondaryTextColor,
                                 textAlign = TextAlign.Center
                             )
                             CustomButton(
-                                "Commencer ma première séance",
+                                stringResource(R.string.start_first_session),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp),
@@ -703,7 +703,7 @@ fun HomePage(
 
             item {
                 Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
-                    Text("Collection", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.collection), style = MaterialTheme.typography.titleSmall)
 
                     Row(
                         modifier = Modifier
@@ -714,7 +714,7 @@ fun HomePage(
                         Box(modifier = Modifier.weight(1f)) {
                             CardWithContent(
                                 modifier = Modifier.padding(8.dp, 4.dp),
-                                text = "Exercices",
+                                text = pluralStringResource(R.plurals.exercise,2),
                                 subText = state.masterDataMaps?.exerciseMap?.size.toString(),
                                 componentRight = {
                                     Icon(
@@ -728,7 +728,7 @@ fun HomePage(
                         Box(modifier = Modifier.weight(1f)) {
                             CardWithContent(
                                 modifier = Modifier.padding(8.dp, 4.dp),
-                                text = "Voir mes Presets",
+                                text = stringResource(R.string.view_presets),
                                 onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET) },
                                 componentRight = {
                                     Icon(
@@ -771,7 +771,7 @@ fun HomePage(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET) },
-        title = "Preset",
+        title = stringResource(R.string.preset_title),
         presetList = presetList,
         onClickPreset = {
             navController.navigate("preset/${it.idLocal}")
@@ -786,8 +786,8 @@ fun HomePage(
             homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
             presetViewModel.createPreset(value)
         },
-        title = "Nouveau Preset",
-        buttonText = "Crée",
+        title = stringResource(R.string.new_preset),
+        buttonText = stringResource(R.string.create),
     )
 
 

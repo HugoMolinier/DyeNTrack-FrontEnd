@@ -185,7 +185,6 @@ fun SetRow(
 
         InputCustom(
             text = chargeState,
-            placeholder = "Charge",
             enabled = !lockInput,
             replaceZeroToNull = true,
             modifier = Modifier.weight(1f),
@@ -208,7 +207,6 @@ fun SetRow(
 
         InputCustom(
             text = rirState,
-            placeholder = "RIR",
             enabled = !lockInput,
             modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,

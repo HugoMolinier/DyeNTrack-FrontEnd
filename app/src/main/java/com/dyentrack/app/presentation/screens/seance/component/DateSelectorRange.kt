@@ -70,10 +70,10 @@ fun DateSelectorRange(
         items(days.size) { index ->
             val day = days.toList()[index]
             val isSelected = uiState.daySelected == day.dateFormat
-            val hasSeance =
-                uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() == true
+            val hasSeance = uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() ?: false
+
             val isToday = today == day.dateFormat
-            val isAfterToday = day.dateLocal.isAfter(todayDate)
+            val isAfterToday = day.dateLocal?.isAfter(todayDate) ?: false
             val saveStatus = uiState.seancesParJour[day.dateFormat]?.saveAPI
             val dotColor = when {
                 !hasSeance -> null

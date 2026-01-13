@@ -1,5 +1,6 @@
 package com.dyentrack.app.data.repository
 
+import android.util.Log
 import com.dyentrack.app.data.local.datasource.SecureSessionDataSource
 import com.dyentrack.app.data.local.datasource.toDomain
 import com.dyentrack.app.data.local.datasource.toLocal
@@ -78,6 +79,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
         }
         return try {
             val response = api.loginUser(IdentificationRequest(email, password))
+            Log.d("response","${response}")
             val data = response.data
             val user = data.userDTO
             val token = data.token
@@ -93,7 +95,8 @@ class UserConnectionRepositoryImpl @Inject constructor(
             RequestState.Error(
                 if (e.code() == 401) AuthError.UNAUTHORIZED else AuthError.ERROR_API
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.d("ErrorLogin","${e}")
             RequestState.Error(AuthError.ERROR_API)
         }
     }

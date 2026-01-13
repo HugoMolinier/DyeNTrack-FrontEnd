@@ -46,6 +46,7 @@ fun LanguagePage(
     val focusManager = LocalFocusManager.current
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
+    val languageUser = userPreference?.language?: LANGUAGE.FR
     val context = LocalContext.current
     val activity = context.findActivity()
 
@@ -94,7 +95,7 @@ fun LanguagePage(
                             )
 
                             val menu = languageOptions.map { (label, language) ->
-                                val isSelected = userPreference?.language == language
+                                val isSelected = languageUser == language
 
                                 ParameterItem(onClick = {
                                     if (!isSelected) {

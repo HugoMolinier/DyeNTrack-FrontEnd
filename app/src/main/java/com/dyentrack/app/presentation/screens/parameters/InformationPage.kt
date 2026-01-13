@@ -230,17 +230,10 @@ fun InformationPage(
 
 
                 }
-                item {
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-
-                    }
-                }
+                /*
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp),modifier=Modifier.padding(top = 20.dp)) {
                         Text(
                             stringResource(R.string.sex_label),
                             style = MaterialTheme.typography.bodyLarge,
@@ -274,6 +267,8 @@ fun InformationPage(
 
                 }
 
+
+                 */
                 item {
                     Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
 

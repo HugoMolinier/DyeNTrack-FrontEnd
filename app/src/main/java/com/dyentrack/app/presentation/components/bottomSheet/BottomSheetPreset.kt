@@ -21,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.presentation.components.ChipDropDown
 import com.dyentrack.app.presentation.theme.secondaryTextColor
@@ -60,7 +62,9 @@ fun BottomSheetPreset(
                     horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChipDropDown(listOf("Par nom", "Par date de création", "Last Occurence"))
+                    ChipDropDown(listOf(        stringResource(R.string.sort_by_name),
+                        stringResource(R.string.sort_by_creation_date),
+                        stringResource(R.string.sort_by_last_occurrence)))
                     Icon(Icons.Outlined.FilterList, "Croissant")
                 }
 
@@ -124,13 +128,13 @@ fun BottomSheetPreset(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = "Ajouter",
+                                    contentDescription = stringResource(R.string.add),
                                     tint = secondaryTextColor
                                 )
                             }
 
                             Text(
-                                text = "Ajouter",
+                                text = stringResource(R.string.add),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

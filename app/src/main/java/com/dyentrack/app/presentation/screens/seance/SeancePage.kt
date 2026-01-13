@@ -305,7 +305,7 @@ fun SeancePage(
                                         ) {
                                             Icon(
                                                 Icons.Outlined.Lock,
-                                                contentDescription = "Lock Mode",
+                                                contentDescription = stringResource(R.string.mode_lock),
                                                 tint = if (modeActual.isLock()) MaterialTheme.colorScheme.primary else secondaryTextColor,
                                                 modifier = Modifier.size(18.dp)
                                             )

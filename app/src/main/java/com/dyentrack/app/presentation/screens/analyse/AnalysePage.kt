@@ -117,6 +117,7 @@ fun AnalysePage(
     }
     var showRangePicker by remember { mutableStateOf(false) }
 
+    val noPresetText = stringResource(R.string.no_preset)
     val moyenneSetParEx = analyseViewModel.moyenneSetParEx(globalMuscleRate)
     val proportionSetFail = analyseViewModel.proportionSetFail(globalMuscleRate)
     val sommePondUserUnit =
@@ -236,7 +237,6 @@ fun AnalysePage(
                         }
                     }
                     Column {
-                        //debut composant
                         Row(horizontalArrangement = Arrangement.Absolute.SpaceBetween) {
                             Column(
                                 Modifier.padding(vertical = 12.dp),
@@ -492,7 +492,7 @@ fun AnalysePage(
                         .padding(top = 20.dp)
                 ) {
                     Text(
-                        "Par Preset",
+                        stringResource(R.string.per_preset),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -596,7 +596,7 @@ fun AnalysePage(
                         if (noPresetCount > 0) {
                             usageList.add(
                                 Triple(
-                                    "No preset",
+                                    noPresetText,
                                     noPresetCount,
                                     noPresetCount.toFloat() / total * 100f
                                 )
@@ -627,7 +627,7 @@ fun AnalysePage(
                     Column(modifier = Modifier.padding(top = 8.dp, start = 8.dp)) {
 
                         Text(
-                            text = ("Occurence"),
+                            text = stringResource(R.string.occurrence),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
@@ -744,7 +744,7 @@ fun AnalysePage(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
         onClose = { analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         onNew = { analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET) },
-        title = "Preset",
+        title =stringResource(R.string.preset_title),
         presetList = allPreset,
         onClickPreset = { preset ->
             analyseViewModel.choseThisPreset(preset)
@@ -796,10 +796,10 @@ fun AnalysePage(
             })
     }
     BottomSheetText(
-        title = "Information",
+        title = stringResource(R.string.info),
         onClose = { BottomSheetVisibleType.NO },
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.TEXT,
-        text = "On ne prend pas en compte votre poids dans les exercises en poids du corps."
+        text =stringResource(R.string.bodyweight_info)
     )
 
 

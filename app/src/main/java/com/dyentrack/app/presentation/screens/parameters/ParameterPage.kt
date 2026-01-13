@@ -30,20 +30,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.ActiveMenu
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.enums.EmphasisType
 import com.dyentrack.app.domain.model.enums.SizeType
 import com.dyentrack.app.domain.model.enums.VariantType
+import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
+import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
@@ -58,6 +65,12 @@ fun ParameterPage(
 
 
     val authState by authViewModel.authState.collectAsState()
+    var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
+
+    val yesText = stringResource(R.string.yes)
+    val noText = stringResource(R.string.no)
+    val resetTitle = stringResource(R.string.reset_data_title)
+    val resetDescription = stringResource(R.string.reset_data_description)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
@@ -76,8 +89,6 @@ fun ParameterPage(
                     .padding(start = 12.dp, end = 12.dp, top = 8.dp)
                     .weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
-                //debut composant
                 if (!authState.isConnected) {
                     item {
                         Column(
@@ -263,7 +274,20 @@ fun ParameterPage(
                 if (authState.isConnected) {
                     item {
                         Button(
-                            onClick = { authViewModel.logout();navController.navigate("parametre") },
+                            onClick = {
+                                activeMenu = ActiveMenu(
+                                    title =resetTitle,
+                                    description = resetDescription,
+                                    content = listOf(
+                                        MenuItemData(noText, onClick = { activeMenu = null }),
+                                        MenuItemData(yesText, color = Color.Red, onClick = {
+                                            authViewModel.logout()
+                                            activeMenu = null
+                                            navController.navigate("parametre")
+                                        })
+                                    )
+                                )
+                                      },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 12.dp),
@@ -281,5 +305,17 @@ fun ParameterPage(
                 }
             }
         }
+    }
+
+    activeMenu?.let { menu ->
+        CenterMenu(
+            onDismiss = { activeMenu = null },
+
+            title = menu.title,
+            descrition = menu.description,
+            items = menu.content
+
+
+        )
     }
 }

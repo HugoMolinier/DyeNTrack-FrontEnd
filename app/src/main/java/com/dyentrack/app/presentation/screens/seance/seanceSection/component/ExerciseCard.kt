@@ -42,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -131,7 +133,7 @@ fun ExerciseCard(
             buildList {
                 add(
                     MenuItemData(
-                        "Voir Exercice",
+                        stringResource(R.string.exercise_view),
                         {
                             navController.navigate("exercise/${exercise.idExercise}")
                         }
@@ -140,7 +142,7 @@ fun ExerciseCard(
                 if (state.exerciseMode != ExerciseMode.LOCK) {
                     add(
                         MenuItemData(
-                            "Supprimer",
+                            stringResource(R.string.delete),
                             { viewModel.deleteExercice(exerciseId) }
                             , MaterialTheme.typography.bodyMedium,
                             color = Color.Red.copy(alpha = 0.8f)
@@ -277,13 +279,14 @@ fun ExerciseCard(
                                 .padding(bottom = 4.dp, top = 4.dp)
                         ) {
                             Spacer(modifier = Modifier.width(24.dp))
-                            Text("rep", modifier = Modifier
+                            Text(
+                                pluralStringResource(R.plurals.set,1), modifier = Modifier
                                 .weight(1f)
                                 .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
-                            Text("poids ("+userUnit.toString().lowercase()+")", modifier = Modifier
+                            Text("${stringResource(R.string.weight)} (${userUnit.toString().lowercase()})", modifier = Modifier
                                 .weight(1f)
                                 .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall, color=secondaryTextColor)
-                            Text("rir", modifier = Modifier
+                            Text(stringResource(R.string.rir), modifier = Modifier
                                 .width(65.dp)
                                 .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
                         }

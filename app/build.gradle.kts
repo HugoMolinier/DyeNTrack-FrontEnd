@@ -1,3 +1,5 @@
+import io.grpc.internal.SharedResourceHolder.release
+import org.gradle.kotlin.dsl.release
 import java.util.Properties
 
 
@@ -23,8 +25,9 @@ android {
         applicationId = "com.dyentrack.app"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.0"
+
         val secretsFile = rootProject.file("local.properties")
         val properties = Properties()
         properties.load(secretsFile.inputStream())
@@ -40,16 +43,31 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    signingConfigs {
+        create("release") {
+            val secretsFile = rootProject.file("local.properties")
+            val properties = Properties()
+            properties.load(secretsFile.inputStream())
+            storeFile = file(properties.getProperty("RELEASE_STORE_FILE"))
+            storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = properties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = properties.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("release") {
+
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false // false car 1er prod
+            isShrinkResources = false// false car 1er prod
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

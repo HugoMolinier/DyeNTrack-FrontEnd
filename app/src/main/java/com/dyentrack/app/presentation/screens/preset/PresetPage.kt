@@ -127,6 +127,13 @@ fun PresetPage(
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
+    val yesText = stringResource(R.string.yes)
+    val noText = stringResource(R.string.no)
+    val deletePresetTittleText = stringResource(R.string.delete_preset_title)
+    val deletePresetDescriptionText = stringResource(R.string.delete_preset_description)
+
+
+
     DisposableEffect(Unit) {
         onDispose {
             if (state.currentPreset != null && state.isModified) {
@@ -150,7 +157,7 @@ fun PresetPage(
                 })
             }) {
         Column {
-            TopNavigationBar("Preset", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, rightSide = {
+            TopNavigationBar(stringResource(R.string.preset_title), leftIcon = Icons.AutoMirrored.Filled.ArrowBack, rightSide = {
                 Box {
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Default.MoreVert, "", tint = secondaryTextColor)
@@ -159,25 +166,25 @@ fun PresetPage(
                         expanded = expanded,
                         containerColor = MaterialTheme.colorScheme.surface,
                         onDismissRequest = { expanded = false }) {
-                        DropdownMenuItem(text = { Text("Changer le nom") }, onClick = {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.change_name)) }, onClick = {
                             presetPageViewModel.toggleBottomSheet(
                                 BottomSheetVisibleType.INPUTPRESET
                             )
                             expanded = false
                         })
                         DropdownMenuItem(
-                            text = { Text("Supprimer") }, colors = MenuDefaults.itemColors(
+                            text = { Text(stringResource(R.string.delete)) }, colors = MenuDefaults.itemColors(
                                 textColor = Color.Red
                             ), onClick = {
                                 expanded = false
                                 activeMenu = ActiveMenu(
-                                    title = "Supprimer le preset",
-                                    description = "Cela dissociera tout les presets des seances associé ?",
+                                    title = deletePresetTittleText,
+                                    description = deletePresetDescriptionText,
                                     content = listOf(
                                         MenuItemData(
-                                            "Non",
+                                            noText,
                                             onClick = { activeMenu = null }),
-                                        MenuItemData("Oui", color = Color.Red, onClick = {
+                                        MenuItemData(yesText, color = Color.Red, onClick = {
                                             presetViewModel.deletePreset(state.currentPreset!!)
                                             activeMenu = null
                                             navController.popBackStack()
@@ -229,13 +236,13 @@ fun PresetPage(
                                 )
 
                                 Text(
-                                    "Crée par vous",
+                                    stringResource(R.string.created_by_you),
                                     style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                 )
                                 Row {
+                                    val numberExercise= currentPreset.presetSeanceExerciseVO?.size ?: 0
                                     Text(
-                                        text = (currentPreset.presetSeanceExerciseVO?.size
-                                            ?: 0).toString() + " exercise • ",
+                                        text = (numberExercise.toString() + " ${pluralStringResource(R.plurals.exercise,numberExercise)} • "),
                                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                     )
                                     val sumSet =
@@ -288,7 +295,7 @@ fun PresetPage(
                                     }) {
                                     Icon(
                                         Icons.Outlined.Edit,
-                                        contentDescription = "Voir stats",
+                                        contentDescription = stringResource(R.string.edit_info),
                                         tint = if (modeActual.isNormal()) MaterialTheme.colorScheme.primary else secondaryTextColor,
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -353,7 +360,7 @@ fun PresetPage(
                                             stringResource(R.string.exercise_view),
                                             { navController.navigate("exercise/${exInPreset.idExercise}") }),
                                         MenuItemData(
-                                            "Supprimer",
+                                            stringResource(R.string.delete),
                                             { presetPageViewModel.deleteExercice(exInPreset.idExercise) },
                                             MaterialTheme.typography.bodyMedium,
                                             modeActual.isNormal(),
@@ -453,7 +460,7 @@ fun PresetPage(
                                         }
                                         val list = listOf(
                                             ParameterItem(
-                                                label = "Nombre de série", composableRight = {
+                                                label = stringResource(R.string.number_of_sets), composableRight = {
                                                     Row(
                                                         modifier.height(40.dp),
                                                         verticalAlignment = Alignment.CenterVertically
@@ -488,7 +495,7 @@ fun PresetPage(
 
                                                     }
                                                 }), ParameterItem(
-                                                label = "Fourchette de rep", composableRight = {
+                                                label = stringResource(R.string.rep_range), composableRight = {
                                                     Row(
                                                         modifier = Modifier.height(40.dp),
                                                         verticalAlignment = Alignment.CenterVertically
@@ -524,7 +531,7 @@ fun PresetPage(
                                                             })
 
                                                         Text(
-                                                            "à",
+                                                            stringResource(R.string.to),
                                                             modifier = Modifier.padding(horizontal = 20.dp),
                                                             style = MaterialTheme.typography.bodyMedium
                                                         )
@@ -636,7 +643,7 @@ fun PresetPage(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    "Ajouter un exercice en éditant le preset",
+                                    stringResource(R.string.add_exercise_hint),
                                     style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                                 )
 
@@ -722,8 +729,8 @@ fun PresetPage(
             presetPageViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
 
         },
-        title = "Renommer le Preset",
-        buttonText = "Renommer",
+        title = stringResource(R.string.rename_preset),
+        buttonText = stringResource(R.string.rename),
         inputDefaultValue = state.currentPreset?.name
     )
 

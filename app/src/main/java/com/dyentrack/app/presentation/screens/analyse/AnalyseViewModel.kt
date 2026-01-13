@@ -144,8 +144,10 @@ class AnalyseViewModel @Inject constructor(
         return _uiState.value.muscleRateByDay.mapNotNull { (dayStr, dayData) ->
 
             //  Filtre date
-            allSeanceByDay[dayStr]?.second?.takeIf { !it.isBefore(start) && !it.isAfter(end) }
+            allSeanceByDay[dayStr]?.second
+                ?.takeIf { it != null && !it.isBefore(start) && !it.isAfter(end) }
                 ?: return@mapNotNull null
+
 
             //  Filtre exercices
             val filteredExercises = dayData.perExerciseStat.filterKeys { exerciseId ->

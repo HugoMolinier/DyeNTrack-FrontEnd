@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.R
@@ -67,12 +68,13 @@ fun CommentRow(
 
 
                     Text(
-                        "Note :", style = MaterialTheme.typography.bodySmall
+                        stringResource(R.string.note_label),
+                        style = MaterialTheme.typography.bodySmall
                     )
                     Text(
                         infoExercise.note, style = MaterialTheme.typography.bodySmall.copy(
-                                color = secondaryTextColor, fontWeight = FontWeight.Medium
-                            )
+                            color = secondaryTextColor, fontWeight = FontWeight.Medium
+                        )
                     )
                 }
             }
@@ -85,45 +87,46 @@ fun CommentRow(
 
 
                     Text(
-                        "Fourchette :", style = MaterialTheme.typography.bodySmall
+                        stringResource(R.string.range_label),
+                        style = MaterialTheme.typography.bodySmall
                     )
                     Text(
                         preset.formatSubtitle(
-                        repPlural = { count ->
-                            context.resources.getQuantityString(
-                                R.plurals.rep, count, count
-                            )
-                        }), style = MaterialTheme.typography.bodySmall.copy(
+                            repPlural = { count ->
+                                context.resources.getQuantityString(
+                                    R.plurals.rep, count, count
+                                )
+                            }), style = MaterialTheme.typography.bodySmall.copy(
                             color = secondaryTextColor, fontWeight = FontWeight.Medium
-                        ))
+                        )
+                    )
                 }
             }
             if (!hasNote && !hasRange) {
-                if (!hasNote && !hasRange) {
+                Text(
+                    stringResource(R.string.no_note_or_range_found),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = secondaryTextColor, fontWeight = FontWeight.Medium
+                    ),
+                    modifier = Modifier.padding(4.dp)
+                )
+
+                Button(
+                    onClick = {
+                        onClick.invoke()
+                    },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
                     Text(
-                        "Aucune note ou fourchette (lié à un preset) trouvée",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = secondaryTextColor, fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.padding(4.dp)
+                        stringResource(R.string.add_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
 
-                    Button(
-                        onClick = {
-                            onClick.invoke()
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            "Ajouter une note",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                    }
                 }
             }
 

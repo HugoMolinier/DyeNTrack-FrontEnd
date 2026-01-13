@@ -180,7 +180,7 @@ fun PhysioBox(
                     )
                 )
                 Text(
-                    "73.1 kg (2025-12-12)", style = MaterialTheme.typography.bodySmall.copy(
+                    "NaN (DD-MM-YYYY)", style = MaterialTheme.typography.bodySmall.copy(
                         color = secondaryTextColor, fontSize = 10.sp
                     )
                 )

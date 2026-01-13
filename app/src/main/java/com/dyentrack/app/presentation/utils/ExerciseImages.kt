@@ -5,6 +5,7 @@ import com.dyentrack.app.R
 object ExerciseImages {
     val map: Map<Long, Int> = mapOf(
         1L to R.drawable.exercise_bench,
+        3L to R.drawable.exercise_traction,
         4L to R.drawable.rowing,
         5L to R.drawable.exercise_squat,
         6L to R.drawable.exercise_deadlift,
@@ -24,6 +25,8 @@ object ExerciseImages {
         26L to R.drawable.tirageverticalla,
         27L to R.drawable.rowing,
         28L to R.drawable.exercise_curlmarteau,
+        32L to R.drawable.exercise_neckcurl,
+        33L to R.drawable.exercise_curlincline
 
 
         )
