@@ -121,6 +121,7 @@ dependencies {
 
     implementation(libs.play.services.ads.api)
     implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.foundation.layout)
 
 
     // Navigation

@@ -9,5 +9,6 @@ class AdViewModel : ViewModel() {
         AdRequest.Builder().build()
     }
 
+    val adTestUnitId = "ca-app-pub-3940256099942544/6300978111"
     val adUnitId = "ca-app-pub-6460148032129069/7574655455"
 }
