@@ -16,8 +16,7 @@ import com.google.android.gms.ads.AdView
 
 @Composable
 fun AdaptiveAdBanner(
-    modifier: Modifier = Modifier,
-    adViewModel: AdViewModel
+    modifier: Modifier = Modifier, adViewModel: AdViewModel
 ) {
     val context = LocalContext.current
     var adSize by remember { mutableStateOf<AdSize?>(null) }
@@ -26,8 +25,7 @@ fun AdaptiveAdBanner(
         val widthPx = constraints.maxWidth
         if (adSize == null && widthPx > 0) {
             adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-                context,
-                (widthPx / LocalContext.current.resources.displayMetrics.density).toInt()
+                context, (widthPx / LocalContext.current.resources.displayMetrics.density).toInt()
             )
         }
 
