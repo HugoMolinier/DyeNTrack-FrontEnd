@@ -13,6 +13,8 @@ interface UserConnectionRepository {
     fun getToken(): String
     fun logout()
 
+    suspend fun deleteAll(): RequestState
+
 
     suspend fun loginUser(
         email: String, password: String

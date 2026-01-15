@@ -167,6 +167,18 @@ class UserConnectionRepositoryImpl @Inject constructor(
         updateAuthState()
     }
 
+    override suspend fun deleteAll(): RequestState {
+        return try {
+
+                 api.deleteUser()
+                logout()
+                RequestState.Success
+        } catch (e: Exception) {
+            Log.d("dsds","$e")
+            RequestState.Error(AuthError.ERROR_API)
+        }
+    }
+
     /**
      * 2 caractères avant @, au moins 1 caractère entre @ et ., au moins 1 caractère après .
      */

@@ -61,9 +61,11 @@ class MasterDataRepositoryImpl @Inject constructor(
         }
 
 
-        val fallbackData = getFallbackMasterData()
-        cachedMasterData = fallbackData
-        _masterDataFlow.value = fallbackData
+        if(cachedMasterData==null) {
+            val fallbackData = getFallbackMasterData()
+            cachedMasterData = fallbackData
+            _masterDataFlow.value = fallbackData
+        }
     }
 
 

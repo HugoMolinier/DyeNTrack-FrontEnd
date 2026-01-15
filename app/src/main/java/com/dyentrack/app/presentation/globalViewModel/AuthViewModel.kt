@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.domain.model.AuthState
 import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.domain.repository.UserConnectionRepository
+import com.dyentrack.app.domain.usecase.auth.DeleteUserUseCase
 import com.dyentrack.app.domain.usecase.auth.LoginUserUseCase
 import com.dyentrack.app.domain.usecase.auth.LogoutUseCase
 import com.dyentrack.app.domain.usecase.auth.RegisterUserUseCase
@@ -22,6 +23,7 @@ class AuthViewModel @Inject constructor(
     private val registerUserUseCase: RegisterUserUseCase,
     private val updateUserUseCase: UpdateUserUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val deleteUserUseCase: DeleteUserUseCase,
     repository: UserConnectionRepository
 
 ) : ViewModel() {
@@ -56,6 +58,16 @@ class AuthViewModel @Inject constructor(
             _requestState.value = RequestState.Loading
             _requestState.value = updateUserUseCase(pseudo, height, sexe, birthDate)
         }
+
+    fun deleteAll() {
+        viewModelScope.launch {
+            _requestState.value = RequestState.Loading
+
+            _requestState.value = deleteUserUseCase()
+
+
+        }
+    }
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {

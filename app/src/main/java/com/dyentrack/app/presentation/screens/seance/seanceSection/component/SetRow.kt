@@ -187,6 +187,7 @@ fun SetRow(
             text = chargeState,
             enabled = !lockInput,
             replaceZeroToNull = true,
+            placeholder = "0.0",
             modifier = Modifier.weight(1f),
             maxCaracter = 6,
             keyboardType = KeyboardType.Decimal,
@@ -211,6 +212,7 @@ fun SetRow(
             modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,
             maxCaracter = 2,
+            placeholder = "1",
             onValueChange = {
                 viewModel.updateSet(
                     exerciseId = exerciseId,

@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,10 +43,8 @@ import com.dyentrack.app.domain.model.enums.EmphasisType
 import com.dyentrack.app.domain.model.enums.VariantType
 import com.dyentrack.app.presentation.components.CenterMenu
 import com.dyentrack.app.presentation.components.CustomButton
-import com.dyentrack.app.presentation.components.DatePickerInput
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.components.MenuItemData
-import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 
@@ -106,13 +103,14 @@ fun InformationPage(
     val yesLabel = stringResource(R.string.yes)
     val noLabel = stringResource(R.string.no)
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectTapGestures(onTap = {
-                focusManager.clearFocus()
-            })
-        }) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }) {
         Column {
 
             TopNavigationBar(
@@ -131,7 +129,9 @@ fun InformationPage(
                                 MenuItemData(yesLabel, color = Color.Red, onClick = {
                                     navController.popBackStack()
 
-                                })))
+                                })
+                            )
+                        )
 
                     } else {
                         navController.popBackStack()
@@ -154,7 +154,9 @@ fun InformationPage(
                                         MenuItemData("Oui", color = Color.Red, onClick = {
                                             navController.navigate("home")
 
-                                        })))
+                                        })
+                                    )
+                                )
 
                             } else {
                                 navController.navigate("home")
@@ -188,6 +190,7 @@ fun InformationPage(
                         )
                     }
                 }
+                /*
                 item {
 
                     Column(
@@ -231,7 +234,7 @@ fun InformationPage(
 
                 }
 
-                /*
+
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp),modifier=Modifier.padding(top = 20.dp)) {
                         Text(
@@ -287,6 +290,40 @@ fun InformationPage(
                                     color = Color.Red, fontSize = 12.sp
                                 )
                             )
+                        }
+                    }
+
+
+                }
+
+                item {
+                    Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CustomButton(
+                                "Supprimer mon compte",
+                                enable = requestState !is RequestState.Loading,
+                                isLoading = requestState is RequestState.Loading,
+                                variant = VariantType.OUTLINED,
+                                emphasis = EmphasisType.DESTRUCTIVE,
+                                onClick = {
+                                    activeMenu = ActiveMenu(
+                                        title = "Supprimer mon compte",
+                                        description = "Cette action supprimera votre compte et l'entiereté de ces données. Etre vous sur de continué ?",
+                                        content = listOf(
+                                            MenuItemData(noLabel, onClick = { activeMenu = null }),
+                                            MenuItemData(yesLabel, color = Color.Red, onClick = {
+                                                authViewModel.deleteAll()
+                                                activeMenu = null
+
+                                            })
+                                        )
+                                    )
+
+                                })
                         }
                     }
 

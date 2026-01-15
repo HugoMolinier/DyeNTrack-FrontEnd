@@ -58,7 +58,7 @@ object MasterDataFallback {
 
         Exercise(
             idExercise = 1,
-            nameFR = "Développé Couché Local",
+            nameFR = "Développé Couché",
             nameEN = "Bench Press",
             muscleInfos = listOf(
                 MuscleInfos(1), MuscleInfos(5), MuscleInfos(7)

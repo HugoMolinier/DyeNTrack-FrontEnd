@@ -73,6 +73,10 @@ fun CustomButton(
             backgroundColor = addColor.TertiaOne
             contentColor = MaterialTheme.colorScheme.onSurface
         }
+        EmphasisType.DESTRUCTIVE -> {
+            backgroundColor = Color.Red
+            contentColor = Color.Red
+        }
     }
 
     val finalBackground = if (variant == VariantType.OUTLINED) Color.Transparent else backgroundColor

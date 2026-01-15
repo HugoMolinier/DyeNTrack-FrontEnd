@@ -54,6 +54,10 @@ interface ApiInterface {
         @Body request: UserUpdate
     ): ApiResponse<User>
 
+    @DELETE("user/delete")
+    suspend fun deleteUser(): retrofit2.Response<Unit>
+
+
 
     @DELETE("preset-seances/delete/{id}")
     suspend fun deletePreset(
