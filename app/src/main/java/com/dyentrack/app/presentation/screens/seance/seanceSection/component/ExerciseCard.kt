@@ -3,11 +3,14 @@ package com.dyentrack.app.presentation.screens.seance.seanceSection.component
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -17,14 +20,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.QueryStats
-import androidx.compose.material.icons.filled.Reorder
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Reorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,24 +39,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.SetSide
+import com.dyentrack.app.domain.model.InfoExerciseUser
+import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.ExerciseMode
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
+import com.dyentrack.app.domain.model.getName
+import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.ChipDropDown
+import com.dyentrack.app.presentation.components.LeftIcon
 import com.dyentrack.app.presentation.components.MenuItemData
-import com.dyentrack.app.presentation.components.SubTextEmphasis
-import com.dyentrack.app.presentation.screens.seance.viewModel.ExerciseMode
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceUiState
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
-import com.dyentrack.app.presentation.theme.TertiaOne
+import com.dyentrack.app.presentation.screens.seance.ExpandSection
+import com.dyentrack.app.presentation.screens.seance.SeanceUiState
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.formatForDisplay
+import com.dyentrack.app.presentation.utils.toIsoDate
+import java.time.LocalDate
 import kotlin.math.roundToInt
 
 
@@ -62,93 +76,83 @@ fun ExerciseCard(
     state: SeanceUiState,
     viewModel: SeanceViewModel,
     navController: NavController,
-    lateriteNameMap: List<String>,
-    equipmentNameMap: List<String>
+    userUnit: MesureUnit,
+    infoExercise: InfoExerciseUser?,
+    preset: Preset?,
+    dragModifier: Modifier = Modifier
 ) {
     val exerciseId = exInSeance.exerciseId
-    val exercise =
-        viewModel.masterData?.officialExercise?.find { it.idExercise == exerciseId } ?: return
-    val lateriteName =
-        viewModel.masterData?.lateralites?.find { it.id == exInSeance.laterite }?.nameFR ?: ""
-    val equipmentName =
-        viewModel.masterData?.equipment?.find { it.id == exInSeance.equipment }?.nameFR ?: ""
+    val language = viewModel.languageUser
+    val exercise = state.masterDataMaps?.exerciseMap?.get( exerciseId ) ?: return
+
+    val selectedLateriteId = exInSeance.laterite
+    val selectedEquipment = exInSeance.equipment
 
     val exerciseSets = state.seancesParJour[state.daySelected]?.setsMap[exerciseId]
 
-    val isLock = (state.exerciseMode == ExerciseMode.LOCK)
-    val textSub = buildString {
-        var chargePres: Double? = null
-        var stop = false
-        exerciseSets?.forEach {
-            if (stop) return@forEach
-            if (it.charge != chargePres && chargePres != null) {
-                append(chargePres, "kg");append(" | ")
-            }
-            append(it.reps ?: " ")
-            if (it.side == SetSide.LEFT) append("/", it.linkedRightSet?.reps ?: "_")
-            append(" - ")
-            chargePres = it.charge
-            if (this.length >= 40) {
-                append("...")
-                stop = true
-            }
-        }
-
-        if (!stop && chargePres != null) {
-            append("${chargePres}kg")
-        }
-    }
-
-
-
+    val modeActual = (state.exerciseMode )
+    val textSub= exerciseSets.formatForDisplay(userUnit)
     CardWithContent(
-        modifier = Modifier.padding(10.dp, 4.dp),
-        exercise.nameFR,
+        modifier = Modifier.padding(start = 10.dp, bottom = 4.dp, top = 4.dp),
+        exercise.getName(language),
         canExtend = state.exerciseMode != ExerciseMode.CHANGE_ORDER,
         subText = textSub,
-        leftIcon = ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent,
+        leftIcon = LeftIcon.Single(ExerciseImages.map[exercise.idExercise]?:   R.drawable.logotransparent),
         expanded = state.expandedExerciseId == exerciseId,
         onExpandChange = { expanded ->
             viewModel.expandExercise(if (expanded) exerciseId else null)
         },
 
         componentRight = {
-            Icon(
-                if (state.exerciseMode != ExerciseMode.CHANGE_ORDER) {
-                    if (state.expandedExerciseId == exerciseId) {
-                        Icons.Default.ArrowDropUp
+            if (modeActual.isChangeOrder()) {
+                Box(
+                    modifier = dragModifier
+                        .fillMaxHeight()
+                        .width(80.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        Icons.Outlined.Reorder,
+                        contentDescription = "Déplacer l'exercice",
+                        tint = secondaryTextColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }else {
+                Icon(
+                    if (state.expandedExerciseId == exInSeance.exerciseId) {
+                        Icons.Outlined.KeyboardArrowUp
                     } else {
-                        Icons.Default.ArrowDropDown
-                    }
-                } else {
-                    Icons.Default.Reorder
-                }, ""
-            )
+                        Icons.Outlined.KeyboardArrowDown
+                    },
+                    "", modifier = Modifier.size(20.dp)
+                )
+            }
         },
         menuOnLongClick = if (state.exerciseMode != ExerciseMode.CHANGE_ORDER) {
             buildList {
                 add(
                     MenuItemData(
-                        "Voir Exercice",
+                        stringResource(R.string.exercise_view),
                         {
-                            navController.currentBackStackEntry?.savedStateHandle?.set("exercise", exercise)
-                            navController.navigate("exercise")
+                            navController.navigate("exercise/${exercise.idExercise}")
                         }
                     )
                 )
                 if (state.exerciseMode != ExerciseMode.LOCK) {
                     add(
                         MenuItemData(
-                            "Supprimer",
+                            stringResource(R.string.delete),
                             { viewModel.deleteExercice(exerciseId) }
-                            , MaterialTheme.typography.bodyMedium.copy(color = Color.Red.copy(alpha = 0.8f))
+                            , MaterialTheme.typography.bodyMedium,
+                            color = Color.Red.copy(alpha = 0.8f)
                         )
                     )
                 }
             }
         } else null,
 
-        subTextEmphasis = SubTextEmphasis.SECONDARY,
+        subTextEmphasis = EmphasisType.SECONDARY,
         childrenForExtend = {
             Column(
                 Modifier
@@ -158,109 +162,137 @@ fun ExerciseCard(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 4.dp)
                         .height(32.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
 
                 ) {
-                    if (!isLock) {
-                        IconButton(
-                            onClick = { viewModel.addSetToExercise(exerciseId, lateriteName) },
-                            Modifier
-                                .border(
-                                    1.dp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape
+                    Box {
+                        if (!modeActual.isLock()) {
+                            IconButton(
+                                onClick = {
+                                    viewModel.addSetToExercise(
+                                        exerciseId,
+                                        selectedLateriteId
+                                    )
+                                },
+                                Modifier
+                                    .border(
+                                        1.dp,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape
+                                    )
+                                    .height(24.dp)
+                                    .width(24.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Ajouter",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(4.dp)
                                 )
-                                .height(24.dp)
-                                .width(24.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Ajouter",
-
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(4.dp) // espace autour de l'icône
-                            )
+                            }
                         }
                     }
 
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.End)) {
+                        ChipDropDown(
+                            listOfSelectableItem = state.masterDataMaps.lateraliteMap.values.toList(),
 
-                    ChipDropDown(
-                        listOfSelectableItem = lateriteNameMap,
 
+                            defaultSelected = state.masterDataMaps.lateraliteMap[selectedLateriteId] ?: "",
+                            canChange = !modeActual.isLock()
 
-                        defaultSelected = lateriteName,
-                        canChange = !isLock
+                        ) { selectedName ->
+                            val lateriteId =
+                                state.masterDataMaps.lateraliteMap.entries.firstOrNull { it.value == selectedName }?.key
+                                    ?: 0L
+                            viewModel.updateLaterite(exInSeance.exerciseId, lateriteId)
+                        }
+                        ChipDropDown(
+                            listOfSelectableItem = exercise.equipmentInfo
+                                ?.mapNotNull { idEquipment -> state.masterDataMaps?.equipmentMap?.get(idEquipment.idEquipment) }
+                                ?: emptyList(),
+                            defaultSelected = state.masterDataMaps.equipmentMap[selectedEquipment],
+                            canChange = !modeActual.isLock()
+                        ) { selectedName ->
+                            val equipmentId =
+                                state.masterDataMaps.equipmentMap.entries.firstOrNull { it.value == selectedName }?.key
+                                    ?: 0L
+                            viewModel.updateEquipment(exInSeance.exerciseId, equipmentId)
+                        }
 
-                    ) { selected ->
-                        val lateriteId = viewModel.masterData?.lateralites
-                            ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
-                        viewModel.updateLaterite(exInSeance.exerciseId, lateriteId)
-                    }
-                    ChipDropDown(
-                        listOfSelectableItem = equipmentNameMap,
-                        defaultSelected = equipmentName,
-                        canChange = !isLock
-                    ) { selected ->
-                        val equipmentId = viewModel.masterData?.equipment
-                            ?.firstOrNull { it.nameFR == selected }?.id ?: 0L
-                        viewModel.updateEquipment(exInSeance.exerciseId, equipmentId)
-                    }
-                    IconButton(
-                        onClick = {
-                            viewModel.toggleShowAnalyseData()
-                            viewModel.getLastExercicePerfBetweenDate(
-                                state.daySelected,
-                                "2025-10-20"
-                            )
-                        },
-                        Modifier
-                            .border(
-                                1.dp,
-                                color = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else TertiaOne,
-                                shape = CircleShape
-                            )
-
-                            .size(22.dp)
-                    ) {
                         Icon(
                             Icons.Default.QueryStats,
                             contentDescription = "Voir stats",
-                            tint = if (state.showAnalyseData) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(4.dp)
+                            tint = if (state.showExpand== ExpandSection.ANALYSE) MaterialTheme.colorScheme.primary else secondaryTextColor,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.toggleShowAnalyseData(ExpandSection.ANALYSE)
+                                        viewModel.getLastExercicePerfBetweenDate(
+                                            state.daySelected,
+                                            LocalDate.parse(state.daySelected).minusDays(90)
+                                                .toIsoDate()
+                                        )
+                                    },
+                                )
                         )
-                    }
-                    IconButton(
-                        onClick = {
 
 
-                        },
-                        Modifier
-                            .border(
-                                1.dp,
-                                color = TertiaOne,
-                                shape = CircleShape
-                            )
-                            .size(30.dp)
-                    ) {
                         Icon(
-                            Icons.Default.Info,
-                            contentDescription = "Ajouter",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(4.dp)
-                        )
-                    }
+                            Icons.Outlined.Info,
 
+                            contentDescription = "Ajouter",
+                            tint = if (state.showExpand== ExpandSection.COMMENT) MaterialTheme.colorScheme.primary else secondaryTextColor,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.toggleShowAnalyseData(ExpandSection.COMMENT)
+                                    },
+                                )
+                        )
+
+                    }
 
                 }
-                AnalyseRow(viewModel, state)
+                if(state.showExpand== ExpandSection.ANALYSE) {
+                    AnalyseRow(viewModel, state, userUnit, language)
+                }
+                if(state.showExpand== ExpandSection.COMMENT) {
+                    CommentRow(infoExercise, preset?.presetSeanceExerciseVO?.find { it.idExercise==exerciseId },    onClick={   navController.navigate("exercise/${exercise.idExercise}")})
+                }
 
 
                 Column {
+                    if (exerciseSets?.isNotEmpty()==true){
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(15.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp, top = 4.dp)
+                        ) {
+                            Spacer(modifier = Modifier.width(24.dp))
+                            Text(
+                                pluralStringResource(R.plurals.set,1), modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
+                            Text("${stringResource(R.string.weight)} (${userUnit.toString().lowercase()})", modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall, color=secondaryTextColor)
+                            Text(stringResource(R.string.rir), modifier = Modifier
+                                .width(65.dp)
+                                .padding(start = 8.dp),style=MaterialTheme.typography.bodySmall,color=secondaryTextColor)
+                        }
+                    }
                     exerciseSets?.forEachIndexed { index, set ->
-                        key(set) {
+                        key(set.id,set.side) {
                             var offsetY by remember { mutableFloatStateOf(0f) }
                             var isDragging by remember { mutableStateOf(false) }
                             val animOffset =
@@ -279,10 +311,12 @@ fun ExerciseCard(
                                     )
                                     .offset { IntOffset(0, offsetY.roundToInt()) }
                                     .then(
-                                        if (!isLock) {
+                                        if (!modeActual.isLock()) {
                                             Modifier.pointerInput(Unit) {
                                                 detectDragGesturesAfterLongPress(
-                                                    onDragStart = { isDragging = true },
+                                                    onDragStart = {
+                                                        isDragging = true
+                                                    },
                                                     onDrag = { change, dragAmount ->
                                                         offsetY += dragAmount.y
                                                         change.consume()
@@ -314,20 +348,19 @@ fun ExerciseCard(
                                                     onDragCancel = {
                                                         offsetY = 0f
                                                         isDragging = false
-                                                    }
-                                                )
+                                                    })
                                             }
-                                        } else Modifier
-                                    )
+                                        } else Modifier)
                             ) {
                                 SetRow(
                                     set,
                                     index,
-                                    setRightForUni = set.linkedRightSet,
-                                    lockInput = isLock,
-                                    onClickBadge = if (index == exerciseSets.lastIndex) {
-                                        { viewModel.deleteLastSet(exerciseId) }
-                                    } else null
+                                    lockInput = modeActual.isLock(),
+                                    onClickBadge =
+                                        { viewModel.deleteSet(exerciseId,set.id) },
+                                    exerciseId = exerciseId,
+                                    userUnit=userUnit
+
                                 )
                             }
                         }

@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.network
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -10,31 +9,24 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL: String = "http://4.233.56.101:8080/api/"
-    private const val TestToken : String ="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6IjEiLCJpYXQiOjE3NjE1OTEyMzcsImV4cCI6MTc2MjE5NjAzN30.Ipr7gQcA_iAh-y0is8jW8Fyov9lKRNtYS_PJAvqo1qE"
-    private const val AccountPersPerfToken: String = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjIsInN1YiI6IjIiLCJpYXQiOjE3NjU2NTM3NTIsImV4cCI6MTc2ODI0NTc1Mn0.HCmf93Gp-Mx-2PBpIxLobMzwcOTTpr2BbqBuPapcMVY"
-    private const val Apikey : String ="gK7WOGlkQQxEiDQeYxweqbKluRfulBxkXHzqUP8k3U0="
+    const val BASE_URL: String = "http://4.233.56.101:8080/api/"
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val requestBuilder = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer $AccountPersPerfToken")
-                    .addHeader("X-API-KEY", Apikey)
-                    .addHeader("Accept", "application/json")
-                val request = requestBuilder.build()
-                Log.d("REQUEST API", " : ${request}")
-                chain.proceed(request)
-            }
-            .build()
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor
+    ): OkHttpClient {
+
+        return OkHttpClient.Builder().retryOnConnectionFailure(false)
+            .addInterceptor(authInterceptor).connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS).build()
     }
 
     @Provides
@@ -44,11 +36,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideApiInterface(client: OkHttpClient, gson: Gson): ApiInterface {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
+        return Retrofit.Builder().baseUrl(BASE_URL).client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson)).build()
             .create(ApiInterface::class.java)
     }
 }

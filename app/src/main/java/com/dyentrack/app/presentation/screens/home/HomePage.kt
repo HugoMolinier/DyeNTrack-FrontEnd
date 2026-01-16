@@ -2,13 +2,17 @@ package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,41 +24,58 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dyentrack.app.R
 import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.MasterDataStatic
-import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.presentation.components.ButtonEmphasis
-import com.dyentrack.app.presentation.components.ButtonVariant
+import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.EmphasisType
+import com.dyentrack.app.domain.model.enums.VariantType
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.CardWithContent
 import com.dyentrack.app.presentation.components.CustomButton
+import com.dyentrack.app.presentation.components.ObjectifBox
 import com.dyentrack.app.presentation.components.ProgressLine
-import com.dyentrack.app.presentation.components.RadarChartMP
-import com.dyentrack.app.presentation.screens.home.component.ObjectifBox
-import com.dyentrack.app.presentation.theme.TertiaOne
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetInput
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
+import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
+import com.dyentrack.app.presentation.components.chart.RadarChartMP
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
+import com.dyentrack.app.presentation.globalViewModel.PresetViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @SuppressLint("FrequentlyChangingValue")
@@ -62,35 +83,51 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun HomePage(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
-    navController: NavController
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
+    presetViewModel: PresetViewModel = hiltViewModel<PresetViewModel>()
 ) {
 
+    val userPreference by userPreferenceViewModel.userPreference.collectAsState()
+    val presetList by presetViewModel.presetFlow.collectAsState()
+    LaunchedEffect(Unit) {
+        presetViewModel.navigateToPreset.collect { preset ->
+            Log.d("presetNav", "${preset}")
+            if (preset != null) navController.navigate("preset/${preset.idLocal}")
+        }
+    }
+
+    val authState by authViewModel.authState.collectAsState()
     val state by homeViewModel.uiState.collectAsState()
-    val pseudo = "Pearlt"
-    val objectifStep = 15000
-    val objectifCal = 3000
-    val objectifsommeil = 8.0
+    val objectifStep = userPreference?.objStep ?: 0
+    val objectifCal = userPreference?.objCalorie ?: 0
+    val objectifsommeil = userPreference?.objHourSleep ?: 0.0
 
-    var pourcentage = 0f
-    if (state.todaySeance?.seanceTrack?.plannedExercises?.isNotEmpty() == true) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.nutritionTrack?.calories !=0 && state.todaySeance?.nutritionTrack?.calories !=null ) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.physioTrack?.step !=0 &&state.todaySeance?.physioTrack?.step !=null) {
-        pourcentage += 0.25f
-    }
-    if (state.todaySeance?.physioTrack?.hourOfSleep !=0.0&&state.todaySeance?.physioTrack?.hourOfSleep !=null) {
-        pourcentage += 0.25f
-    }
+    val masterData by homeViewModel.masterData.collectAsState()
 
-    val muscleName: Map<Long, String> = homeViewModel.masterData?.muscles
-        ?.associate { muscle -> muscle.id to muscle.nameFR }
-        ?: emptyMap()
+    val infoMapUser by infoUserViewModel.infoExerciseUserFlow.collectAsState()
+
+    val context = LocalContext.current
+    val textToast = stringResource(R.string.favorite_login_prompt)
+    val language = homeViewModel.languageUser
+    val pourcentage = remember(state.todaySeance, objectifCal, objectifStep, objectifsommeil) {
+        var p = 0f
+        state.todaySeance?.let { seance ->
+            if (seance.seanceTrack?.plannedExercises?.isNotEmpty() == true) p += 0.25f
+            if ((seance.nutritionTrack?.calories ?: 0) > objectifCal) p += 0.25f
+            if ((seance.physioTrack?.step ?: 0) > objectifStep) p += 0.25f
+            if ((seance.physioTrack?.hourOfSleep ?: 0.0) > objectifsommeil) p += 0.25f
+        }
+        p
+    }
+    val widthScreen = LocalConfiguration.current.screenWidthDp.toFloat()
+
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier
-            .fillMaxWidth()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             item {
                 Row(
                     modifier = Modifier
@@ -100,18 +137,17 @@ fun HomePage(
                 ) {
                     Column {
                         Text(
-                            "Bonjour,",
+                            stringResource(R.string.hello) + ",",
                             style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                         )
                         Text(
-                            "$pseudo !",
+                            "${authState.user?.pseudo ?: stringResource(R.string.prepare_day)} !",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier= Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                     IconButton(
-                        { navController.navigate("parametre") }, modifier = Modifier
-                            .size(36.dp)
+                        { navController.navigate("parametre") }, modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
@@ -122,37 +158,101 @@ fun HomePage(
                     }
                 }
             }
-            item { Column(Modifier.fillMaxWidth().padding(start = 24.dp,end= 24.dp,top=32.dp,bottom=40.dp), verticalArrangement = Arrangement.spacedBy(8.dp) ){
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom){
-                    Text(
-                        "Données du jour ",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600 )
-                    )
-                    Text(
-                            "${(pourcentage*100).toInt()} %",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600),
-                    )
+            if (!authState.isConnected) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, top = 20.dp, end = 20.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium
+                            )
+                            .height(
+                                IntrinsicSize.Min
+                            )
+                            .clickable(onClick = { navController.navigate("parametre") }),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.cloud_save),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                stringResource(R.string.cloud_save_desc),
+                                color = secondaryTextColor,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+
+                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.welcope),
+                            "",
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(end = 16.dp)
+                                .align(Alignment.Bottom)
+                        )
+                    }
                 }
-                ProgressLine(pourcentage, height = 8.dp)
+            }
+            item {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 40.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            stringResource(R.string.daily_data),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W600)
+                        )
+                        Text(
+                            "${(pourcentage * 100).toInt()} %",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600),
+                        )
+                    }
+                    ProgressLine(pourcentage, height = 8.dp)
 
 
-            } }
+                }
+            }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     val listState = rememberLazyListState()
 
                     LazyRow(
                         state = listState,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true||state.todaySeance?.seanceTrack?.plannedExercises == null) {
+                        if ((state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true || state.todaySeance?.seanceTrack?.plannedExercises == null) && state.last5DaysKeys.isNotEmpty()) {
                             item {
+
                                 Box(
                                     modifier = Modifier
-                                        .size(88.dp).clip(MaterialTheme.shapes.medium)
-                                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
+                                        .size(88.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(
+                                                alpha = 1f
+                                            )
+                                        )
                                         .clickable(onClick = { navController.navigate("seance") }),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -163,10 +263,10 @@ fun HomePage(
                                         Icon(
                                             imageVector = Icons.Default.Add,
                                             tint = MaterialTheme.colorScheme.background,
-                                            contentDescription = "ajouter une séance"
+                                            contentDescription = stringResource(R.string.add)
                                         )
                                         Text(
-                                            "Ajouter une séance",
+                                            stringResource(R.string.add_session),
                                             textAlign = TextAlign.Center,
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 color = MaterialTheme.colorScheme.background,
@@ -178,14 +278,24 @@ fun HomePage(
                             }
                         }
                         item {
-                            val steps = remember(state.todaySeance) { state.todaySeance?.physioTrack?.step ?: 0 }
-                            val progressSteps = remember(steps, objectifStep) { (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f) }
+                            val steps = remember(state.todaySeance) {
+                                state.todaySeance?.physioTrack?.step ?: 0
+                            }
+                            val progressSteps = remember(steps, objectifStep) {
+                                if (objectifStep == 0) {
+                                    0f
+                                } else {
+                                    (steps.toFloat() / objectifStep.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
 
                             ObjectifBox(
                                 value = steps.toString(),
-                                objectif = objectifStep.toString(),
-                                unit = "pas",
-                                drawableTop =  R.drawable.icon_step
+                                objectif = if (objectifStep == 0) "NaN" else objectifStep.toString(),
+                                onClickObjectif = { navController.navigate("objectif") },
+                                unit = stringResource(R.string.step),
+                                onClick = { navController.navigate("seance?section=data") },
+                                drawableTop = R.drawable.icon_step
 
                             ) {
                                 ProgressLine(
@@ -197,13 +307,23 @@ fun HomePage(
                             }
                         }
                         item {
-                            val calories = remember(state.todaySeance) { state.todaySeance?.nutritionTrack?.calories ?: 0 }
-                            val progressCalories = remember(calories, objectifCal) { (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f) }
+                            val calories = remember(state.todaySeance) {
+                                state.todaySeance?.nutritionTrack?.calories ?: 0
+                            }
+                            val progressCalories = remember(calories, objectifCal) {
+                                if (objectifCal == 0) {
+                                    0f
+                                } else {
+                                    (calories.toFloat() / objectifCal.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
                             ObjectifBox(
                                 value = calories.toString(),
-                                objectif = objectifCal.toString(),
-                                unit = "Cal",
-                                drawableTop =  R.drawable.icon_cal
+                                objectif = if (objectifCal == 0) "NaN" else objectifCal.toString(),
+                                unit = "kcal",
+                                onClick = { navController.navigate("seance?section=data") },
+                                onClickObjectif = { navController.navigate("objectif") },
+                                drawableTop = R.drawable.icon_cal
                             ) {
                                 ProgressLine(
                                     progressCalories,
@@ -214,13 +334,23 @@ fun HomePage(
                             }
                         }
                         item {
-                            val sleep = remember(state.todaySeance) { state.todaySeance?.physioTrack?.hourOfSleep ?: 0 }
-                            val progressSleep = remember(sleep, objectifsommeil) { (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f) }
+                            val sleep = remember(state.todaySeance) {
+                                state.todaySeance?.physioTrack?.hourOfSleep ?: 0
+                            }
+                            val progressSleep = remember(sleep, objectifsommeil) {
+                                if (objectifsommeil == 0.0) {
+                                    0f
+                                } else {
+                                    (sleep.toFloat() / objectifsommeil.toFloat()).coerceIn(0f, 1f)
+                                }
+                            }
                             ObjectifBox(
                                 value = sleep.toString(),
-                                objectif = objectifsommeil.toString(),
+                                objectif = if (objectifsommeil == 0.0) "NaN" else objectifsommeil.toString(),
                                 unit = "h",
-                                drawableTop =  R.drawable.icon_sleep
+                                onClick = { navController.navigate("seance?section=data") },
+                                onClickObjectif = { navController.navigate("objectif") },
+                                drawableTop = R.drawable.icon_sleep
                             ) {
                                 ProgressLine(
                                     progressSleep,
@@ -235,17 +365,25 @@ fun HomePage(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        val itemCount = if (state.todaySeance?.seanceTrack?.plannedExercises?.isEmpty() == true|| state.todaySeance?.seanceTrack?.plannedExercises ==null) 4 else 3
+                        val itemCount = listState.layoutInfo.totalItemsCount
 
 
                         for (i in 0 until itemCount) {
                             val alpha = when {
                                 i < listState.firstVisibleItemIndex -> 0.3f
                                 i == listState.firstVisibleItemIndex -> {
-                                    val scrollFraction = listState.firstVisibleItemScrollOffset / 200f
-                                    1f - scrollFraction.coerceIn(0f, 0.7f)
+                                    val scrollFraction =
+                                        listState.firstVisibleItemScrollOffset / widthScreen
+                                    1f - scrollFraction.coerceIn(0f, 0.5f)
                                 }
-                                else -> 1f
+
+                                i > listState.firstVisibleItemIndex + 2 -> {
+                                    0.5f
+                                }
+
+                                else -> {
+                                    1f
+                                }
                             }
 
                             Box(
@@ -261,221 +399,397 @@ fun HomePage(
 
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(top = 32.dp, start = 10.dp, end = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
-                        Text("Scéances précédentes", Modifier.padding(bottom = 12.dp))
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.previous_workouts),
+                            Modifier.padding(bottom = 12.dp)
+                        )
                     }
-                    for (i in state.mapSeance.size - 1 downTo (state.mapSeance.size - 5).coerceAtLeast(
-                        0
-                    )) {
-                        val dayKey = state.mapSeance.keys.elementAt(i)
-                        val setGroupMuscu: MutableSet<String> = mutableSetOf()
 
-                        state.muscleRateOfEachDay[dayKey]?.keys?.forEach { muscleId ->
-                            val muscle =
-                                homeViewModel.masterData?.muscles?.find { it.id == muscleId }
-                            val groupeMusculaire =
-                                homeViewModel.masterData?.musclesGroup?.find { it.id == muscle?.idMuscularGroup }
-                            groupeMusculaire?.nameFR?.let { setGroupMuscu.add(it) }
-                        }
-                        CardWithContent(
-                            modifier = Modifier.padding(8.dp, 2.dp),
-                            text = setGroupMuscu.joinToString(", "),
-                            dayKey,
-                            onExpandChange = { expanded ->
-                                homeViewModel.expandSeance(if (expanded) i else null)
-                            },
-                            canExtend = true,
-                            expanded = state.expandedSeance == i,
+                    if (state.last5DaysKeys.isNotEmpty()) {
+                        state.last5DaysKeys.forEachIndexed { index, day ->
+                            val groupMuscles =
+                                state.muscleRateOfEachDay[day]?.keys?.mapNotNull { muscleId ->
+                                    val muscle = state.masterDataMaps?.muscleMap?.get(muscleId)
+                                    state.masterDataMaps?.musclesGroupMap?.get(muscle?.idMuscularGroup)
+                                }?.toSet() ?: emptySet()
 
-                            componentRight = {
-                                Icon(
-                                    if (state.expandedSeance == i) {
-                                        Icons.Default.ArrowDropUp
-                                    } else {
-                                        Icons.Default.ArrowDropDown
-                                    }, ""
-                                )
-                            },
-                            hasLineShadowBetweenMainAndChildren = true,
-                            childrenForExtend = {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        modifier = Modifier
+                            CardWithContent(
+                                modifier = Modifier.padding(8.dp, 2.dp),
+                                text = groupMuscles.joinToString(", "),
+                                day,
+                                onExpandChange = { expanded ->
+                                    homeViewModel.expandSeance(if (expanded) index else null)
+                                },
+                                canExtend = true,
+                                expanded = state.expandedSeance == index,
+
+                                componentRight = {
+                                    Icon(
+                                        if (state.expandedSeance == index) {
+                                            Icons.Default.ArrowDropUp
+                                        } else {
+                                            Icons.Default.ArrowDropDown
+                                        }, contentDescription = stringResource(
+                                            if (state.expandedSeance == index) R.string.show_less else R.string.show_more
+                                        )
+                                    )
+                                },
+                                leftIcon = homeViewModel.getLeftIconForSeance(state.mapSeance[day]),
+                                hasLineShadowBetweenMainAndChildren = true,
+                                childrenForExtend = {
+                                    Column(
+                                        Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 12.dp, bottom = 8.dp)
+                                            .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
                                     ) {
-                                        Text(
-                                            "Muscles",
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f)
-                                        )
-                                        Text(
-                                            "Exercice",
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Text(
-                                            "Série",
-                                            style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Spacer(modifier = Modifier.width(24.dp))
-                                    }
-
-                                    state.muscleRateOfEachDay[dayKey]?.entries?.forEachIndexed { index, (key, value) ->
-                                        val isLast =
-                                            index == state.muscleRateOfEachDay[dayKey]!!.size - 1
                                         Row(
                                             horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(30.dp)
+                                                .padding(top = 12.dp, bottom = 8.dp)
                                         ) {
                                             Text(
-                                                muscleName[key] ?: "Not found",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                pluralStringResource(R.plurals.muscle, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .weight(1f)
                                             )
                                             Text(
-                                                value.numberExercise.toString(),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.weight(1f),
-                                                textAlign = TextAlign.Center
-                                            )
-                                            Text(
-                                                value.numberSet.toString(),
-                                                style = MaterialTheme.typography.bodySmall,
+                                                pluralStringResource(R.plurals.exercise, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .weight(1f),
                                                 textAlign = TextAlign.Center
                                             )
-                                            if (isLast) {
-                                                IconButton(
-                                                    onClick = {navController.navigate("seance?dayKey=$dayKey")},
-                                                    modifier = Modifier.size(24.dp)
-                                                ) { Icon(Icons.Default.Fullscreen, "go to seance") }
-                                            } else {
-                                                Spacer(modifier = Modifier.width(24.dp))
+                                            Text(
+                                                pluralStringResource(R.plurals.set, 2),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = secondaryTextColor
+                                                ),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .weight(1f),
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.width(24.dp))
+                                        }
+
+                                        state.muscleRateOfEachDay[day]?.entries?.forEachIndexed { index, (key, value) ->
+                                            val isLast =
+                                                index == state.muscleRateOfEachDay[day]!!.size - 1
+                                            Row(
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(30.dp)
+                                            ) {
+                                                Text(
+                                                    state.masterDataMaps?.muscleMap?.get(key)
+                                                        ?.getName(language) ?: "NaN",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .weight(1f)
+                                                )
+                                                Text(
+                                                    value.numberExercise.toString(),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.weight(1f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Text(
+                                                    value.numberSet.toString(),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .weight(1f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                if (isLast) {
+                                                    IconButton(
+                                                        onClick = { navController.navigate("seance?dayKey=$day") },
+                                                        modifier = Modifier.size(24.dp)
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Default.Fullscreen, "go to seance"
+                                                        )
+                                                    }
+                                                } else {
+                                                    Spacer(modifier = Modifier.width(24.dp))
+                                                }
                                             }
                                         }
+
                                     }
 
+                                })
 
-                                }
-
-                            }
-                        )
+                        }
 
 
+
+                        CustomButton(
+                            stringResource(R.string.view_workouts),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp, start = 10.dp, end = 10.dp),
+                            variant = VariantType.OUTLINED,
+                            emphasis = EmphasisType.SECONDARY,
+                            onClick = { navController.navigate("seance") })
                     }
-
                 }
             }
-            item {
-                CustomButton(
-                    "Voir les séances",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, start = 10.dp, end = 10.dp),
-                    variant = ButtonVariant.OUTLINED,
-                    emphasis = ButtonEmphasis.SECONDARY,
-                    onClick = { navController.navigate("seance") }
-                )
+
+            if (state.last5DaysKeys.isEmpty()) {
+                item {
+
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, start = 16.dp, end = 16.dp)
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                ambientColor = Color.Black.copy(alpha = 0.25f),
+                                spotColor = Color.Black.copy(alpha = 0.25f)
+                            ),
+
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+
+                            )
+
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(20.dp),
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.no_session_yet),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                stringResource(R.string.first_session_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryTextColor,
+                                textAlign = TextAlign.Center
+                            )
+                            CustomButton(
+                                stringResource(R.string.start_first_session),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                onClick = { navController.navigate("seance") })
+                        }
+                    }
+                }
+
+
             }
             item {
-
                 Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Analyse", style = MaterialTheme.typography.titleSmall)
-                        Box(Modifier.clickable(onClick = {navController.navigate("analyse")})){
+                        Text(
+                            stringResource(R.string.analysis),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Box(Modifier.clickable(onClick = { navController.navigate("analyse") })) {
 
                             Text(
-                                "Voir plus",
+                                stringResource(R.string.see_more),
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
-                            ) }
+                            )
+                        }
                     }
                     Text(
-                        ""+ state.mapSeance.count() + " / 14 jours",
+                        "" + state.mapSeance.count() + " / 14 " + pluralStringResource(
+                            R.plurals.days, 2
+                        ),
                         style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor)
                     )
                 }
-                Box(
+                LazyRow(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(340.dp).padding(horizontal = 10.dp)
-
-
-                        .wrapContentHeight()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.medium
-                        )
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
-                    RadarChartSample(state.graphData, homeViewModel.masterData)
-                }
 
+                    item {
+
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
+
+
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val radarGroupData = homeViewModel.getRadarData(
+                                data = state.groupRateOfEachDay,
+                                labelsMap = state.masterDataMaps?.musclesGroupMap ?: emptyMap()
+                            )
+                            RadarChartMP(
+                                modifier = Modifier.fillMaxSize(),
+                                radarGroupData.first,
+                                radarGroupData.second,
+                                radarGroupData.third
+                            )
+
+                        }
+                    }
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(328.dp)
+
+
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val radarMuscleData =
+                                homeViewModel.getRadarData(
+                                    data = state.muscleRateOfEachDay,
+                                    labelsMap = state.masterDataMaps?.muscleMap?.mapValues {
+                                        it.value.getName(
+                                            language
+                                        )
+                                    } ?: emptyMap())
+
+                            RadarChartMP(
+                                modifier = modifier,
+                                radarMuscleData.first,
+                                radarMuscleData.second,
+                                radarMuscleData.third
+                            )
+                        }
+
+                    }
+                }
+            }
+
+            item {
+                Column(Modifier.padding(top = 60.dp, bottom = 16.dp, start = 14.dp, end = 14.dp)) {
+                    Text(stringResource(R.string.collection), style = MaterialTheme.typography.titleSmall)
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            CardWithContent(
+                                modifier = Modifier.padding(8.dp, 4.dp),
+                                text = pluralStringResource(R.plurals.exercise,2),
+                                subText = state.masterDataMaps?.exerciseMap?.size.toString(),
+                                componentRight = {
+                                    Icon(
+                                        Icons.Default.Bookmarks,
+                                        "",
+                                        tint = secondaryTextColor.copy(0.1f)
+                                    )
+                                },
+                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYEXERCICE) })
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            CardWithContent(
+                                modifier = Modifier.padding(8.dp, 4.dp),
+                                text = stringResource(R.string.view_presets),
+                                onClick = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.ONLYPRESET) },
+                                componentRight = {
+                                    Icon(
+                                        Icons.Default.DashboardCustomize,
+                                        "",
+                                        tint = secondaryTextColor.copy(0.1f)
+                                    )
+                                },
+                                subText = presetList.size.toString()
+                            )
+                        }
+                    }
+                }
             }
         }
     }
-}
 
-@Composable
-fun RadarChartSample(graphData:Map<Long, MuscleRate>, masterData: MasterDataStatic?) {
-
-    val radarData = remember(graphData) {
-        val radarLabels = mutableListOf<String>()
-        val values2 = mutableListOf<Float>()
-        val values3 = mutableListOf<Float>()
-
-        graphData.forEach { (muscleGroupId, stats) ->
-            val groupName =
-                masterData?.musclesGroup?.find { it.id == muscleGroupId }?.nameFR
-                    ?: "N/A"
-            radarLabels.add(groupName)
-            values2.add(stats.numberExercise.toFloat())
-            values3.add(stats.numberSet.toFloat())
+    BottomSheetSelectionExercise(
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
+        navController = navController,
+        title = stringResource(R.string.see_info),
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        officialExercise = masterData?.officialExercise,
+        infoMapUser = infoMapUser,
+        onClickExercise = { exercice ->
+            Log.d("aa", "${exercice.idExercise}")
+            navController.navigate("exercise/${exercice.idExercise}")
+        },
+        onClickFavorite = {
+            if (authState.isConnected) infoUserViewModel.updateInfoExerciseUser(
+                it, !(infoMapUser[it]?.favorite ?: false), null
+            ) else {
+                Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+            }
+        },
+        userlanguage = language,
+        musclesGroupMap = state.masterDataMaps?.musclesGroupMap
+    )
+    BottomSheetPreset(
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYPRESET,
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onNew = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.INPUTPRESET) },
+        title = stringResource(R.string.preset_title),
+        presetList = presetList,
+        onClickPreset = {
+            navController.navigate("preset/${it.idLocal}")
         }
 
-        Triple(radarLabels, values2, values3)
-    }
-
-    val radarLabels = radarData.first
-    if (radarLabels.size < 3) {
-        Text("Pas assez de données pour le radar")
-        return
-    }
-    RadarChartMP(
-        Modifier.fillMaxSize(),
-        radarLabels,
-        values1 = radarData.second,
-        values2 = radarData.third
     )
 
+    BottomSheetInput(
+        bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.INPUTPRESET,
+        onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
+        onNew = { value ->
+            homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
+            presetViewModel.createPreset(value)
+        },
+        title = stringResource(R.string.new_preset),
+        buttonText = stringResource(R.string.create),
+    )
+
+
 }
+

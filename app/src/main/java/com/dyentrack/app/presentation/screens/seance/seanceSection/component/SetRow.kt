@@ -25,12 +25,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.SetData
+import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.screens.seance.viewModel.SaveType
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.addColor
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.utils.convertWeight
 import kotlinx.coroutines.delay
 
 @Composable
@@ -38,25 +40,27 @@ fun SetRow(
     set: SetData,
     index: Int,
     viewModel: SeanceViewModel = viewModel(),
-    setRightForUni: SetData? = null,
     lockInput: Boolean,
     onClickBadge: (() -> Unit)? = null,
+    exerciseId: Long,
+    userUnit: MesureUnit
 ) {
     val chargeState = remember {
         mutableStateOf(
-            TextFieldValue(
-                text = set.charge?.toString() ?: "",
-
-                )
-        )
+            TextFieldValue(text = set.charge?.let {
+                    convertWeight(
+                        it,
+                        MesureUnit.KG,
+                        userUnit
+                    )
+                }?.let { String.format("%.1f", it) } ?: ""))
     }
 
     val rirState = remember {
         mutableStateOf(
             TextFieldValue(
                 text = set.rir?.toString() ?: "",
-
-                )
+            )
         )
     }
 
@@ -68,9 +72,11 @@ fun SetRow(
             )
         )
     }
-    val repsRightState = remember(setRightForUni) {
-        mutableStateOf(TextFieldValue(text = setRightForUni?.reps?.toString() ?: ""))
+
+    val repsRightState = remember {
+        mutableStateOf(TextFieldValue(text = set.linkedRightSet?.reps?.toString() ?: ""))
     }
+
     var confirmDelete by remember { mutableStateOf(false) }
     if (confirmDelete) {
         LaunchedEffect(true) {
@@ -78,6 +84,7 @@ fun SetRow(
             confirmDelete = false
         }
     }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -101,11 +108,17 @@ fun SetRow(
                         confirmDelete = true
                     } else {
                         onClickBadge?.invoke()
+                        confirmDelete = false
                     }
 
-                }.then(if (confirmDelete){
-                    Modifier.border(1.dp,MaterialTheme.colorScheme.primary, CircleShape)}else{
-                    Modifier}),
+                }
+                .then(
+                    if (confirmDelete) {
+                        Modifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    } else {
+                        Modifier
+                    }
+                ),
             containerColor = if (confirmDelete) {
                 Color.Transparent
             } else {
@@ -116,76 +129,100 @@ fun SetRow(
             },
             contentColor = if (confirmDelete) {
                 MaterialTheme.colorScheme.primary
-            } else {when (set.type) {
-                SetType.WARMUP -> MaterialTheme.colorScheme.onSurface
-                else -> MaterialTheme.colorScheme.background
-            }},
+            } else {
+                when (set.type) {
+                    SetType.WARMUP -> MaterialTheme.colorScheme.onSurface
+                    else -> MaterialTheme.colorScheme.background
+                }
+            },
         )
 
-        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(
+            modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
 
 
             InputCustom(
                 text = repsState,
                 enabled = !lockInput,
-                placeholder = if (setRightForUni != null) "L" else "Reps",
+                placeholder = if (set.linkedRightSet != null) "L" else "Reps",
                 modifier = Modifier.weight(1f),
                 keyboardType = KeyboardType.Number,
                 maxCaracter = 2,
-                onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
-            )
-            LaunchedEffect(repsState.value.text) {
-                set.reps = repsState.value.text.toIntOrNull() ?: 0
-            }
-            if (setRightForUni != null) {
+                replaceZeroToNull = true,
+                onValueChange = {
+
+                    viewModel.updateSet(
+                        exerciseId = exerciseId,
+                        index = index,
+                        newValue = SetField.Reps(repsState.value.text.toIntOrNull()),
+                        rightSet = false,
+                        unilateral = set.linkedRightSet != null
+                    )
+                })
+
+            if (set.linkedRightSet != null) {
                 InputCustom(
                     text = repsRightState,
                     placeholder = "R",
                     enabled = !lockInput,
                     modifier = Modifier.weight(1f),
                     maxCaracter = 2,
+                    replaceZeroToNull = true,
                     keyboardType = KeyboardType.Number,
-                    onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
-                )
-                LaunchedEffect(repsRightState.value.text) {
-                    setRightForUni.reps = repsRightState.value.text.toIntOrNull() ?: 0
-                }
+                    onValueChange = {
+                        viewModel.updateSet(
+                            exerciseId = exerciseId,
+                            index = index,
+                            newValue = SetField.Reps(repsRightState.value.text.toIntOrNull()),
+                            rightSet = true,
+                            unilateral = true
+                        )
+                    })
+
             }
         }
 
         InputCustom(
             text = chargeState,
-            placeholder = "Charge",
             enabled = !lockInput,
+            replaceZeroToNull = true,
+            placeholder = "0.0",
             modifier = Modifier.weight(1f),
             maxCaracter = 6,
             keyboardType = KeyboardType.Decimal,
-            onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
+            onValueChange = {
+                viewModel.updateSet(
+                    exerciseId = exerciseId, index = index, newValue = SetField.Charge(
+                        convertWeight(
+                            chargeState.value.text.toDoubleOrNull(), userUnit, MesureUnit.KG
+                        )
+
+                    ), rightSet = false, unilateral = set.linkedRightSet != null
+                )
+            }
 
         )
-        LaunchedEffect(chargeState.value.text) {
-            val value = chargeState.value.text.toDoubleOrNull()
-            set.charge = value
-            setRightForUni?.charge = value
-        }
 
 
 
         InputCustom(
             text = rirState,
-            placeholder = "RIR",
             enabled = !lockInput,
             modifier = Modifier.width(65.dp),
             keyboardType = KeyboardType.Number,
             maxCaracter = 2,
-            onValueChange = { viewModel.changeSaveStatus(SaveType.NOTSAVE) }
-        )
-        LaunchedEffect(rirState.value.text) {
-            val rirValue = rirState.value.text.toIntOrNull() ?: 0
-            set.rir = rirValue
-            setRightForUni?.rir = rirValue
+            placeholder = "1",
+            onValueChange = {
+                viewModel.updateSet(
+                    exerciseId = exerciseId,
+                    index = index,
+                    newValue = SetField.Rir(rirState.value.text.toIntOrNull()),
+                    rightSet = false,
+                    unilateral = set.linkedRightSet != null
+                )
+            })
 
-        }
 
     }
 

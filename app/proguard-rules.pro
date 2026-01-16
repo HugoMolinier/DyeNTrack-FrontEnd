@@ -19,3 +19,26 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# -----------------------------
+# Retrofit & Gson
+# -----------------------------
+
+# Ne pas minifier les modèles (POJO) utilisés par Gson
+-keep class com.dyentrack.app.domain.model.** { *; }
+-keep class com.dyentrack.app.data.network.dto.** { *; }
+
+# Ne pas minifier ApiResponse et ses génériques
+-keep class com.dyentrack.app.domain.model.ApiResponse { *; }
+
+# Garder les annotations Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# Retrofit interface
+-keep interface com.dyentrack.app.data.network.ApiInterface { *; }
+
+# Optional : garder les classes Gson de type paramétré
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}

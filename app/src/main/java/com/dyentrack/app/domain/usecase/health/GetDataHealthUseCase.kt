@@ -4,18 +4,18 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
-import com.dyentrack.app.domain.model.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import java.time.Instant
 import javax.inject.Inject
-import androidx.health.connect.client.request.ReadRecordsRequest
+import javax.inject.Singleton
 
+@Singleton
 class GetDataHealthUseCase @Inject constructor() {
 
     suspend fun aggregateSteps(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): Long {
         return try {
             val response = healthConnectClient.aggregate(
@@ -24,19 +24,15 @@ class GetDataHealthUseCase @Inject constructor() {
                     timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                 )
             )
-            // Peut être null si pas de donnée
             response[StepsRecord.COUNT_TOTAL] ?: 0L
-        } catch (e: Exception) {
-            // Gestion d’erreur
+        } catch (_: Exception) {
             0L
         }
     }
 
 
     suspend fun getNutritionRecords(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): List<NutritionRecord> {
         val records: List<NutritionRecord> = try {
             val request = ReadRecordsRequest(
@@ -45,7 +41,7 @@ class GetDataHealthUseCase @Inject constructor() {
             )
             val response = healthConnectClient.readRecords(request)
             response.records
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
 
@@ -54,9 +50,7 @@ class GetDataHealthUseCase @Inject constructor() {
 
 
     suspend fun nutritionData(
-        healthConnectClient: HealthConnectClient,
-        startTime: Instant,
-        endTime: Instant
+        healthConnectClient: HealthConnectClient, startTime: Instant, endTime: Instant
     ): NutritionTrack {
         val records = getNutritionRecords(healthConnectClient, startTime, endTime)
 

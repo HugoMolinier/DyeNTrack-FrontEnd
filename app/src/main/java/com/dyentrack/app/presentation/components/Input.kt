@@ -8,13 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,19 +29,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dyentrack.app.presentation.theme.PrimaryTextColor
-import com.dyentrack.app.presentation.theme.TertiaOne
+import com.dyentrack.app.domain.model.enums.SizeType
+import com.dyentrack.app.domain.model.enums.VariantType
+import com.dyentrack.app.presentation.theme.addColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-
-enum class InputVariant { FILLED, OUTLINED ,EMPTY }
 
 @Composable
 fun InputCustom(
@@ -46,25 +58,62 @@ fun InputCustom(
     enabled: Boolean = true,
     leadingIcon:   ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    variant : InputVariant ?= InputVariant.FILLED,
+    variant : VariantType ?= VariantType.FILLED,
     singleLine:Boolean = true,
-    maxCaracter: Int? = null
+    replaceZeroToNull:Boolean=false,
+    size:  SizeType= SizeType.LARGE,
+    maxCaracter: Int? = null,
+    hideContent: Boolean = false,
+    centerText: Boolean = false,
+    autoFocus: Boolean = false,
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    var contentVisible by remember { mutableStateOf(!hideContent) }
 
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    if(replaceZeroToNull) {
+        LaunchedEffect(isFocused) {
+            if (isFocused ) {
+                if (text.value.text == "0" || text.value.text == "0.0") {
+                    text.value = TextFieldValue(text = "", selection = TextRange(0))
+                }
+            }
+        }
+    }
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .height(if (variant == InputVariant.EMPTY)32.dp else 44.dp)
-            .background(color = TertiaOne, shape = RoundedCornerShape(if (variant == InputVariant.OUTLINED) 12.dp else 5.dp))
-
+            .height(if (variant == VariantType.EMPTY)32.dp else 44.dp)
+            .background(color =  addColor.TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp)).alpha(if (enabled) 1f else 0.8f)
             .then(
-                if (variant == InputVariant.OUTLINED) Modifier.border(
+                if (variant == VariantType.OUTLINED) Modifier.border(
                     width = 1.dp,
                     color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
                 ) else Modifier
-            ).padding(horizontal = 16.dp, vertical =if (singleLine)0.dp else 10.dp),
+            ).padding(
+                start = when (size) {
+                    SizeType.LARGE -> 16.dp
+                    SizeType.MEDIUM -> 8.dp
+                    SizeType.NO -> 0.dp
+                    SizeType.SMALL ->4.dp
+                },
+                end = when (size) {
+                    SizeType.LARGE -> if (hideContent) 8.dp else 16.dp
+                    SizeType.MEDIUM -> 8.dp
+                    SizeType.NO -> 0.dp
+                    SizeType.SMALL ->4.dp
+                },
+                top = if (singleLine) 0.dp else 10.dp,
+                bottom = if (singleLine) 0.dp else 10.dp
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -78,8 +127,16 @@ fun InputCustom(
         BasicTextField(
             value = text.value,
             enabled= enabled,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier=Modifier.weight(1f).onFocusChanged { focusState ->
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType,
+                imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onFocusLost?.invoke(text.value.text) // ← commit la valeur quand Done est pressé
+                }
+            ),
+            visualTransformation = if (contentVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier=Modifier.weight(1f).focusRequester(focusRequester).onFocusChanged { focusState ->
+                // FOCUS OUT
                 if (isFocused && !focusState.isFocused) {
                     onFocusLost?.invoke(text.value.text)
                 }
@@ -87,20 +144,23 @@ fun InputCustom(
             },
 
             onValueChange = { newValue ->
+
                 var filteredText = when (keyboardType) {
                     KeyboardType.Number -> newValue.text.filter { it.isDigit() }
                     KeyboardType.Decimal -> newValue.text
-                        .filter { it.isDigit() || it == '.' } // on garde les chiffres et le point
+                        .filter { it.isDigit() || it == '.' || it == ',' }
                         .let { text ->
-                            val parts = text.split('.')
+                            val normalizedText = text.replace(',', '.')
+                            val parts = normalizedText.split('.')
                             if (parts.size > 1) {
-                                parts[0] + "." + parts[1].take(1) // garde max 1 chiffre après le point
+                                parts[0] + "." + parts[1].take(1)
                             } else {
-                                text
+                                normalizedText
                             }
                         }
                     else -> newValue.text
                 }
+
 
                 if (maxCaracter != null && filteredText.length > maxCaracter) {
                     filteredText = if (keyboardType == KeyboardType.Decimal && !filteredText.contains('.')) {
@@ -127,14 +187,15 @@ fun InputCustom(
             },
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = PrimaryTextColor,
-                        textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
+                color = if (enabled) MaterialTheme .colorScheme.onSurface else secondaryTextColor.copy(alpha= 0.8f),
+                textAlign = if (centerText) TextAlign.Center else if (variant == VariantType.EMPTY) TextAlign.End else TextAlign.Start
 
             ),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment =  if(singleLine)if (variant == InputVariant.EMPTY)Alignment.CenterEnd else  Alignment.CenterStart else Alignment.TopStart
+                    contentAlignment = if (singleLine) if (centerText) Alignment.Center else if (variant == VariantType.EMPTY) Alignment.CenterEnd else Alignment.CenterStart else Alignment.TopStart
+
                 ) {
                     if (text.value.text.isEmpty()) {
                         Text(
@@ -143,11 +204,20 @@ fun InputCustom(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = secondaryTextColor.copy(alpha = 0.5f),
 
-                                textAlign = if (variant == InputVariant.EMPTY) TextAlign.End else TextAlign.Start
+                                textAlign = if (variant == VariantType.EMPTY) TextAlign.End else TextAlign.Start
                             ),
                         )
                     }
                     innerTextField()
+                    if (hideContent) { // Affiche bouton pour basculer visibilité
+                        IconButton(onClick = { contentVisible = !contentVisible },            modifier = Modifier.align(Alignment.CenterEnd).size(22.dp)) {
+                            Icon(
+                                imageVector = if (contentVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                                contentDescription = if (contentVisible) "Masquer" else "Afficher",
+                                tint = secondaryTextColor.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
                 }
             }
         )

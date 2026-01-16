@@ -2,4 +2,453 @@
     <string name="app_name">DyeNTrack</string>
     <string name="show_less">Show less</string>
     <string name="show_more">Show more</string>
+    <string name="exercise_detail">Détail de l\'exercice</string>
+    <string name="average_weight_5">Moyenne Poids 5 occurrences</string>
+    <string name="muscle_use">Muscle utilisé</string>
+    <string name="primary_muscle">Muscle principal</string>
+    <string name="possible_equipment">Equipement possible</string>
+    <string name="possible_execution">Exécution possible</string>
+    <string name="add_note">Ajouter une note</string>
+    <string name="details">Détails</string>
+    <string name="made_by">Crée par %1$s</string>
+
+    <string name="explanation">Explication</string>
+    <string name="statistics">Statistique</string>
+
+    <string name="not_editable">Non modifiable car Auto-Sync</string>
+
+    <string name="exercise_per_week">Exercice/semaine</string>
+    <string name="sets_per_week">Set/semaine</string>
+    <string name="last_occurrence">Dernière occurrence</string>
+    <string name="performance_indicator">Indicateur de performance</string>
+    <string name="weighted_sum">Somme pondérée</string>
+    <string name="fail_set_ratio">Ratio échec / set</string>
+
+    <string name="you">Vous</string>
+    <string name="a_user">Un utilisateur</string>
+    <string name="back">Retour à la page précédente</string>
+
+    <string name="today_session">Séance du jour</string>
+    <string name="sessions">Séances</string>
+    <string name="data">Data</string>
+
+    <string name="no_workout">Aucun exercice pour le moment</string>
+    <string name="add_workout">Ajouter un exercice ou une routine</string>
+    <string name="add_exercise">Ajouter un exercice</string>
+
+    <string name="seance_detail">Détails de la séance</string>
+    <string name="number_of_sets">Nombre de séries</string>
+    <string name="number_of_exercises">Nombre d\'exercices</string>
+
+    <string name="number_steps">Nombre de pas</string>
+    <string name="step">Pas</string>
+
+    <string name="sleep">Sommeil</string>
+    <string name="sleep_hours">Heure de sommeil</string>
+    <string name="weight">Poids</string>
+    <string name="last">Dernière occurence :</string>
+
+    <string name="proteins">Protéines</string>
+    <string name="carbohydrates">Glucides</string>
+    <string name="lipids">Lipides</string>
+    <string name="fiber">Fibres</string>
+    <string name="caffeine">Caféine</string>
+    <string name="calories">Calories</string>
+    <string name="calculated">Calculé</string>
+    <string name="show_calculation">Afficher Calcul</string>
+    <string name="reload">Recharger</string>
+
+    <string name="cancel">Annuler</string>
+    <string name="add">Ajouter</string>
+
+    <string name="filter_search">Recherche</string>
+    <string name="filter_muscle_groups">Groupes Musculaires</string>
+    <string name="filter_all">Tous</string>
+    <string name="filter_official">Officiel</string>
+    <string name="filter_favorite">Favori</string>
+    <string name="filter_user_created">Non Officiel</string>
+    <string name="filter_clear">Effacer les filtres</string>
+    <string name="exercise_view">Voir Exercice</string>
+
+    <string name="mode_lock">Verrouillé entré</string>
+    <string name="mode_change_order">Changer l\'ordre</string>
+    <string name="mode_menu">Menu</string>
+
+    <string name="favorite_login_prompt">Connectez-vous pour ajouter un favori</string>
+
+    <string name="filter_by_muscle_group">Filtre par groupe musculaire</string>
+    <string name="number_of_sessions">Nombre de sessions</string>
+    <string name="no_exercise">Aucun Exercice</string>
+    <string name="choose_exercise">Choisir un exercice</string>
+    <string name="choose">Choisir</string>
+
+    <string name="change_selection">Changer la sélection</string>
+    <string name="per_exercise">Par exercice</string>
+    <string name="distribution">Répartition</string>
+    <string name="see_info">voir info</string>
+    <string name="avg_set_per_exercise">Moyenne Set/ Exercices</string>
+    <string name="full_analysis">Analyse complète</string>
+    <string name="show_filters">Afficher les filtres</string>
+
+    <string name="custom_section">Personnalisé</string>
+    <string name="two_weeks">2 Semaines</string>
+    <string name="month">Mois</string>
+    <string name="all">Tout</string>
+
+    <plurals name="set">
+        <item quantity="one">Série</item>
+        <item quantity="other">Séries</item>
+    </plurals>
+
+    <plurals name="muscle">
+        <item quantity="one">Muscle</item>
+        <item quantity="other">Muscles</item>
+    </plurals>
+
+    <plurals name="exercise">
+        <item quantity="one">Exercice</item>
+        <item quantity="other">Exercices</item>
+    </plurals>
+
+    <string name="add_session">Ajouter une séance</string>
+    <string name="daily_data">Données du jour</string>
+    <string name="previous_workouts">Séances précédentes</string>
+    <string name="view_workouts">Voir les séances</string>
+
+    <string name="see_more">Voir plus</string>
+    <string name="analysis">Analyse</string>
+    <plurals name="days">
+        <item quantity="one">Jour</item>
+        <item quantity="other">Jours</item>
+    </plurals>
+    <plurals name="rep">
+        <item quantity="one">rep</item>
+        <item quantity="other">reps</item>
+    </plurals>
+    <string name="hello">Bonjour</string>
+    <string name="prepare_day">Préparons la journée</string>
+    <string name="legend_exercises">Nombre d\'exercices</string>
+    <string name="legend_sets">Nombre de séries</string>
+
+
+    <string name="parameter">Paramètre</string>
+    <string name="back_to_menu">Retourner au menu</string>
+
+    <!-- Non connecté -->
+    <string name="signup_prompt">Inscrivez-vous pour profiter de fonctionnalité</string>
+    <string name="save_data">Garder une sauvegarde des données sur un serveur</string>
+    <string name="create_exercises">Crée des exercices, accéder au note et favorie</string>
+    <string name="collect_achievements">Collectionner plein d\'achievement</string>
+    <string name="signup">S\'inscire</string>
+    <string name="login">Se connecter</string>
+
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="information">Informations</string>
+    <string name="connected_app">App Connectée</string>
+    <string name="my_goals">Mes Objectifs</string>
+
+    <!-- Préférence et données -->
+    <string name="preferences_and_data">Préférence et données</string>
+    <string name="measurement_unit">Unité de mesures</string>
+    <string name="language">Langue</string>
+    <string name="export_data">Export des données</string>
+
+    <!-- Autre -->
+    <string name="other">Autre</string>
+    <string name="accessibility">Accessibilité</string>
+    <string name="privacy">Confidentialité</string>
+    <string name="legal_notices">Mention Légales</string>
+
+    <!-- Déconnexion -->
+    <string name="logout">Déconnection</string>
+
+    <string name="set_display_language">Définir la langue affichée</string>
+
+    <string name="set_display_unit">Définir l\'unité affichée</string>
+    <string name="info_measure_unit_1">Attention, les charges sont stockées en kilos.</string>
+    <string name="info_measure_unit_2">Pour Pound, cela n\'est qu\'une conversion pour l\'affichage.</string>
+    <string name="info_measure_unit_3">La conversion se fait :</string>
+
+    <string name="define_goals">Définir mes objectifs</string>
+
+    <string name="email_label">Email</string>
+    <string name="email_placeholder">votre@email.com</string>
+    <string name="pseudo_label">Pseudo</string>
+    <string name="pseudo_placeholder">Entrer votre pseudo</string>
+    <string name="password_label">Mot de passe</string>
+    <string name="password_placeholder">Entrer votre mot de passe</string>
+
+    <!-- Erreurs -->
+    <string name="error_invalid_password">Format mot de passe invalide, 8 à 60 caractères (1 chiffre et 1 lettre)</string>
+    <string name="error_invalid_email">Format email invalide</string>
+    <string name="error_wrong_credentials">Identifiants incorrects</string>
+    <string name="error_email_used">Identifiants déjà utilisés</string>
+    <string name="error_invalid_pseudo">Format pseudo invalide, 3 à 20 caractères</string>
+
+    <!-- Boutons -->
+    <string name="registering">Inscription...</string>
+    <string name="finish_registration">Finaliser l\'inscription</string>
+
+    <!-- Liens -->
+    <string name="already_account">Déjà un compte ?</string>
+    <string name="login_here">Connectez-vous ici</string>
+
+    <string name="logging_in">Connexion...</string>
+
+
+    <!-- Liens -->
+    <string name="no_account">Pas de compte ?</string>
+    <string name="signup_here">S\'inscrire ici</string>
+    <string name="rir" translatable="false">rir</string>
+
+    <string name="error_api">Erreur serveur</string>
+
+    <string name="height_label">Taille</string>
+    <string name="birthday_label">Anniversaire</string>
+    <string name="sex_label">Sexe</string>
+    <string name="male_label">Homme</string>
+    <string name="female_label">Femme</string>
+    <string name="other_label">Autre</string>
+    <string name="error_invalid_height">Taille entre 50 et 300 cm</string>
+    <string name="edit_info">Modifier les infos</string>
+    <string name="apply">Appliquer</string>
+    <string name="applying">Appliquer...</string>
+
+
+    <string name="health_connect">Health Connect</string>
+    <string name="checking">Vérification...</string>
+    <string name="install">Installer</string>
+    <string name="authorize">Autoriser</string>
+    <string name="operational">Opérationnel</string>
+    <string name="update">Mettre à jour</string>
+    <string name="not_available">Non disponible</string>
+
+    <string name="info_text_1">
+        Cette application permet de suivre ton activité, ta nutrition et ton sommeil.
+    </string>
+    <string name="info_text_2">Nous lisons les informations nécessaires : pas, nutrition et sommeil. Tes séances d’exercices seront enregistrées pour que d\'autres applications les voient.</string>
+    <string name="auto_sync">Auto-Sync</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="auto_sync_desc">Synchronisation à chaque démarrage si opérationnel et autorisé</string>
+    <string name="home">Accueil</string>
+    <string name="workout">Séance</string>
+    <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+
+
+    <string name="privacy_title">Politique de confidentialité</string>
+
+    <!-- Point 1 -->
+    <string name="privacy_heading_1">1. Responsable du traitement</string>
+    <string name="privacy_text_1_1">Les données personnelles collectées via l’application sont traitées par l’éditeur de l’application, responsable du traitement au sens du Règlement Général sur la Protection des Données (RGPD).</string>
+    <!-- Point 2 -->
+    <string name="privacy_heading_2">2. Données collectées</string>
+    <string name="privacy_text_2_1">Nous collectons uniquement les données strictement nécessaires au fonctionnement de l’application :</string>
+    <string name="privacy_text_2_2">Cela inclut l’adresse email, les informations de profil (taille, sexe, date de naissance), les préférences utilisateur ainsi que les données liées à l’activité, la nutrition, le poids et le sommeil.</string>
+    <string name="privacy_text_2_3">Les données de santé sont collectées uniquement après obtention du consentement explicite de l’utilisateur, notamment lors de l’activation de services de synchronisation avec des applications tierces telles que Health Connect.</string>
+
+    <!-- Point 3 -->
+    <string name="privacy_heading_3">3. Utilisation des données</string>
+    <string name="privacy_text_3_1">Les données sont utilisées pour permettre la création et la gestion du compte utilisateur.</string>
+    <string name="privacy_text_3_2">Elles servent également à assurer le suivi de ton activité physique, de ta nutrition et de ton sommeil, ainsi qu’à personnaliser ton expérience dans l’application.</string>
+    <string name="privacy_text_3_3">Aucune donnée n’est utilisée à des fins publicitaires ou commerciales.</string>
+
+    <!-- Point 4 -->
+    <string name="privacy_heading_4">4. Utilisation hors connexion</string>
+    <string name="privacy_text_4_1">Lorsque l’utilisateur n’est pas connecté à un compte, aucune donnée n’est transmise vers un serveur distant.</string>
+    <string name="privacy_text_4_2">Dans ce cas, l’ensemble des données est stocké exclusivement en local sur l’appareil de l’utilisateur, afin de permettre l’utilisation de l’application en mode hors ligne.</string>
+    <string name="privacy_text_4_3">Aucune synchronisation, transmission ou traitement serveur n’est effectué sans authentification préalable.</string>
+
+    <!-- Point 5 -->
+    <string name="privacy_heading_5">5. Adresse email</string>
+    <string name="privacy_text_5_1">L’adresse email est collectée uniquement pour l’identification et la sécurisation du compte utilisateur.</string>
+    <string name="privacy_text_5_2">Aucun email, notification promotionnelle ou communication commerciale ne sera envoyé à l’adresse fournie.</string>
+    <string name="privacy_text_5_3">L’adresse email n’est jamais partagée avec des tiers.</string>
+
+    <!-- Point 6 -->
+    <string name="privacy_heading_6">6. Partage des données</string>
+    <string name="privacy_text_6_1">Les données personnelles ne sont ni vendues, ni louées, ni cédées à des tiers.</string>
+    <string name="privacy_text_6_2">Aucun partage de données n’est effectué à des fins commerciales ou publicitaires.</string>
+    <string name="privacy_text_6_3">Les services tiers intégrés à l’application n’accèdent aux données qu’après autorisation explicite de l’utilisateur.</string>
+
+    <!-- Point 7 -->
+    <string name="privacy_heading_7">7. Sécurité des données</string>
+    <string name="privacy_text_7_1">Des mesures techniques et organisationnelles appropriées sont mises en place afin de garantir la sécurité des données.</string>
+    <string name="privacy_text_7_2">L’accès aux données est strictement limité aux besoins du fonctionnement de l’application.</string>
+    <string name="privacy_text_7_3">Toute tentative d’accès non autorisé est empêchée par des mécanismes de sécurité adaptés.</string>
+
+    <!-- Point 8 -->
+    <string name="privacy_heading_8">8. Conservation des données</string>
+    <string name="privacy_text_8_1">Les données personnelles sont conservées uniquement pendant la durée d’utilisation du compte utilisateur.</string>
+    <string name="privacy_text_8_2">En cas de suppression du compte, l’ensemble des données associées est supprimé de manière définitive.</string>
+    <string name="privacy_text_8_3">Les données stockées localement sont supprimées lors de la désinstallation de l’application.</string>
+
+    <!-- Point 9 -->
+    <string name="privacy_heading_9">9. Droits de l’utilisateur</string>
+    <string name="privacy_text_9_1">Conformément au RGPD, l’utilisateur dispose d’un droit d’accès, de rectification et de suppression de ses données.</string>
+    <string name="privacy_text_9_2">L’utilisateur peut également demander la limitation ou l’opposition au traitement de ses données.</string>
+    <string name="privacy_text_9_3">Ces droits peuvent être exercés directement depuis l’application.</string>
+
+    <!-- Point 10 -->
+    <string name="privacy_heading_10">10. Modification de la politique</string>
+    <string name="privacy_text_10_1">La présente politique de confidentialité peut être mise à jour à tout moment.</string>
+    <string name="privacy_text_10_2">Toute modification substantielle fera l’objet d’une information au sein de l’application.</string>
+    <string name="privacy_text_10_3">La poursuite de l’utilisation de l’application vaut acceptation de la politique mise à jour.</string>
+
+    <string name="legal_title">Mentions légales</string>
+
+    <string name="legal_heading_1">1. Éditeur</string>
+    <string name="legal_text_1_1">Cette application est éditée par Dyentrack App, responsable du contenu et de la maintenance du logiciel.</string>
+
+    <string name="legal_heading_2">2. Propriété intellectuelle</string>
+    <string name="legal_text_2_1">L’ensemble du contenu, des graphiques, logos et du code inclus dans cette application est protégé par le droit d’auteur et la propriété intellectuelle.</string>
+    <string name="legal_text_2_2">Toute reproduction ou distribution sans autorisation préalable est interdite.</string>
+
+    <string name="legal_heading_3">3. Responsabilité</string>
+    <string name="legal_text_3_1">L’éditeur ne peut être tenu responsable de tout dommage direct ou indirect résultant de l’utilisation de cette application.</string>
+
+    <string name="legal_heading_4">4. Mises à jour</string>
+    <string name="legal_text_4_1">L’application peut être mise à jour régulièrement pour améliorer ses fonctionnalités ou sa sécurité.</string>
+    <string name="legal_text_4_2">Il est recommandé d’utiliser la dernière version pour des performances optimales.</string>
+    <string name="legal_text_4_3">La poursuite de l’utilisation de l’application vaut acceptation des présentes mentions légales.</string>
+
+    <string name="advanced">Avancé</string>
+
+    <string name="sync_performance_title">
+    Synchronisation automatique des performances
+</string>
+
+    <string name="sync_performance_description">
+    Définit quand reprendre automatiquement la charge et le RIR depuis tes 15 séances précédentes.
+</string>
+
+    <string name="sync_option_preset_only">Seulement Preset</string>
+    <string name="none">Aucune</string>
+
+    <string name="sync_details_title">
+    Détails des modes de synchronisation
+</string>
+
+    <string name="sync_detail_all">
+    La charge et le RIR sont automatiquement entré, pour tous les exercices ajoutés.
+</string>
+
+    <string name="sync_detail_preset">
+    Les performances sont reprises uniquement lors de l’ajout d’exercices d\'un même preset.
+</string>
+
+    <string name="sync_detail_none">
+  Aucune reprise automatique des performances. Les charges et le RIR restent vides.
+</string>
+
+    <string name="unsaved_changes_title">Modifications non sauvegardées</string>
+
+    <string name="unsaved_changes_description">
+    Revenir quand même sans sauvegarder les changements ?
+</string>
+
+    <string name="error">Erreur</string>
+
+
+    <string name="associate_preset">Associer un preset</string>
+    <string name="old_preset">Ancien preset</string>
+
+    <string name="revoke_preset_title">Révoquer le preset</string>
+    <string name="revoke_preset_description">
+    Cela enlèvera uniquement l’association de ce preset à la séance.
+</string>
+
+    <string name="view_stats">Voir stats</string>
+
+    <string name="import_from_preset">Importer depuis un preset</string>
+    <string name="add_preset_exercises_title">Ajouter les exercices du preset</string>
+    <string name="add_preset_exercises_description">
+    Cela va associer les exercices sans remplacer ceux existants.
+</string>
+
+    <string name="associate_only">Juste associer</string>
+
+    <string name="menu">Menu</string>
+    <string name="swap">Changer</string>
+
+    <string name="delete">Supprimer</string>
+
+    <string name="note_label">Note :</string>
+    <string name="range_label">Fourchette :</string>
+    <string name="no_note_or_range_found">
+        Aucune note ou fourchette (lié à un preset) trouvée
+    </string>
+
+    <string name="day_letter">J</string>
+
+    <string name="preset_title">Preset</string>
+    <string name="created_by_you">Créé par vous</string>
+
+    <!-- Menu -->
+    <string name="change_name">Changer le nom</string>
+    <string name="delete_preset_title">Supprimer le preset</string>
+    <string name="delete_preset_description">
+        Cela dissociera tous les presets des séances associées ?
+    </string>
+
+
+    <!-- Parameters -->
+    <string name="rep_range">Fourchette de reps</string>
+    <string name="to">à</string>
+
+    <!-- Empty state -->
+    <string name="add_exercise_hint">
+        Ajouter un exercice en éditant le preset
+    </string>
+
+    <!-- Bottom sheets -->
+    <string name="rename_preset">Renommer le preset</string>
+    <string name="rename">Renommer</string>
+
+    <!-- Collection -->
+    <string name="collection">Collection</string>
+    <string name="exercises">Exercices</string>
+    <string name="view_presets">Voir mes presets</string>
+
+    <!-- Bottom sheets -->
+    <string name="new_preset">Nouveau preset</string>
+    <string name="create">Créer</string>
+
+    <string name="cloud_save">Sauvegarder sur le cloud</string>
+    <string name="cloud_save_desc">
+        Connectez-vous ou inscrivez-vous pour sauvegarder vos données
+    </string>
+
+    <string name="no_session_yet">Aucune séance pour le moment</string>
+    <string name="first_session_desc">
+        Prêt à relever le défi ? Commence ta première séance et suis ta progression en temps réel.
+    </string>
+    <string name="start_first_session">Commencer ma première séance</string>
+
+
+    <string name="info">Information</string>
+    <string name="bodyweight_info">
+        Le poids du corps n’est pas pris en compte pour les exercices au poids du corps.
+    </string>
+
+    <string name="occurrence">Occurrence</string>
+    <string name="per_preset">Par preset</string>
+    <string name="no_name_preset">Preset sans nom</string>
+    <string name="no_preset">Sans preset</string>
+
+    <string name="preset_name_placeholder">Nom du preset</string>
+    <string name="preset_name_empty_error">Le nom ne peut pas être vide</string>
+
+    <string name="sort_by_name">Par nom</string>
+    <string name="sort_by_creation_date">Par date de création</string>
+    <string name="sort_by_last_occurrence">Dernière occurrence</string>
+
+    <string name="ascending">Croissant</string>
+
+    <string name="reset_data_title">Vous allez supprimer vos données</string>
+    <string name="reset_data_description">
+        Vos données locales seront réinitialisées pour éviter une perte de synchronisation.
+        Vous les retrouverez une fois reconnecté. Voulez-vous quand même continuer ?
+    </string>
 </resources>

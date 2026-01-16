@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun FavoriteIconButton(
@@ -16,6 +17,7 @@ fun FavoriteIconButton(
     Icon(
         imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
         contentDescription = if (isFavorite) "Remove from favorite" else "Add to favorite",
-        modifier = Modifier.clickable { onClick() }
+        modifier = Modifier.clickable { onClick() },
+        tint = secondaryTextColor
     )
 }

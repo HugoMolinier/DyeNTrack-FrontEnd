@@ -1,8 +1,11 @@
 package com.dyentrack.app.domain.usecase.health
 
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.records.*
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.StepsRecord
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,10 +18,7 @@ class RequestHealthConnectPermissionsUseCase @Inject constructor() {
             HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(NutritionRecord::class),
             HealthPermission.getWritePermission(ExerciseSessionRecord::class),
-            HealthPermission.getReadPermission(WeightRecord::class),
-            HealthPermission.getReadPermission(BodyFatRecord::class),
             HealthPermission.getReadPermission(SleepSessionRecord::class),
-            HealthPermission.getReadPermission(HeightRecord::class)
         )
     }
 

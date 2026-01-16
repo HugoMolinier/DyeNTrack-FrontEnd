@@ -2,10 +2,6 @@ package com.dyentrack.app
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.dyentrack.app.domain.model.PlannedExerciseVO
-import com.dyentrack.app.domain.model.SetVO
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 import org.junit.Test
 import org.junit.runner.RunWith

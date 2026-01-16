@@ -1,5 +1,7 @@
 package com.dyentrack.app.presentation.screens.exercise
 
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,65 +11,81 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dyentrack.app.domain.model.exercise.Exercise
+import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.LANGUAGE
+import com.dyentrack.app.domain.model.MesureUnit
+import com.dyentrack.app.domain.model.enums.VariantType
+import com.dyentrack.app.domain.model.getDescription
+import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.FavoriteIconButton
 import com.dyentrack.app.presentation.components.InfoRow
 import com.dyentrack.app.presentation.components.InputCustom
-import com.dyentrack.app.presentation.components.InputVariant
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.SectionSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.YouTubePlayerViewComposable
-import com.dyentrack.app.presentation.components.VariantSelection
-import com.dyentrack.app.presentation.screens.analyse.components.CombinedChartMP
+import com.dyentrack.app.presentation.components.chart.CombinedChartMP
+import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.InfoUserViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ExercisePage(
-    modifier: Modifier = Modifier, navController: NavController, exercise: Exercise,
+    modifier: Modifier = Modifier, navController: NavController,
+    exerciseId: Long,
     exerciseViewModel: ExerciseViewModel = hiltViewModel<ExerciseViewModel>(),
+    userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    infoUserViewModel: InfoUserViewModel = hiltViewModel<InfoUserViewModel>(),
 ) {
-
-
-    val idUser = 1.toLong()
+    val context = LocalContext.current
+    val textToast = stringResource(R.string.favorite_login_prompt)
+    val userPref by userPreferenceViewModel.userPreference.collectAsState()
+    val userUnit = userPref?.mesureUnit ?: MesureUnit.KG
+    LaunchedEffect(exerciseId) {
+        exerciseViewModel.setExercise(exerciseId)
+    }
+    val userConnected by authViewModel.authState.collectAsState()
+    val idUser = userConnected.user?.id ?: 0L
     val state by exerciseViewModel.uiState.collectAsState()
-    val infoMapState by exerciseViewModel.infoExerciseUserFlow.collectAsState()
-
+    val infoMapState by infoUserViewModel.infoExerciseUserFlow.collectAsState()
+    val language = exerciseViewModel.languageUser
+    val currentExercise by exerciseViewModel.currentExercise.collectAsState()
+    val exercise = currentExercise
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                })
-
-            }) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        }) {
         Column {
             TopNavigationBar(
-                "Détail de l’exercice", leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                stringResource(R.string.exercise_detail),
+                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() })
 
 
@@ -79,26 +97,23 @@ fun ExercisePage(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 item {
-                    Box (modifier= Modifier.padding(top = 6.dp, bottom = 12.dp)) {
+                    Box(modifier = Modifier.padding(top = 6.dp, bottom = 12.dp)) {
                         SectionSelector(
-                            variant = VariantSelection.FULL,
-                            selectedIndex = if(state.sectionChose==SectionChose.EXPLAIN)0 else 1 ,
+                            variant = VariantType.FILLED,
+                            selectedIndex = if (state.sectionChose == SectionChose.EXPLAIN) 0 else 1,
                             itemSection = listOf(
                                 MenuItemData(
-                                    "Explication",
-                                    { exerciseViewModel.changeSection(SectionChose.EXPLAIN) }
-                                ),
+                                    stringResource(R.string.explanation),
+                                    { exerciseViewModel.changeSection(SectionChose.EXPLAIN) }),
                                 MenuItemData(
-                                    "Statistique",
-                                    {  exerciseViewModel.changeSection(SectionChose.ANALYSE) }
-                                )
-                            )
+                                    stringResource(R.string.statistics),
+                                    { exerciseViewModel.changeSection(SectionChose.ANALYSE) }))
 
 
                         )
                     }
                 }
-                if(state.sectionChose==SectionChose.EXPLAIN) {
+                if (state.sectionChose == SectionChose.EXPLAIN && exercise != null) {
                     item {
                         Column {
                             Row(
@@ -107,29 +122,29 @@ fun ExercisePage(
                                     .padding(top = 0.dp, end = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(exercise.nameFR)
+                                Text(exercise.getName(language))
 
 
                                 FavoriteIconButton(
                                     isFavorite = infoMapState[exercise.idExercise]?.favorite
-                                        ?: false,
-                                    onClick = {
-                                        val currentFavorite =
-                                            infoMapState[exercise.idExercise]?.favorite ?: false
-                                        exerciseViewModel.updateInfoExerciseUser(
-                                            exercise.idExercise,
-                                            !currentFavorite,
-                                            null
-                                        )
-                                    }
-                                )
+                                        ?: false, onClick = {
+                                        if (userConnected.isConnected) {
+                                            val currentFavorite =
+                                                infoMapState[exercise.idExercise]?.favorite ?: false
+                                            infoUserViewModel.updateInfoExerciseUser(
+                                                exercise.idExercise, !currentFavorite, null
+                                            )
+                                        } else {
+                                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT)
+                                                .show()
+                                        }
+                                    })
                             }
                             Text(
-                                text = "Crée par " + when (exercise.idCreator) {
-                                    null -> "DyeNTrack"
-                                    idUser -> "Vous"
-                                    else -> "un utilisateur"
-                                },
+                                text = stringResource(
+                                    R.string.made_by,
+                                    exerciseViewModel.getExerciseCreatorName(exercise, idUser)
+                                ),
                                 style = MaterialTheme.typography.bodySmall.copy(color = secondaryTextColor)
                             )
 
@@ -138,10 +153,10 @@ fun ExercisePage(
                     }
 
 
-                    if (exercise.description?.isNotBlank() == true) {
+                    if (exercise.getDescription(language).isNotBlank()) {
                         item {
                             Text(
-                                exercise.description,
+                                exercise.getDescription(language),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -153,47 +168,43 @@ fun ExercisePage(
                     }
 
                     if (exercise.muscleInfos?.isNotEmpty() == true) {
-                        val muscleUse = exerciseViewModel.masterData?.muscles
-                            ?.filter { it.id in exercise.muscleInfos.map { it -> it.idMuscle } }
-                            ?.map { it.nameFR } ?: emptySet()
+
 
                         item {
                             Column(modifier = modifier.fillMaxWidth()) {
                                 Text(
-                                    "Détails",
+                                    stringResource(R.string.details),
                                     modifier = Modifier.padding(vertical = 12.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
+                                if (language != LANGUAGE.EN && exercise.nameFR != exercise.nameEN) {
+                                    InfoRow(
+                                        label = "Aussi Appellé",
+                                        value = exercise.getName(LANGUAGE.EN)
+                                    )
+                                }
                                 InfoRow(
-                                    label = "Aussi Appellé",
-                                    value = "future nom anglais",
-                                )
-                                InfoRow(
-                                    label = "Muscle utilisé",
-                                    value = muscleUse.joinToString(", "),
+                                    label = stringResource(R.string.muscle_use),
+                                    value = exerciseViewModel.getMuscleUsedNames(exercise)
+                                        .joinToString(", "),
                                     border = true
                                 )
+                                if (exercise.muscleInfos.size > 1) {
+                                    InfoRow(
+                                        label = stringResource(R.string.primary_muscle),
+                                        value = exerciseViewModel.getPrimaryMuscleName(exercise)
+                                    )
+                                }
+
                                 InfoRow(
-                                    label = "Muscle Principal",
-                                    value = exercise.muscleInfos
-                                        .firstOrNull { it.principal }
-                                        ?.idMuscle
-                                        ?.let { id -> exerciseViewModel.masterData?.muscles?.firstOrNull { it.id == id }?.nameFR }
-                                        ?: "Aucun",
-                                )
-                                InfoRow(
-                                    label = "Equipement possible",
-                                    value = exerciseViewModel.masterData?.equipment?.joinToString(", ") { it.nameFR }
-                                        ?: "Aucun",
+                                    label = stringResource(R.string.possible_equipment),
+                                    value = exerciseViewModel.getEquipmentNames(),
                                     border = true
                                 )
 
                                 InfoRow(
-                                    label = "Exécution possible",
-                                    value = exerciseViewModel.masterData?.lateralites?.joinToString(
-                                        ", "
-                                    ) { it.nameFR }
-                                        ?: "Aucune",
+                                    label = stringResource(R.string.possible_execution),
+                                    value = exerciseViewModel.getLateralities()
                                 )
 
 
@@ -216,25 +227,81 @@ fun ExercisePage(
                                     .padding(top = 12.dp)
                                     .height(70.dp),
                                 noteState,
-                                placeholder = "Ajouter une note",
-                                variant = InputVariant.OUTLINED,
+                                placeholder = stringResource(R.string.add_note),
+                                variant = VariantType.OUTLINED,
                                 singleLine = false,
                                 onFocusLost = { finalText ->
-                                    exerciseViewModel.updateInfoExerciseUser(
-                                        exercise.idExercise,
-                                        null,
-                                        finalText
+                                    infoUserViewModel.updateInfoExerciseUser(
+                                        exercise.idExercise, null, finalText
                                     )
-                                }
-                            )
+                                })
 
 
                         }
 
                     }
-                }
-                else{
-                   // CombinedChartMP(Modifier,state.)
+                } else {
+                    item {
+                        Text(
+                            stringResource(R.string.performance_indicator),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .padding(vertical = 8.dp)
+
+
+                                .wrapContentHeight()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        ) {
+                            val numberSize = state.allDataExercise.values.size
+                            CombinedChartMP(
+                                labels = state.allDataExercise.keys.toList(),
+                                barValues = exerciseViewModel.getChartBarValues(userUnit),
+                                lineValues = exerciseViewModel.getChartLineValues(),
+                                showValueBar = numberSize < 35,
+                                showValueLine = numberSize < 20,
+                                modifier = Modifier.fillMaxWidth(),
+                                barLegendLabel = stringResource(R.string.weighted_sum),
+                                lineLegendLabel = stringResource(R.string.fail_set_ratio)
+
+                            )
+                        }
+
+                    }
+                    item {
+                        Column {
+                            InfoRow(
+                                label = stringResource(R.string.average_weight_5),
+                                value = exerciseViewModel.getAverageWeightFormatted(
+                                    top = 5, userUnit = userUnit
+                                )
+                            )
+                            val last14Day = exerciseViewModel.getLast14DaysDataDivided()
+
+                            InfoRow(
+                                label = stringResource(R.string.exercise_per_week),
+                                border = true,
+                                value = exerciseViewModel.getFrequencyPerWeek(last14Day).toString()
+                            )
+                            InfoRow(
+                                label = stringResource(R.string.sets_per_week),
+                                border = true,
+                                value = exerciseViewModel.getTotalSetsPerWeek(last14Day).toString()
+                            )
+                            InfoRow(
+                                label = stringResource(R.string.last_occurrence),
+                                value = exerciseViewModel.getLastDoneDate()
+                            )
+                        }
+                    }
                 }
             }
         }

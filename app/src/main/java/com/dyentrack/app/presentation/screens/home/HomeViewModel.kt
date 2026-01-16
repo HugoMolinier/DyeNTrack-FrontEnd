@@ -1,138 +1,180 @@
 package com.dyentrack.app.presentation.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyentrack.app.domain.model.DayDataRequest
-import com.dyentrack.app.domain.model.HealthConnectStatus
-import com.dyentrack.app.domain.model.MasterDataStatic
+import com.dyentrack.app.R
+import com.dyentrack.app.core.locale.LocaleManager
 import com.dyentrack.app.domain.model.MuscleRate
-import com.dyentrack.app.domain.usecase.GetMasterDataStaticUseCase
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
+import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.usecase.GetRadarDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
-import com.dyentrack.app.domain.usecase.health.CheckHealthConnectUseCase
-import com.dyentrack.app.domain.usecase.health.GetDataHealthUseCase
-import com.dyentrack.app.domain.usecase.health.RequestHealthConnectPermissionsUseCase
-import com.dyentrack.app.domain.usecase.health.SyncHealthDataUseCase
+import com.dyentrack.app.domain.usecase.masterdata.BuildMasterDataMapsUseCase
+import com.dyentrack.app.domain.usecase.masterdata.GetMasterDataStaticUseCase
+import com.dyentrack.app.presentation.components.LeftIcon
+import com.dyentrack.app.presentation.utils.ExerciseImages
+import com.dyentrack.app.presentation.utils.toIsoDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.math.ceil
 
 @HiltViewModel
+
 class HomeViewModel @Inject constructor(
     getDayDataUseCase: GetDayDataUseCase,
     getMasterDataStaticUseCase: GetMasterDataStaticUseCase,
-    private val healthConnectUseCase: CheckHealthConnectUseCase,
-    private val requestHealthConnectPermissionsUseCase: RequestHealthConnectPermissionsUseCase,
-    private val syncHealthDataUseCas: SyncHealthDataUseCase
+    private val buildMasterDataMapsUseCase: BuildMasterDataMapsUseCase,
+    private val getRadarDataUseCase: GetRadarDataUseCase,
 ) : ViewModel() {
 
-    val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
+    private val dayDataFlow: StateFlow<List<DayDataRequest>?> = getDayDataUseCase.dayDataFlow
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
-    var masterData: MasterDataStatic? = null
-
+    val masterData = getMasterDataStaticUseCase.masterDataFlow.stateIn(
+        viewModelScope, started = SharingStarted.Eagerly, initialValue = null
+    )
+    val languageUser = LocaleManager.getCurrentLanguage()
 
 
     init {
-        viewModelScope.launch {
-            masterData = getMasterDataStaticUseCase()
+        val today = LocalDate.now()
+        val todayIso = today.toIsoDate()
+        //Evite de parser 100date et compare juste des string
+        val last14DaysSet = (0L until 14L).map { today.minusDays(it).toIsoDate() }.toSet()
 
+        viewModelScope.launch {
+            val maps = buildMasterDataMapsUseCase.execute(languageUser)
+            _uiState.update { it.copy(masterDataMaps = maps) }
 
             dayDataFlow.collect { list ->
                 if (list == null) {
-                    _uiState.update { it.copy(mapSeance = emptyMap()) }
+                    _uiState.update {
+                        it.copy(
+                            mapSeance = emptyMap(),
+                            todaySeance = null,
+                            last5DaysKeys = emptyList(),
+                            muscleRateOfEachDay = emptyMap(),
+                            groupRateOfEachDay = emptyMap()
+                        )
+                    }
+
                     return@collect
                 }
-                val formatter = DateTimeFormatter.ISO_DATE
-                val today = LocalDate.now()
 
-                val last15Days = (0L..14L).map { today.minusDays(it) }.reversed()
-                var todaySeanceTemp: DayDataRequest? = null
-                val newMap = list
-                    .mapNotNull { dayData ->
-                        val day = LocalDate.parse(dayData.dayData, formatter)
-                        if (day == today) todaySeanceTemp = dayData
-                        if (day in last15Days && dayData.seanceTrack?.plannedExercises?.isNotEmpty()==true) {
-                            dayData.dayData to dayData.seanceTrack
-                        } else null
+                var todaySeance: DayDataRequest? = null
+                val last5DaysSorted = java.util.TreeSet<LocalDate>(compareByDescending { it })
+                val tempMap = mutableMapOf<String, SeanceTrack>()
+
+                list.forEach { dayData ->
+                    if (dayData.dayData !in last14DaysSet) return@forEach // seulement 15 derniers jours
+
+                    if (dayData.dayData == todayIso) todaySeance = dayData
+
+                    val exercises = dayData.seanceTrack?.plannedExercises
+                    if (!exercises.isNullOrEmpty()) {
+                        tempMap[dayData.dayData] = dayData.seanceTrack
+                        last5DaysSorted.add(dayData.localDate)
+                        if (last5DaysSorted.size > 5) last5DaysSorted.pollLast()
                     }
-                    .toMap()
+                }
 
-                _uiState.update { current -> current.copy(mapSeance = newMap, todaySeance = todaySeanceTemp) }
-                muscleRateOfEachDay(true)
+                _uiState.update { current ->
+                    current.copy(
+                        mapSeance = tempMap,
+                        todaySeance = todaySeance,
+                        last5DaysKeys = last5DaysSorted.map { it.toIsoDate() })
+                }
+                muscleRateOfEachDay()
             }
 
         }
-        viewModelScope.launch {
-            val status = healthConnectUseCase()
-            when (status) {
-                is HealthConnectStatus.Available -> {
-                    val client = status.client
-                    val permissionsGranted = requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
-                    if (permissionsGranted) {
-                       syncHealthDataUseCas.invoke(client)
-                    } else {
-                        Log.d("HealthSync", "Permissions non accordées")
-                    }
-                }
-                else -> Log.d("HealthSync", "Health Connect non disponible")
-            }
+
+    }
+
+    fun getLeftIconForSeance(seance: SeanceTrack?): LeftIcon {
+        if (seance == null) return LeftIcon.Single(R.drawable.logotransparent)
+        val first3Icons = seance.plannedExercises.asSequence()                     // lazy
+            .sortedBy { it.exerciseOrder }
+            .map { ExerciseImages.map[it.exerciseId] ?: R.drawable.logotransparent } // map
+            .take(3).toMutableList()
+
+        if (seance.plannedExercises.size > 3) {
+            first3Icons.add(R.drawable.point)
+        }
+        return if (first3Icons.isNotEmpty()) {
+            LeftIcon.Multiple(first3Icons)
+        } else {
+            LeftIcon.Single(R.drawable.logotransparent)
         }
     }
 
+    fun getRadarData(
+        data: Map<String, Map<Long, MuscleRate>>, labelsMap: Map<Long, String>
+    ): Triple<List<String>, List<Float>, List<Float>> {
+        return getRadarDataUseCase(data, labelsMap)
+    }
+
+    fun toggleBottomSheet(show: BottomSheetVisibleType) {
+        _uiState.update { it.copy(isBottomSheetVisible = show) }
+    }
+
+    fun muscleRateOfEachDay() {
+        val lastSeance = _uiState.value.mapSeance
+
+        val muscleRateByDay: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
+        val groupRateByDay: MutableMap<String, MutableMap<Long, MuscleRate>> =
+            mutableMapOf() // par jour
+
+        lastSeance.forEach { (dayKey, seanceTrack) ->
+            val dayMap = muscleRateByDay.getOrPut(dayKey) { mutableMapOf() }
+            val groupMap = groupRateByDay.getOrPut(dayKey) { mutableMapOf() }
+
+            seanceTrack.plannedExercises.forEach { exerciseVO ->
+                val exercise =
+                    _uiState.value.masterDataMaps?.exerciseMap?.get(exerciseVO.exerciseId)
+                        ?: return@forEach
+                val setsCount = exerciseVO.sets?.count() ?: 0
+                val adjustedSets =
+                    if (exerciseVO.lateraliteId == 2L) ceil(setsCount / 2.0).toInt() else setsCount
 
 
-    fun muscleRateOfEachDay(principalOnly:Boolean) {
-            val master = masterData ?: return
+                val muscleId = exercise.mainMuscle ?: 0L
+                val groupId =
+                    _uiState.value.masterDataMaps?.muscleMap?.get(muscleId)?.idMuscularGroup ?: 0L
 
-        val lastScence = _uiState.value.mapSeance
-        val muscleRate: MutableMap<String, MutableMap<Long, MuscleRate>> = mutableMapOf()
-        val futurGraphData: MutableMap<Long, MuscleRate> =mutableMapOf()
-        lastScence.forEach { (dayKey, seanceTrack) ->
+                // Muscle individuel
+                dayMap[muscleId] = dayMap[muscleId]?.copy(
+                    numberExercise = dayMap[muscleId]!!.numberExercise + 1,
+                    numberSet = dayMap[muscleId]!!.numberSet + adjustedSets
+                ) ?: MuscleRate(1, adjustedSets)
 
-            val dayMap = muscleRate.getOrPut(dayKey) { mutableMapOf() }
+                // Groupe musculaire
+                groupMap[groupId] = groupMap[groupId]?.copy(
+                    numberExercise = groupMap[groupId]!!.numberExercise + 1,
+                    numberSet = groupMap[groupId]!!.numberSet + adjustedSets
+                ) ?: MuscleRate(1, adjustedSets)
 
-
-
-            seanceTrack.plannedExercises.forEach { plannedExerciseVO ->
-                val exercise = master.officialExercise.find { it.idExercise == plannedExerciseVO.exerciseId }?: return@forEach
-                exercise.muscleInfos?.forEach { muscleInfo ->
-                    if (principalOnly && !muscleInfo.principal)return@forEach
-                    val muscle = master.muscles.find { it.id == muscleInfo.idMuscle } ?: return@forEach
-                    val prevVal = dayMap[muscle.id]
-                    var numberSet =plannedExerciseVO.sets?.count() ?: 0
-                    if (plannedExerciseVO.lateraliteId ==2L)  numberSet = ceil(numberSet / 2.0).toInt()
-                    val exerciseCount =  1
-                    //pour muscle
-                    val updatedValue = prevVal?.copy(
-                        numberExercise = prevVal.numberExercise + exerciseCount,
-                                numberSet = prevVal.numberSet + numberSet
-                    ) ?: MuscleRate(exerciseCount, numberSet)
-                    dayMap[muscle.id] = updatedValue
-
-                    //pour groupe musculmaire sur 15j:
-                    val prevValgroup = futurGraphData[muscle.idMuscularGroup]
-                    val updatedValuegroup = prevValgroup?.copy(
-                        numberExercise = prevValgroup.numberExercise + exerciseCount,
-                        numberSet = prevValgroup.numberSet + numberSet
-                    ) ?: MuscleRate(exerciseCount, numberSet)
-                    futurGraphData[muscle.idMuscularGroup as Long] =updatedValuegroup
-
-
-
-
-                }
             }
+
+            muscleRateByDay[dayKey] = dayMap
+            groupRateByDay[dayKey] = groupMap
         }
 
-        _uiState.update { it.copy(muscleRateOfEachDay = muscleRate, graphData = futurGraphData) }
+        _uiState.update {
+            it.copy(
+                muscleRateOfEachDay = muscleRateByDay, groupRateOfEachDay = groupRateByDay
+            )
+        }
     }
+
 
     fun expandSeance(id: Int?) {
         _uiState.update { it.copy(expandedSeance = id) }

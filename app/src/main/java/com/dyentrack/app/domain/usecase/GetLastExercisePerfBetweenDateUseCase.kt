@@ -1,35 +1,35 @@
 package com.dyentrack.app.domain.usecase
 
-import com.dyentrack.app.domain.model.DayDataRequest
 import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetSide
+import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class GetLastExercisePerfBetweenDateUseCase @Inject constructor(){
+@Singleton
+class GetLastExercisePerfBetweenDateUseCase @Inject constructor() {
 
     operator fun invoke(
-        dayDataFlow: List<DayDataRequest>?,
-        idExercise: Long,
-        dateRecent: String,
-        dateBefore: String
+        dayDataFlow: List<DayDataRequest>?, idExercise: Long, dateRecent: String, dateBefore: String
     ): Map<String, List<SetData>> {
 
         if (dayDataFlow == null) return emptyMap()
 
         val result = mutableMapOf<String, MutableList<SetData>>()
 
-        generateSequence(LocalDate.parse(dateRecent)) { it.minusDays(1) }
-            .takeWhile { !it.isBefore(LocalDate.parse(dateBefore)) }
-            .forEach { day ->
+        generateSequence(LocalDate.parse(dateRecent)) { it.minusDays(1) }.takeWhile {
+                !it.isBefore(
+                    LocalDate.parse(dateBefore)
+                )
+            }.forEach { day ->
                 val dayKey = day.format(DateTimeFormatter.ISO_DATE)
 
                 val dayData = dayDataFlow.find { it.dayData == dayKey } ?: return@forEach
 
-                val exercise = dayData.seanceTrack
-                    ?.plannedExercises
-                    ?.firstOrNull { it.exerciseId == idExercise }
+                val exercise =
+                    dayData.seanceTrack?.plannedExercises?.firstOrNull { it.exerciseId == idExercise }
 
                 val setsVO = exercise?.sets.orEmpty()
                 if (setsVO.isNotEmpty()) {

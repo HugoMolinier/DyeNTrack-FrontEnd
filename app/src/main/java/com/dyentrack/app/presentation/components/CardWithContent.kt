@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,15 +43,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.domain.model.enums.EmphasisType
 import com.dyentrack.app.presentation.theme.TertiaOne
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
-enum class SubTextEmphasis { PRIMARY, SECONDARY }
 data class MenuItemData(
     val label: String,
     val onClick: () -> Unit,
-    val style: TextStyle?=null
+    val style: TextStyle?=null,
+    val canBeClick :Boolean = true,
+    val color:Color=secondaryTextColor,
 )
+
+sealed class LeftIcon {
+    data class Single(@DrawableRes val icon: Int) : LeftIcon()
+    data class Multiple(@DrawableRes val icons: List<Int>) : LeftIcon()
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -58,16 +66,16 @@ fun CardWithContent(
     modifier: Modifier = Modifier,
     text: String,
     subText: String,
-    @DrawableRes leftIcon: Int ? = null,
+    leftIcon: LeftIcon ? = null,
     badgeText: String? = null,
-    componentRight: @Composable (() -> Unit)? = null,
+    componentRight: @Composable ((showMenu: () -> Unit) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     canExtend: Boolean = false,
     expanded: Boolean = false,
     onExpandChange: ((Boolean) -> Unit)? = null,
     menuOnLongClick: List<MenuItemData>? = null,
     childrenForExtend: @Composable (() -> Unit)? = null,
-    subTextEmphasis: SubTextEmphasis = SubTextEmphasis.SECONDARY,
+    subTextEmphasis: EmphasisType = EmphasisType.SECONDARY,
     hasLineShadowBetweenMainAndChildren: Boolean=false,
 ) {
 
@@ -121,26 +129,45 @@ fun CardWithContent(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
 
-                            Box(
-                                modifier = Modifier
-                                    .height(58.dp)
-                                    .width(58.dp)
-                                    .background(
-                                        color = if (leftIcon == null) TertiaOne else TertiaOne.copy(
-                                            alpha = 0.5f
-                                        ),
-                                        shape = RoundedCornerShape(5.dp)
-                                    )
+                            if(leftIcon!=null) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(58.dp)
+                                        .width(58.dp)
+                                        .background(
+                                            color = TertiaOne.copy(
+                                                alpha = 0.5f
+                                            ),
+                                            shape = RoundedCornerShape(5.dp)
+                                        )
 
 
-                            ) {
-                                if (leftIcon != null) {
-                                    Image(
-                                        painter = painterResource(id = leftIcon),
-                                        contentDescription = "Image de l'exercise",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Fit
-                                    )
+                                ) {
+                                    when (leftIcon) {
+                                        is LeftIcon.Single -> Image(
+                                            painter = painterResource(id = leftIcon.icon),
+                                            contentDescription = "Image de l'exercise",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit
+                                        )
+
+                                        is LeftIcon.Multiple -> {
+                                            FlowRow(
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp), // espace horizontal
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)    // espace vertical
+                                            ) {
+                                                leftIcon.icons.forEach { iconRes ->
+                                                    Image(
+                                                        painter = painterResource(id = iconRes),
+                                                        contentDescription = "Image de l'exercice",
+                                                        modifier = Modifier.size(24.dp), // adapter la taille selon besoin
+                                                        contentScale = ContentScale.Fit
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
                                 }
                             }
                             Column(
@@ -154,7 +181,7 @@ fun CardWithContent(
                                 Text(
                                     text = subText,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = if (subTextEmphasis == SubTextEmphasis.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
+                                    color = if (subTextEmphasis == EmphasisType.SECONDARY) secondaryTextColor else MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -166,13 +193,13 @@ fun CardWithContent(
                             if (badgeText != null) {
                                 Badge(
                                     containerColor = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(24.dp)
                                 ) {
                                     Text(badgeText)
                                 }
                             }
                             if (componentRight != null) {
-                                componentRight()
+                                componentRight { showMenu = true }
                             }
                         }
 
@@ -188,7 +215,14 @@ fun CardWithContent(
                     )
                 }
                 if (canExtend && expanded) {
-                    childrenForExtend?.invoke()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.2f))
+
+                    ) {
+                        childrenForExtend?.invoke()
+                    }
 
                 }
 
@@ -205,11 +239,16 @@ fun CardWithContent(
 
             menuOnLongClick?.forEach { menuItemAction ->
                 DropdownMenuItem(
-                    text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium ) },
+                    text = { Text(menuItemAction.label, style = menuItemAction.style?: MaterialTheme.typography.bodyMedium,color=menuItemAction.color ) },
                     onClick = {
-                        menuItemAction.onClick()
-                        showMenu = false
-                    })
+                        if(menuItemAction.canBeClick) {
+                            menuItemAction.onClick()
+                            showMenu = false
+                        }
+
+                    },
+                    enabled = menuItemAction.canBeClick
+                )
             }
         }
     }

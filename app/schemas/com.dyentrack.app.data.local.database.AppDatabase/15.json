@@ -1,0 +1,130 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 15,
+    "identityHash": "42e32b8f9deb7f1ff6cb7349bb910df4",
+    "entities": [
+      {
+        "tableName": "seanceOfDay",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idDayData` INTEGER, `dayData` TEXT NOT NULL, `seanceTrack` TEXT, `nutritionTrack` TEXT, `physioTrack` TEXT, `lastUpdate` TEXT, `lastUpdateHealthLocal` TEXT, PRIMARY KEY(`dayData`))",
+        "fields": [
+          {
+            "fieldPath": "idDayData",
+            "columnName": "idDayData",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dayData",
+            "columnName": "dayData",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seanceTrack",
+            "columnName": "seanceTrack",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nutritionTrack",
+            "columnName": "nutritionTrack",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "physioTrack",
+            "columnName": "physioTrack",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastUpdate",
+            "columnName": "lastUpdate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastUpdateHealthLocal",
+            "columnName": "lastUpdateHealthLocal",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "dayData"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "preset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idLocal` INTEGER PRIMARY KEY AUTOINCREMENT, `idPreset` INTEGER, `name` TEXT NOT NULL, `lastUpdate` TEXT NOT NULL, `presetSeanceExerciseVO` TEXT, `isDelete` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "idLocal",
+            "columnName": "idLocal",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "idPreset",
+            "columnName": "idPreset",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdate",
+            "columnName": "lastUpdate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "presetSeanceExerciseVO",
+            "columnName": "presetSeanceExerciseVO",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isDelete",
+            "columnName": "isDelete",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "idLocal"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_preset_idPreset",
+            "unique": true,
+            "columnNames": [
+              "idPreset"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_preset_idPreset` ON `${TABLE_NAME}` (`idPreset`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '42e32b8f9deb7f1ff6cb7349bb910df4')"
+    ]
+  }
+}

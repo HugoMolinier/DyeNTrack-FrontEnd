@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dyentrack.app.R
+import com.dyentrack.app.domain.model.ParameterIcon
+import com.dyentrack.app.domain.model.ParameterItem
+import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun TopNavigationBar(
@@ -53,7 +61,7 @@ fun TopNavigationBar(
             if (leftIcon != null) {
                 Icon(
                     imageVector = leftIcon,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -71,10 +79,7 @@ fun TopNavigationBar(
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .align(Alignment.CenterEnd)
-                .clickable(enabled = onClickLeft != null) {
-                    onClickLeft?.invoke()
-                },
+                .align(Alignment.CenterEnd),
             contentAlignment = Alignment.Center
         ) {
         if (rightSide != null) {
@@ -83,3 +88,5 @@ fun TopNavigationBar(
         } }
     }
 }
+
+

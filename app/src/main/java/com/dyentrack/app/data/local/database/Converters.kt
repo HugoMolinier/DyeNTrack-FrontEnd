@@ -1,9 +1,11 @@
 package com.dyentrack.app.data.local.database
 
 import androidx.room.TypeConverter
-import com.dyentrack.app.domain.model.NutritionTrack
-import com.dyentrack.app.domain.model.PhysioTrack
-import com.dyentrack.app.domain.model.PlannedExerciseVO
+import com.dyentrack.app.domain.model.dayData.NutritionTrack
+import com.dyentrack.app.domain.model.dayData.PhysioTrack
+import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
+import com.dyentrack.app.domain.model.dayData.SeanceTrack
+import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -30,7 +32,9 @@ class Converters {
 
     @TypeConverter
     fun toNutritionTrack(value: String?): NutritionTrack {
-        return gson.fromJson(value, NutritionTrack::class.java)
+
+        return gson.fromJson(value, NutritionTrack::class.java) ?: NutritionTrack()
+
     }
 
     @TypeConverter
@@ -40,12 +44,28 @@ class Converters {
 
     @TypeConverter
     fun toPhysioTrack(value: String?): PhysioTrack {
-        return gson.fromJson(value, PhysioTrack::class.java) ?: PhysioTrack(
-            weight = 0.0,
-            step = 0,
-            hourOfSleep = 0.0,
-            mood = ""
-        )
+        return gson.fromJson(value, PhysioTrack::class.java) ?: PhysioTrack()
+    }
+
+    @TypeConverter
+    fun fromSeanceTrack(track: SeanceTrack?): String? {
+        return gson.toJson(track)
+    }
+
+    @TypeConverter
+    fun toSeanceTrack(value: String?): SeanceTrack? {
+        return value?.let { gson.fromJson(it, SeanceTrack::class.java) }
+    }
+
+    @TypeConverter
+    fun fromExerciceList(value: List<ExerciceInPreset>?): String {
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun toExerciceList(value: String): List<ExerciceInPreset>? {
+        val listType = object : TypeToken<List<ExerciceInPreset>>() {}.type
+        return gson.fromJson(value, listType)
     }
 
 }

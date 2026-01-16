@@ -5,24 +5,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.health.connect.client.PermissionController
-import com.dyentrack.app.presentation.screens.seance.viewModel.SeanceViewModel
+import com.dyentrack.app.presentation.globalViewModel.HealthConnectViewModel
+import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 
 @Composable
 fun HealthConnectPermissionsScreen(
     healthConnectPermissionsNeeded: Set<String>,
-    viewModel: SeanceViewModel
+    viewModel: HealthConnectViewModel
 ) {
     val launcher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract()
     ) { grantedPermissions ->
-        // Résultat des permissions
-        if (grantedPermissions.containsAll(healthConnectPermissionsNeeded)) {
-            Log.d("HealthConnect", "Permissions accordées")
-        } else {
-            Log.d("HealthConnect", "Permissions refusées ou incomplètes")
-        }
-        // Relancer la synchro pour mettre à jour l'état
-        viewModel.syncHealthData()
+
+        viewModel.onPermissionsResult(
+            grantedPermissions.containsAll(healthConnectPermissionsNeeded)
+        )
     }
 
     LaunchedEffect(healthConnectPermissionsNeeded) {

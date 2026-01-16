@@ -17,11 +17,11 @@ class CheckHealthConnectUseCase @Inject constructor(
         val status = HealthConnectClient.Companion.getSdkStatus(context)
 
         return when (status) {
-            HealthConnectClient.Companion.SDK_UNAVAILABLE ->
-                HealthConnectStatus.NotAvailable
+            HealthConnectClient.Companion.SDK_UNAVAILABLE -> HealthConnectStatus.NotAvailable
 
-            HealthConnectClient.Companion.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED ->
-                HealthConnectStatus.NeedsUpdate(provider)
+            HealthConnectClient.Companion.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> HealthConnectStatus.NeedsUpdate(
+                provider
+            )
 
             else -> {
                 val client = HealthConnectClient.Companion.getOrCreate(context)
