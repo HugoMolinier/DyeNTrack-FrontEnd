@@ -84,7 +84,7 @@ fun ObjectifPage(
         }) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.my_goals),
+                text=stringResource(R.string.my_goals),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

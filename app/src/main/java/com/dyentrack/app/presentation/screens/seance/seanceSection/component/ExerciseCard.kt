@@ -72,6 +72,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ExerciseCard(
+    dragModifier: Modifier = Modifier,
     exInSeance: ExerciseInSeance,
     state: SeanceUiState,
     viewModel: SeanceViewModel,
@@ -79,7 +80,7 @@ fun ExerciseCard(
     userUnit: MesureUnit,
     infoExercise: InfoExerciseUser?,
     preset: Preset?,
-    dragModifier: Modifier = Modifier
+
 ) {
     val exerciseId = exInSeance.exerciseId
     val language = viewModel.languageUser

@@ -123,7 +123,7 @@ fun AnalysePage(
     val sommePondUserUnit =
         convertWeight(globalMuscleRate.rateSetSomme?.sommePond, MesureUnit.KG, userUnit) ?: 0.0
     Column(modifier = modifier.fillMaxWidth()) {
-        TopNavigationBar(stringResource(R.string.full_analysis))
+        TopNavigationBar(text=stringResource(R.string.full_analysis))
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -333,7 +333,7 @@ fun AnalysePage(
                                 }
 
                                 Text(
-                                    sommePondUserUnit?.toInt().toString() + userUnit.toString()
+                                    sommePondUserUnit.toInt().toString() + userUnit.toString()
                                         .lowercase(), style = MaterialTheme.typography.bodyLarge
                                 )
 

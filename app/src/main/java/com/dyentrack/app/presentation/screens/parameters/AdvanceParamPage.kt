@@ -49,7 +49,7 @@ fun AdvanceParamPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.advanced),
+                text=stringResource(R.string.advanced),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

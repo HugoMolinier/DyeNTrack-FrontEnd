@@ -73,7 +73,6 @@
 
     <string name="mode_lock">Lock Mode</string>
     <string name="mode_change_order">Change Order</string>
-    <string name="mode_menu">Menu</string>
 
     <string name="favorite_login_prompt">Please log in to add a favorite</string>
 
@@ -151,7 +150,6 @@
 
     <!-- Autre -->
     <string name="other">Other</string>
-    <string name="accessibility">Accessibility</string>
     <string name="privacy">Privacy</string>
     <string name="legal_notices">Legal Notices</string>
 
@@ -181,7 +179,7 @@
     <string name="error_invalid_pseudo">Invalid username format, 3–20 characters</string>
 
     <!-- Buttons -->
-    <string name="registering">Registering...</string>
+    <string name="registering">Registering…</string>
     <string name="finish_registration">Finish registration</string>
 
     <!-- Links -->
@@ -205,11 +203,11 @@
     <!-- Buttons -->
     <string name="edit_info">Edit Info</string>
     <string name="apply">Apply</string>
-    <string name="applying">Applying...</string>
+    <string name="applying">Applying…</string>
     <string name="error_invalid_height">Height must be between 50 and 300 cm</string>
 
     <string name="health_connect">Health Connect</string>
-    <string name="checking">Checking...</string>
+    <string name="checking">Checking…</string>
     <string name="install">Install</string>
     <string name="authorize">Authorize</string>
     <string name="operational">Operational</string>
@@ -229,7 +227,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="auto_sync_desc">Sync at every startup if operational and authorized</string>
-    <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="privacy_title">Privacy Policy</string>
 
     <!-- Point 1 -->
@@ -394,7 +391,6 @@
 
 
     <string name="collection">Collection</string>
-    <string name="exercises">Exercises</string>
     <string name="view_presets">View my presets</string>
 
     <!-- Bottom sheets -->

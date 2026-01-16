@@ -1,8 +1,6 @@
 package com.dyentrack.app.domain.model.dayData
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class PlannedExerciseVO(
     val id: Long?,
     val exerciseOrder: Int,

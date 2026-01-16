@@ -1,8 +1,6 @@
 package com.dyentrack.app.domain.model.dayData
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class PhysioTrack(
     val weight: Double?=0.0,
     val step: Int?=0,

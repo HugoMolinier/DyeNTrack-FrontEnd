@@ -62,7 +62,7 @@ fun BottomSheetPreset(
                     horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChipDropDown(listOf(        stringResource(R.string.sort_by_name),
+                    ChipDropDown(listOfSelectableItem = listOf(        stringResource(R.string.sort_by_name),
                         stringResource(R.string.sort_by_creation_date),
                         stringResource(R.string.sort_by_last_occurrence)))
                     Icon(Icons.Outlined.FilterList, "Croissant")

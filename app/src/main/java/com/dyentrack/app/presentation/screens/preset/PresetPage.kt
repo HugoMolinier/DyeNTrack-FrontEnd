@@ -157,7 +157,7 @@ fun PresetPage(
                 })
             }) {
         Column {
-            TopNavigationBar(stringResource(R.string.preset_title), leftIcon = Icons.AutoMirrored.Filled.ArrowBack, rightSide = {
+            TopNavigationBar(text=stringResource(R.string.preset_title), leftIcon = Icons.AutoMirrored.Filled.ArrowBack, rightSide = {
                 Box {
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Default.MoreVert, "", tint = secondaryTextColor)
@@ -466,7 +466,7 @@ fun PresetPage(
                                                         verticalAlignment = Alignment.CenterVertically
                                                     ) {
                                                         CustomButton(
-                                                            "-",
+                                                            label="-",
                                                             emphasis = EmphasisType.TERTIA,
                                                             modifier = Modifier.width(40.dp),
                                                             size = SizeType.SMALL,
@@ -482,7 +482,7 @@ fun PresetPage(
                                                             style = MaterialTheme.typography.bodyMedium
                                                         )
                                                         CustomButton(
-                                                            "+",
+                                                            label="+",
                                                             emphasis = EmphasisType.TERTIA,
                                                             modifier = Modifier.width(40.dp),
                                                             size = SizeType.SMALL,

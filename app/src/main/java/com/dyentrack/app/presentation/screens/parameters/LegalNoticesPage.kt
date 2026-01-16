@@ -31,7 +31,7 @@ fun LegalNoticesPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.legal_title),
+                text=stringResource(R.string.legal_title),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

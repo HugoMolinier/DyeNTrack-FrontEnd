@@ -2,9 +2,7 @@ package com.dyentrack.app.domain.model.dayData
 
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class SetVO(
     val setOrder: Int,
     val repsNumber: Int,

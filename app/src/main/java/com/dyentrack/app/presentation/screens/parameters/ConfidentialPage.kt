@@ -31,7 +31,7 @@ fun ConfidentialPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.privacy_title),
+                text=stringResource(R.string.privacy_title),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

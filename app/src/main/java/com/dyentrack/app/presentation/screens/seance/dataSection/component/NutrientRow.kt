@@ -24,13 +24,13 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun NutrientRow(
+    modifier: Modifier = Modifier,
     label: String,
     valueState: MutableState<TextFieldValue>,
     unit: String = "g",
     isEditable: Boolean = true,
     onValueChange: (String) -> Unit = {},
     onFocusLost: ((String) -> Unit)? = null,
-    modifier: Modifier = Modifier,
     modifierInput: Modifier = Modifier,
     autoSync: Boolean
 ) {

@@ -71,7 +71,7 @@ fun ConnectedAppPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.connected_app),
+                text=stringResource(R.string.connected_app),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

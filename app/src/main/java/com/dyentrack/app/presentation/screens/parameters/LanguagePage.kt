@@ -65,7 +65,7 @@ fun LanguagePage(
                 }) {
             Column {
                 TopNavigationBar(
-                    stringResource(R.string.language),
+                    text=stringResource(R.string.language),
                     leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                     onClickLeft = { navController.popBackStack() },
                     rightSide = {

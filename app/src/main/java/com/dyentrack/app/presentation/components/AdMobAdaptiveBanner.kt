@@ -13,6 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.dyentrack.app.presentation.globalViewModel.AdViewModel
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import androidx.compose.ui.platform.LocalResources
 
 @Composable
 fun AdaptiveAdBanner(
@@ -25,7 +26,7 @@ fun AdaptiveAdBanner(
         val widthPx = constraints.maxWidth
         if (adSize == null && widthPx > 0) {
             adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-                context, (widthPx / LocalContext.current.resources.displayMetrics.density).toInt()
+                context, (widthPx / LocalResources.current.displayMetrics.density).toInt()
             )
         }
 

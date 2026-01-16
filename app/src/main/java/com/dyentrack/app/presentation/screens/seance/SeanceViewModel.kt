@@ -16,6 +16,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.dyentrack.app.core.locale.LocaleManager
+import com.dyentrack.app.core.utils.GsonProvider
 import com.dyentrack.app.data.worker.SaveSeanceWorker
 import com.dyentrack.app.domain.model.DayInfo
 import com.dyentrack.app.domain.model.PresetId
@@ -23,7 +24,6 @@ import com.dyentrack.app.domain.model.SetData
 import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetSide
 import com.dyentrack.app.domain.model.SetType
-import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
@@ -33,6 +33,7 @@ import com.dyentrack.app.domain.model.enums.PhysioField
 import com.dyentrack.app.domain.model.enums.SaveType
 import com.dyentrack.app.domain.model.enums.SectionSelectType
 import com.dyentrack.app.domain.model.enums.SyncPerformanceMode
+import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.model.exercise.ExerciseInSeance
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.domain.model.preset.Preset
@@ -57,7 +58,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -624,7 +624,7 @@ class SeanceViewModel @Inject constructor(
 
     fun autoSaveSeanceIfNeeded(day: String, seance: SeanceDuJour) {
         val currentDayData = seance.toDayDataRequest(day)
-        val json = Json.Default.encodeToString(DayDataRequest.serializer(), currentDayData)
+        val json = GsonProvider.gson.toJson(currentDayData)
 
         val workRequest = OneTimeWorkRequestBuilder<SaveSeanceWorker>()
             .setInputData(workDataOf("payload" to json))

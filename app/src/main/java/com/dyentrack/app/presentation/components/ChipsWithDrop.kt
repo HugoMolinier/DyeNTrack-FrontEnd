@@ -25,12 +25,12 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun ChipDropDown(
+    modifier: Modifier=Modifier,
     listOfSelectableItem: List<String>,
     canChange: Boolean = true,
     emphasys : EmphasisType ?= EmphasisType.SECONDARY,
     defaultSelected: String?=null,
     textStyle : TextStyle = MaterialTheme.typography.bodySmall,
-    modifier: Modifier=Modifier,
     justOnClick: () -> Unit = {},
     onSelected: (String) -> Unit = {},
 ) {

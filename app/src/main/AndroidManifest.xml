@@ -21,7 +21,8 @@
         android:roundIcon="@mipmap/icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DyeNTrack"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="33">
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <!-- Mine ca-app-pub-6460148032129069~7193535598  -->
         <meta-data

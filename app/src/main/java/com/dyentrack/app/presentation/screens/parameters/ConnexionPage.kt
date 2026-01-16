@@ -86,7 +86,7 @@ fun ConnexionPage(
         }) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.login),
+                text=stringResource(R.string.login),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

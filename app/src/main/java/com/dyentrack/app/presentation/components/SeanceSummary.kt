@@ -1,7 +1,6 @@
 package com.dyentrack.app.presentation.components
 
 import com.dyentrack.app.domain.model.exercise.Exercise
-import java.security.Principal
 
 data class SeanceSummary(
     val exercisesList: List<Exercise>?=emptyList(),

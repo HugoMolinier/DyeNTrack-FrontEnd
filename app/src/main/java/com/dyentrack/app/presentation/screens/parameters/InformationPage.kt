@@ -89,12 +89,12 @@ fun InformationPage(
         isEditing.value = false
         authViewModel.clearRequestState()
     }
-
+/*
     val sexeOptions = listOf(
         stringResource(R.string.male_label) to true,
         stringResource(R.string.female_label) to false,
         stringResource(R.string.other_label) to null
-    )
+    )*/
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val focusManager = LocalFocusManager.current
 
@@ -115,7 +115,7 @@ fun InformationPage(
 
             TopNavigationBar(
 
-                stringResource(R.string.information),
+                text=stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = {
                     if (originalPseudo.value != pseudo.value.text || originalHeight.value != height.value.text || originalBirthday.value != birthday.value || originalSexe.value != sexe.value) {
@@ -304,7 +304,7 @@ fun InformationPage(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             CustomButton(
-                                "Supprimer mon compte",
+                                label="Supprimer mon compte",
                                 enable = requestState !is RequestState.Loading,
                                 isLoading = requestState is RequestState.Loading,
                                 variant = VariantType.OUTLINED,

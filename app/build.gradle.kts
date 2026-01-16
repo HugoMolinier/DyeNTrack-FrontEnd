@@ -1,7 +1,4 @@
-import io.grpc.internal.SharedResourceHolder.release
-import org.gradle.kotlin.dsl.release
 import java.util.Properties
-
 
 
 plugins {
@@ -23,7 +20,7 @@ android {
     }
     defaultConfig {
         applicationId = "com.dyentrack.app"
-        minSdk = 30
+        minSdk = 26
         targetSdk = 36
         versionCode = 4
         versionName = "1.0.0"
@@ -109,8 +106,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.material3)
     implementation("com.google.android.material:material:1.10.0")

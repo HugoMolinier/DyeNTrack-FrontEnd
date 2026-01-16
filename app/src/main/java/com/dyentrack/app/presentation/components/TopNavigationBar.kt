@@ -1,11 +1,11 @@
 package com.dyentrack.app.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -17,21 +17,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.R
-import com.dyentrack.app.domain.model.ParameterIcon
-import com.dyentrack.app.domain.model.ParameterItem
-import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
 fun TopNavigationBar(
+    modifier: Modifier = Modifier,
     text: String,
     leftIcon: ImageVector? = null,
     onClickLeft:(()->Unit)?=null,
     rightSide: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
 

@@ -145,7 +145,7 @@ class AnalyseViewModel @Inject constructor(
 
             //  Filtre date
             allSeanceByDay[dayStr]?.second
-                ?.takeIf { it != null && !it.isBefore(start) && !it.isAfter(end) }
+                ?.takeIf { !it.isBefore(start) && !it.isAfter(end) }
                 ?: return@mapNotNull null
 
 

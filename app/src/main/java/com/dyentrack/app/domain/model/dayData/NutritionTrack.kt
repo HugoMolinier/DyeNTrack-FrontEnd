@@ -1,8 +1,5 @@
 package com.dyentrack.app.domain.model.dayData
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class NutritionTrack(
     val calories: Int?=0,
     val proteins: Int?=0,

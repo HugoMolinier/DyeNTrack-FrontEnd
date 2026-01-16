@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -24,6 +23,8 @@ import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.createBitmap
 
 @Composable
 fun RadarChartMP(
@@ -79,7 +80,7 @@ fun RadarChartMP(
             val dot = createDot(radarChart.context)
             val entries2 = values2.map {
                 RadarEntry(it).apply {
-                    icon = BitmapDrawable(radarChart.resources, dot)
+                    icon = dot.toDrawable(radarChart.resources)
                 }
             }
 
@@ -134,7 +135,7 @@ fun createDot(context: Context): Bitmap {
     val size = (5 * context.resources.displayMetrics.density).toInt()
     val stroke = (1.5f * context.resources.displayMetrics.density)
 
-    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(size, size)
     val canvas = Canvas(bitmap)
 
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {

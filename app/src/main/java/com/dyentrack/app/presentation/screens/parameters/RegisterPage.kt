@@ -80,7 +80,7 @@ fun RegisterPage(
         }) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.signup),
+                text=stringResource(R.string.signup),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetContent(
+    modifier: Modifier = Modifier,
     title: String="",
     titleAction: (@Composable () -> Unit)? = null,
     closeButtonTitle: Boolean = true,
@@ -37,7 +38,7 @@ fun BottomSheetContent(
     footerComponent: @Composable (() -> Unit)? = null,
     showBottomSheet: Boolean = false,
     onDismiss: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
+
     isfullScreen:Boolean=true,
     dragZoneComponent: @Composable (() -> Unit)? = null,
 ) {

@@ -94,7 +94,6 @@ fun HomePage(
     val presetList by presetViewModel.presetFlow.collectAsState()
     LaunchedEffect(Unit) {
         presetViewModel.navigateToPreset.collect { preset ->
-            Log.d("presetNav", "${preset}")
             if (preset != null) navController.navigate("preset/${preset.idLocal}")
         }
     }
@@ -547,7 +546,7 @@ fun HomePage(
 
 
                         CustomButton(
-                            stringResource(R.string.view_workouts),
+                            label=stringResource(R.string.view_workouts),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 12.dp, start = 10.dp, end = 10.dp),
@@ -595,7 +594,7 @@ fun HomePage(
                                 textAlign = TextAlign.Center
                             )
                             CustomButton(
-                                stringResource(R.string.start_first_session),
+                                label=stringResource(R.string.start_first_session),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp),

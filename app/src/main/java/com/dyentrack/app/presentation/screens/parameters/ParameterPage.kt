@@ -75,7 +75,7 @@ fun ParameterPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.parameter), rightSide = {
+                text=stringResource(R.string.parameter), rightSide = {
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
@@ -149,12 +149,12 @@ fun ParameterPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 CustomButton(
-                                    stringResource(R.string.signup),
+                                    label=stringResource(R.string.signup),
                                     modifier = modifier.fillMaxWidth(),
                                     size = SizeType.MEDIUM,
                                     onClick = { navController.navigate("inscription") })
                                 CustomButton(
-                                    stringResource(R.string.login),
+                                    label=stringResource(R.string.login),
                                     variant = VariantType.OUTLINED,
                                     emphasis = EmphasisType.SECONDARY,
                                     modifier = modifier.fillMaxWidth(),

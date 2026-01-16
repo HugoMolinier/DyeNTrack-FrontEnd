@@ -59,7 +59,7 @@ fun MesureUnitPage(
         }) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.measurement_unit),
+                text=stringResource(R.string.measurement_unit),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

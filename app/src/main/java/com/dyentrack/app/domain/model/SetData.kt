@@ -1,6 +1,5 @@
 package com.dyentrack.app.domain.model
 
-import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class SetData(
@@ -19,12 +18,11 @@ sealed class SetField {
     data class Charge(val value: Double?) : SetField()
 }
 
-@Serializable
+
 enum class SetType {
     EFFECTIVE, TEMPO, WARMUP
 }
 
-@Serializable
 enum class SetSide {
     LEFT, RIGHT, BOTH
 }

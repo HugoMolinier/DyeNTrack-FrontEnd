@@ -84,7 +84,7 @@ fun ExercisePage(
         }) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.exercise_detail),
+                text=stringResource(R.string.exercise_detail),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() })
 

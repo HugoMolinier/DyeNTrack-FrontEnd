@@ -6,9 +6,9 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.dyentrack.app.core.utils.GsonProvider
 import com.dyentrack.app.data.local.entities.SessionLocal
 import com.dyentrack.app.data.local.entities.UserLocal
-import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +18,6 @@ class SecureSessionDataSource @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val gson = Gson()
     private val prefs: SharedPreferences by lazy {
         createEncryptedPrefs()
     }
@@ -50,7 +49,7 @@ class SecureSessionDataSource @Inject constructor(
     /* -------- USER -------- */
 
     fun saveUser(user: UserLocal) {
-        prefs.edit { putString(KEY_USER, gson.toJson(user)) }
+        prefs.edit { putString(KEY_USER, GsonProvider.gson.toJson(user)) }
     }
 
     fun updateUserInfo(
@@ -67,28 +66,24 @@ class SecureSessionDataSource @Inject constructor(
 
 
     fun getUser(): UserLocal? {
-        return prefs.getString(KEY_USER, null)?.let { gson.fromJson(it, UserLocal::class.java) }
-    }
-
-    fun clearUser() {
-        prefs.edit { remove(KEY_USER) }
+        return prefs.getString(KEY_USER, null)?.let { GsonProvider.gson.fromJson(it, UserLocal::class.java) }
     }
 
     /* -------- SESSION -------- */
 
     fun saveSession(session: SessionLocal) {
-        prefs.edit { putString(KEY_SESSION, gson.toJson(session)) }
+        prefs.edit { putString(KEY_SESSION, GsonProvider.gson.toJson(session)) }
     }
 
     fun getSession(): SessionLocal? {
         return prefs.getString(KEY_SESSION, null)
-            ?.let { gson.fromJson(it, SessionLocal::class.java) }
+            ?.let { GsonProvider.gson.fromJson(it, SessionLocal::class.java) }
 
     }
 
     fun getTokenAuthInterceptor(): String? {
         val session = prefs.getString(KEY_SESSION, null)?.let {
-            gson.fromJson(it, SessionLocal::class.java)
+            GsonProvider.gson.fromJson(it, SessionLocal::class.java)
         }
 
         // Vérifie l'expiration

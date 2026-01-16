@@ -79,7 +79,6 @@ class UserConnectionRepositoryImpl @Inject constructor(
         }
         return try {
             val response = api.loginUser(IdentificationRequest(email, password))
-            Log.d("response","${response}")
             val data = response.data
             val user = data.userDTO
             val token = data.token
@@ -96,7 +95,7 @@ class UserConnectionRepositoryImpl @Inject constructor(
                 if (e.code() == 401) AuthError.UNAUTHORIZED else AuthError.ERROR_API
             )
         } catch (e: Exception) {
-            Log.d("ErrorLogin","${e}")
+            Log.d("ErrorLogin","$e")
             RequestState.Error(AuthError.ERROR_API)
         }
     }

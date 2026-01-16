@@ -1,3 +1,3 @@
 package com.dyentrack.app.domain.model.enums
 
-enum class BottomSheetVisibleType { NO, YES,ONLYEXERCICE,ONLYPRESET,INPUTPRESET ,TEXT}
+enum class BottomSheetVisibleType { NO,ONLYEXERCICE,ONLYPRESET,INPUTPRESET ,TEXT}

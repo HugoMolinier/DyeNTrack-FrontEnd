@@ -25,17 +25,17 @@ import androidx.compose.ui.unit.dp
 import com.dyentrack.app.domain.model.enums.EmphasisType
 import com.dyentrack.app.domain.model.enums.SizeType
 import com.dyentrack.app.domain.model.enums.VariantType
-import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.AddColor
 
 
 @Composable
 fun CustomButton(
+    modifier: Modifier = Modifier,
     label: String,
     accessibilityLabel: String=label,
     onClick: (() -> Unit)? = null,
     variant: VariantType = VariantType.FILLED,
     emphasis: EmphasisType = EmphasisType.PRIMARY,
-    modifier: Modifier = Modifier,
     enable: Boolean = true,
     size:SizeType =SizeType.LARGE,
     isLoading:Boolean =false,
@@ -66,11 +66,11 @@ fun CustomButton(
             contentColor = MaterialTheme.colorScheme.background
         }
         EmphasisType.SECONDARY -> {
-            backgroundColor = addColor.TertiaOne
+            backgroundColor = AddColor.TertiaOne
             contentColor = MaterialTheme.colorScheme.primary
         }
         EmphasisType.TERTIA -> {
-            backgroundColor = addColor.TertiaOne
+            backgroundColor = AddColor.TertiaOne
             contentColor = MaterialTheme.colorScheme.onSurface
         }
         EmphasisType.DESTRUCTIVE -> {

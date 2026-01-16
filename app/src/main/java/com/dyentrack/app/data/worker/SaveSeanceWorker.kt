@@ -4,12 +4,11 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.dyentrack.app.core.utils.GsonProvider
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToApiUseCase
-
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.serialization.json.Json
 
 @HiltWorker
 class SaveSeanceWorker @AssistedInject constructor(
@@ -21,7 +20,7 @@ class SaveSeanceWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val json = inputData.getString("payload") ?: return Result.failure()
         return try {
-            val request = Json .decodeFromString<DayDataRequest>(json)
+            val request = GsonProvider.gson.fromJson(json, DayDataRequest::class.java)
             val response = updateDayDataToApiUseCase(request)
             if (response in 200..201) Result.success() else Result.retry()
         } catch (_: Exception) {

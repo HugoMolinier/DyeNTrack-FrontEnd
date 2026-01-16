@@ -147,9 +147,9 @@ fun SeancePage(
     ) {
         Column {
             TopNavigationBar(
-                stringResource(R.string.today_session),
+                text=stringResource(R.string.today_session),
                 rightSide = {
-                    if (todaySeance?.saveAPI == SaveType.NOTSAVE || fetchStatus== SaveType.NOTSAVE) { //TODO( "add Flow of requestDayDataStatus")
+                    if (todaySeance?.saveAPI == SaveType.NOTSAVE || fetchStatus== SaveType.NOTSAVE) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -340,14 +340,7 @@ fun SeancePage(
                                         }
                                 ) {
                                     ExerciseCard(
-                                        exInSeance,
-                                        state,
-                                        viewModel,
-                                        navController,
-                                        userUnit,
-                                        infoMapUser[exInSeance.exerciseId],
-                                    presets.find { it.idLocal == todaySeance?.idPreset?.localId || todaySeance?.idPreset?.apiId == it.idPreset },
-                                            dragModifier = if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
+                                        dragModifier = if (state.exerciseMode == ExerciseMode.CHANGE_ORDER) {
                                             Modifier.draggable(
                                                 orientation = Orientation.Vertical,
                                                 state = rememberDraggableState { delta ->
@@ -366,7 +359,15 @@ fun SeancePage(
                                                 onDragStopped = { offsetY = 0f
                                                     viewModel.changeSaveStatus(SaveType.NOTSAVE)}
                                             )
-                                        } else Modifier
+                                        } else Modifier,
+                                        exInSeance,
+                                        state,
+                                        viewModel,
+                                        navController,
+                                        userUnit,
+                                        infoMapUser[exInSeance.exerciseId],
+                                    presets.find { it.idLocal == todaySeance?.idPreset?.localId || todaySeance?.idPreset?.apiId == it.idPreset },
+
                                         )
                                 }
                             }

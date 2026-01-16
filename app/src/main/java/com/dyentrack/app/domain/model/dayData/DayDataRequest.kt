@@ -1,17 +1,14 @@
 package com.dyentrack.app.domain.model.dayData
 
-import android.util.Log
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.dyentrack.app.data.local.database.Converters
+import kotlinx.serialization.Transient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
-@Serializable
 @Entity(tableName = "seanceOfDay")
 @TypeConverters(Converters::class)
 data class DayDataRequest(

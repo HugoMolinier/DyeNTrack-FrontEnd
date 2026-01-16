@@ -72,7 +72,6 @@
 
     <string name="mode_lock">Verrouillé entré</string>
     <string name="mode_change_order">Changer l\'ordre</string>
-    <string name="mode_menu">Menu</string>
 
     <string name="favorite_login_prompt">Connectez-vous pour ajouter un favori</string>
 
@@ -156,7 +155,6 @@
 
     <!-- Autre -->
     <string name="other">Autre</string>
-    <string name="accessibility">Accessibilité</string>
     <string name="privacy">Confidentialité</string>
     <string name="legal_notices">Mention Légales</string>
 
@@ -187,14 +185,14 @@
     <string name="error_invalid_pseudo">Format pseudo invalide, 3 à 20 caractères</string>
 
     <!-- Boutons -->
-    <string name="registering">Inscription...</string>
+    <string name="registering">Inscription…</string>
     <string name="finish_registration">Finaliser l\'inscription</string>
 
     <!-- Liens -->
     <string name="already_account">Déjà un compte ?</string>
     <string name="login_here">Connectez-vous ici</string>
 
-    <string name="logging_in">Connexion...</string>
+    <string name="logging_in">Connexion…</string>
 
 
     <!-- Liens -->
@@ -213,11 +211,11 @@
     <string name="error_invalid_height">Taille entre 50 et 300 cm</string>
     <string name="edit_info">Modifier les infos</string>
     <string name="apply">Appliquer</string>
-    <string name="applying">Appliquer...</string>
+    <string name="applying">Appliquer…</string>
 
 
     <string name="health_connect">Health Connect</string>
-    <string name="checking">Vérification...</string>
+    <string name="checking">Vérification…</string>
     <string name="install">Installer</string>
     <string name="authorize">Autoriser</string>
     <string name="operational">Opérationnel</string>
@@ -234,8 +232,6 @@
     <string name="auto_sync_desc">Synchronisation à chaque démarrage si opérationnel et autorisé</string>
     <string name="home">Accueil</string>
     <string name="workout">Séance</string>
-    <string name="test_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-
 
     <string name="privacy_title">Politique de confidentialité</string>
 
@@ -408,7 +404,6 @@
 
     <!-- Collection -->
     <string name="collection">Collection</string>
-    <string name="exercises">Exercices</string>
     <string name="view_presets">Voir mes presets</string>
 
     <!-- Bottom sheets -->
