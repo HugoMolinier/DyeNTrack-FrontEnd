@@ -4,25 +4,12 @@ import androidx.room.TypeConverter
 import com.dyentrack.app.core.utils.GsonProvider
 import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import com.dyentrack.app.domain.model.dayData.PhysioTrack
-import com.dyentrack.app.domain.model.dayData.PlannedExerciseVO
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
 import com.dyentrack.app.domain.model.preset.ExerciceInPreset
 import com.google.gson.reflect.TypeToken
 
 class Converters {
 
-
-    @TypeConverter
-    fun fromPlannedExerciseList(value: List<PlannedExerciseVO>?): String {
-        return GsonProvider.gson.toJson(value)
-    }
-
-    @TypeConverter
-    fun toPlannedExerciseList(value: String?): List<PlannedExerciseVO> {
-
-        val type = object : TypeToken<List<PlannedExerciseVO>>() {}.type
-        return GsonProvider.gson.fromJson(value, type)
-    }
 
     @TypeConverter
     fun fromNutritionTrack(track: NutritionTrack?): String? {
@@ -63,8 +50,8 @@ class Converters {
 
     @TypeConverter
     fun toExerciceList(value: String): List<ExerciceInPreset>? {
-        val listType = object : TypeToken<List<ExerciceInPreset>>() {}.type
-        return GsonProvider.gson.fromJson(value, listType)
+        val type = TypeToken.getParameterized(List::class.java, ExerciceInPreset::class.java).type
+        return GsonProvider.gson.fromJson(value, type)
     }
 
 }

@@ -5,33 +5,27 @@
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 -keep class kotlin.Metadata { *; }
 
-
 ####################################
-# ROOM
+# ROOM Minimal
 ####################################
--keep class androidx.room.** { *; }
--keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Dao class * { *; }
--keepclassmembers class * {
-    @androidx.room.* <methods>;
-}
+-keep class * extends androidx.room.RoomDatabase
 
-####################################
-# WORK MANAGER
-####################################
--keep class androidx.work.** { *; }
--dontwarn androidx.work.**
+-keep class com.dyentrack.app.data.local.database.Converters { *; }
+
 
 ####################################
 # GSON - ENHANCED FOR GENERICS
 ####################################
--keep class com.google.gson.** { *; }
 
 # Keep all data model classes with all their fields
 -keep class com.dyentrack.app.data.local.entities.** { *; }
 -keep class com.dyentrack.app.domain.model.ApiResponse { *; }
 -keep class com.dyentrack.app.domain.model.User { *; }
 -keep class com.dyentrack.app.domain.model.ResponseAuth { *; }
+-keep class com.dyentrack.app.domain.model.Token { *; }
+-keepclassmembers enum com.dyentrack.app.domain.model.AuthError { *; }
+-keepclassmembers enum com.dyentrack.app.domain.model.AuthStatus { *; }
 -keep class com.dyentrack.app.domain.model.MasterDataStatic { *; }
 -keep class com.dyentrack.app.domain.model.InfoExerciseUser { *; }
 -keep class com.dyentrack.app.domain.model.preset.Preset { *; }
@@ -53,6 +47,7 @@
     <init>();
 }
 
+
 # Keep SerializedName annotations
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
@@ -72,23 +67,11 @@
 ####################################
 -dontwarn kotlinx.coroutines.**
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
--keep class kotlinx.coroutines.** { *; }
-
-####################################
-# HILT / DAGGER (si présent ou futur)
-####################################
--keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
--dontwarn dagger.hilt.**
 
 ####################################
 # RETROFIT / OKHTTP (si API)
 ####################################
 -keep class retrofit2.** { *; }
--keep,allowobfuscation,allowshrinking interface retrofit2.Call
--keep,allowobfuscation,allowshrinking class retrofit2.Response
-
--dontwarn retrofit2.**
 -dontwarn okhttp3.**
 
 ####################################
@@ -102,10 +85,5 @@
 
 # Google Mobile Ads SDK
 -keep class com.google.android.gms.ads.** { *; }
--keep interface com.google.android.gms.ads.** { *; }
-
 -keep class com.google.android.gms.common.** { *; }
--keep interface com.google.android.gms.common.** { *; }
 
--keep class com.google.android.gms.internal.ads.** { *; }
--keep interface com.google.android.gms.internal.ads.** { *; }

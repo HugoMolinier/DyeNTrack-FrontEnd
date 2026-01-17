@@ -53,10 +53,10 @@ class AuthViewModel @Inject constructor(
         _requestState.value = registerUserUseCase(email, password, pseudo)
     }
 
-    fun updateUser(pseudo: String, height: Int?, sexe: Boolean?, birthDate: String?) =
+    fun updateUser(pseudo: String) =
         viewModelScope.launch {
             _requestState.value = RequestState.Loading
-            _requestState.value = updateUserUseCase(pseudo, height, sexe, birthDate)
+            _requestState.value = updateUserUseCase(pseudo, null, null, null)
         }
 
     fun deleteAll() {

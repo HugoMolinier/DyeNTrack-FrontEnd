@@ -79,13 +79,17 @@ class UserConnectionRepositoryImpl @Inject constructor(
         }
         return try {
             val response = api.loginUser(IdentificationRequest(email, password))
+            Log.d("response","$response")
             val data = response.data
             val user = data.userDTO
             val token = data.token
+            Log.d("a","a")
             if (user == null || token == null) {
                 return RequestState.Error(AuthError.ERROR_API)
             }
+            Log.d("b","b")
             secureSessionDataSource.saveUser(user.toLocal())
+            Log.d("c","c")
             secureSessionDataSource.saveSession(token.toLocal())
 
             updateAuthState()

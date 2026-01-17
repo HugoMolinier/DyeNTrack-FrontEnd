@@ -63,15 +63,8 @@ fun InformationPage(
     val isLoading = requestState is RequestState.Loading
 
     val originalPseudo = remember { mutableStateOf(authState.user?.pseudo ?: "") }
-    val originalHeight = remember { mutableStateOf(authState.user?.height?.toString() ?: "170") }
-    val originalBirthday = remember { mutableStateOf(authState.user?.birthdate ?: "") }
-    val originalSexe = remember { mutableStateOf(authState.user?.sexeMale) }
-
     //  Valeurs modifiables
     val pseudo = remember { mutableStateOf(TextFieldValue(originalPseudo.value)) }
-    val height = remember { mutableStateOf(TextFieldValue(originalHeight.value)) }
-    val birthday = remember { mutableStateOf(originalBirthday.value) }
-    val sexe = remember { mutableStateOf(originalSexe.value) }
     val isEditing = remember { mutableStateOf(false) }
 
 
@@ -89,12 +82,6 @@ fun InformationPage(
         isEditing.value = false
         authViewModel.clearRequestState()
     }
-/*
-    val sexeOptions = listOf(
-        stringResource(R.string.male_label) to true,
-        stringResource(R.string.female_label) to false,
-        stringResource(R.string.other_label) to null
-    )*/
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
     val focusManager = LocalFocusManager.current
 
@@ -118,7 +105,7 @@ fun InformationPage(
                 text=stringResource(R.string.information),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = {
-                    if (originalPseudo.value != pseudo.value.text || originalHeight.value != height.value.text || originalBirthday.value != birthday.value || originalSexe.value != sexe.value) {
+                    if (originalPseudo.value != pseudo.value.text ) {
 
 
                         activeMenu = ActiveMenu(
@@ -142,7 +129,7 @@ fun InformationPage(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
                         modifier = Modifier.clickable(onClick = {
-                            if (originalPseudo.value != pseudo.value.text || originalHeight.value != height.value.text || originalBirthday.value != birthday.value || originalSexe.value != sexe.value) {
+                            if (originalPseudo.value != pseudo.value.text ) {
 
                                 activeMenu = ActiveMenu(
                                     title = "Modification non sauvegarder",
@@ -190,88 +177,6 @@ fun InformationPage(
                         )
                     }
                 }
-                /*
-                item {
-
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.height_label),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                        InputCustom(
-                            text = height,
-                            placeholder = "170",
-                            variant = VariantType.OUTLINED,
-                            maxCaracter = 3,
-                            keyboardType = KeyboardType.Number,
-                            enabled = isEditing.value || isLoading
-
-
-                        )
-                    }
-
-
-                }
-
-                item {
-
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.birthday_label),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                        DatePickerInput(birthday, isEditing.value || isLoading)
-                    }
-
-
-                }
-
-
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp),modifier=Modifier.padding(top = 20.dp)) {
-                        Text(
-                            stringResource(R.string.sex_label),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(40.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                        ) {
-                            sexeOptions.forEach { (label, value) ->
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = label, style = MaterialTheme.typography.bodySmall
-                                    )
-                                    SingleCircleSelector(
-                                        isSelected = sexe.value == value,
-                                        onClick = { sexe.value = value },
-                                        enabled = isEditing.value || isLoading
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-
-                }
-
-
-                 */
                 item {
                     Box(modifier = Modifier.padding(top = 8.dp, bottom = 12.dp, start = 8.dp)) {
 
@@ -346,9 +251,6 @@ fun InformationPage(
                             label = stringResource(R.string.cancel),
                             onClick = {
                                 pseudo.value = TextFieldValue(originalPseudo.value)
-                                height.value = TextFieldValue(originalHeight.value)
-                                birthday.value = originalBirthday.value
-                                sexe.value = originalSexe.value
                                 isEditing.value = false
                                 authViewModel.clearRequestState()
                             },
@@ -362,10 +264,7 @@ fun InformationPage(
                             ),
                             onClick = {
                                 authViewModel.updateUser(
-                                    pseudo.value.text,
-                                    height.value.text.toInt(),
-                                    sexe.value,
-                                    birthday.value
+                                    pseudo.value.text
                                 )
                             },
                             modifier = Modifier.weight(1f),

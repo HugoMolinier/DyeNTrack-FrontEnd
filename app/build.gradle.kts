@@ -20,8 +20,8 @@ android {
         applicationId = "com.dyentrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.0"
+        versionCode = 5
+        versionName = "1.0.1"
 
         val secretsFile = rootProject.file("local.properties")
         val properties = Properties()
