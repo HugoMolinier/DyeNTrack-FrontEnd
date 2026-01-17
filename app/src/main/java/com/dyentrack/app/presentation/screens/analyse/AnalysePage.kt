@@ -797,7 +797,7 @@ fun AnalysePage(
     }
     BottomSheetText(
         title = stringResource(R.string.info),
-        onClose = { BottomSheetVisibleType.NO },
+        onClose = {analyseViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.TEXT,
         text =stringResource(R.string.bodyweight_info)
     )

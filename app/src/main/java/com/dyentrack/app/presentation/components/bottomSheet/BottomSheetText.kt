@@ -21,7 +21,7 @@ fun BottomSheetText(
 ) {
     BottomSheetContent(
         showBottomSheet = bottomSheetVisibility,
-        onDismiss = onClose,
+        onDismiss = { onClose() },
         closeButtonTitle = true,
         isfullScreen = false,
         title = title,

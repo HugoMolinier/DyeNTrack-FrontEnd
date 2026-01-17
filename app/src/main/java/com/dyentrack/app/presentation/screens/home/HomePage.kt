@@ -748,7 +748,7 @@ fun HomePage(
     BottomSheetSelectionExercise(
         bottomSheetVisibility = state.isBottomSheetVisible == BottomSheetVisibleType.ONLYEXERCICE,
         navController = navController,
-        title = stringResource(R.string.see_info),
+        title = pluralStringResource(R.plurals.exercise,2),
         onClose = { homeViewModel.toggleBottomSheet(BottomSheetVisibleType.NO) },
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
