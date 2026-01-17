@@ -5,7 +5,6 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.dyentrack.app.data.local.database.Converters
-import kotlinx.serialization.Transient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -21,7 +20,6 @@ data class DayDataRequest(
     val lastUpdateHealthLocal: String ?=null  //local only seulement pour le merge API / local
 ){
     @Ignore
-    @Transient
     private var _localDate: LocalDate? = null
 
     val localDate: LocalDate

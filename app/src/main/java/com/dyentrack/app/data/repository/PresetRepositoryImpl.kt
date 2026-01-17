@@ -1,6 +1,5 @@
 package com.dyentrack.app.data.repository
 
-import android.util.Log
 import com.dyentrack.app.data.local.database.PresetDao
 import com.dyentrack.app.data.network.ApiInterface
 import com.dyentrack.app.domain.model.AuthStatus

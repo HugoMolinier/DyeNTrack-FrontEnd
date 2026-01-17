@@ -7,8 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.hilt.android)
-    id("kotlin-parcelize")
-    kotlin("plugin.serialization") version "1.9.10"
 }
 
 
@@ -55,8 +53,8 @@ android {
         getByName("release") {
 
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false // false car 1er prod
-            isShrinkResources = false// false car 1er prod
+            isMinifyEnabled = true // false car 1er prod
+            isShrinkResources = true// false car 1er prod
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -123,12 +121,10 @@ dependencies {
     val nav_version = "2.9.5"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.30.1")
 
     // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
@@ -158,4 +154,6 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation("com.google.guava:guava:32.1.3-android")
 }

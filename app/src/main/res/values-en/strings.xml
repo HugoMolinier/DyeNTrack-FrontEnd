@@ -186,7 +186,7 @@
     <string name="already_account">Already have an account?</string>
     <string name="login_here">Log in here</string>
 
-    <string name="logging_in">Logging in...</string>
+    <string name="logging_in">Logging in…</string>
 
     <!-- Links -->
     <string name="no_account">No account?</string>

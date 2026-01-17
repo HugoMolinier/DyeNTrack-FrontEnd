@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.domain.model.enums.SizeType
 import com.dyentrack.app.domain.model.enums.VariantType
-import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.AddColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
 @Composable
@@ -91,7 +91,7 @@ fun InputCustom(
         modifier = modifier
             .fillMaxWidth()
             .height(if (variant == VariantType.EMPTY)32.dp else 44.dp)
-            .background(color =  addColor.TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp)).alpha(if (enabled) 1f else 0.8f)
+            .background(color =  AddColor.TertiaOne, shape = RoundedCornerShape(if (variant == VariantType.OUTLINED) 12.dp else 5.dp)).alpha(if (enabled) 1f else 0.8f)
             .then(
                 if (variant == VariantType.OUTLINED) Modifier.border(
                     width = 1.dp,

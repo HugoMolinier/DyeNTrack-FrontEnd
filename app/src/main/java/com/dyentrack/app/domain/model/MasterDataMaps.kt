@@ -10,8 +10,4 @@ data class MasterDataMaps(
     val musclesGroupMap: Map<Long, String> = emptyMap(),
     val lateraliteMap: Map<Long, String> = emptyMap(),
     val equipmentMap: Map<Long, String> = emptyMap()
-) {
-    companion object {
-        fun empty() = MasterDataMaps()
-    }
-}
+)

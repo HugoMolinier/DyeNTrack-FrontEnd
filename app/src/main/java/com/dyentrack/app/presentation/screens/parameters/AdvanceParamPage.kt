@@ -92,7 +92,8 @@ fun AdvanceParamPage(
                     ) {
 
                         syncOptions.forEach { (label, mode) ->
-                            val isSelected = userPreference?.syncPerformanceMode == mode
+                            val isSelected = (userPreference?.syncPerformanceMode
+                                ?: SyncPerformanceMode.ALL) == mode
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(8.dp)

@@ -35,7 +35,7 @@ import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
 import com.dyentrack.app.presentation.theme.TertiaOne
-import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.AddColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.convertWeight
 import com.dyentrack.app.presentation.utils.toAbbreviatedDate
@@ -135,8 +135,8 @@ fun AnalyseRow(
                                                 .width(20.dp)
                                                 .height(20.dp),
                                             containerColor = when (set.type) {
-                                                SetType.EFFECTIVE -> if (set.rir == 0) addColor.setEch else MaterialTheme.colorScheme.primary
-                                                else -> addColor.setWarm
+                                                SetType.EFFECTIVE -> if (set.rir == 0) AddColor.setEch else MaterialTheme.colorScheme.primary
+                                                else -> AddColor.setWarm
                                             },
                                             contentColor = when (set.type) {
                                                 SetType.WARMUP -> MaterialTheme.colorScheme.onSurface

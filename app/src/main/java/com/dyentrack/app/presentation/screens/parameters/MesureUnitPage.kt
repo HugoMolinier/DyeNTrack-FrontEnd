@@ -89,7 +89,7 @@ fun MesureUnitPage(
                         )
 
                         val menu = unitOptions.map { (label, unit) ->
-                            val isSelected = userPreference?.mesureUnit == unit
+                            val isSelected = (userPreference?.mesureUnit ?: MesureUnit.KG) == unit
 
                             ParameterItem(onClick = {
                                 if (!isSelected) {

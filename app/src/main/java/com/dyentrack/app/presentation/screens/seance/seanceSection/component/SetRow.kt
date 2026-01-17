@@ -31,7 +31,7 @@ import com.dyentrack.app.domain.model.SetField
 import com.dyentrack.app.domain.model.SetType
 import com.dyentrack.app.presentation.components.InputCustom
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
-import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.AddColor
 import com.dyentrack.app.presentation.utils.convertWeight
 import kotlinx.coroutines.delay
 
@@ -123,8 +123,8 @@ fun SetRow(
                 Color.Transparent
             } else {
                 when (set.type) {
-                    SetType.EFFECTIVE -> if (rirState.value.text.toIntOrNull() == 0) addColor.setEch else MaterialTheme.colorScheme.primary
-                    else -> addColor.setWarm
+                    SetType.EFFECTIVE -> if (rirState.value.text.toIntOrNull() == 0) AddColor.setEch else MaterialTheme.colorScheme.primary
+                    else -> AddColor.setWarm
                 }
             },
             contentColor = if (confirmDelete) {

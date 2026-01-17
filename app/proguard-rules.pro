@@ -1,44 +1,111 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+####################################
+# ANDROID / KOTLIN BASICS
+####################################
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-keep class kotlin.Metadata { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+####################################
+# ROOM
+####################################
+-keep class androidx.room.** { *; }
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Dao class * { *; }
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+}
 
-# -----------------------------
-# Retrofit & Gson
-# -----------------------------
+####################################
+# WORK MANAGER
+####################################
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
 
-# Ne pas minifier les modèles (POJO) utilisés par Gson
--keep class com.dyentrack.app.domain.model.** { *; }
+####################################
+# GSON - ENHANCED FOR GENERICS
+####################################
+-keep class com.google.gson.** { *; }
+
+# Keep all data model classes with all their fields
+-keep class com.dyentrack.app.data.local.entities.** { *; }
+-keep class com.dyentrack.app.domain.model.ApiResponse { *; }
+-keep class com.dyentrack.app.domain.model.User { *; }
+-keep class com.dyentrack.app.domain.model.ResponseAuth { *; }
+-keep class com.dyentrack.app.domain.model.MasterDataStatic { *; }
+-keep class com.dyentrack.app.domain.model.InfoExerciseUser { *; }
+-keep class com.dyentrack.app.domain.model.preset.Preset { *; }
+-keep class com.dyentrack.app.domain.model.dayData.DayDataRequest { *; }
 -keep class com.dyentrack.app.data.network.dto.** { *; }
 
-# Ne pas minifier ApiResponse et ses génériques
--keep class com.dyentrack.app.domain.model.ApiResponse { *; }
+# IMPORTANT: Keep ApiResponse with its generic type parameter
+-keepclassmembers class com.dyentrack.app.data.network.dto.** {
+    <fields>;
+    <init>();
+}
+# Keep all fields in model classes
+-keepclassmembers class com.dyentrack.app.data.local.entities.** {
+    <fields>;
+    <init>();
+}
+-keepclassmembers class com.dyentrack.app.domain.model.** {
+    <fields>;
+    <init>();
+}
 
-# Garder les annotations Gson
--keepattributes Signature
--keepattributes *Annotation*
-
-# Retrofit interface
--keep interface com.dyentrack.app.data.network.ApiInterface { *; }
-
-# Optional : garder les classes Gson de type paramétré
+# Keep SerializedName annotations
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
+
+# Prevent stripping of generic type information
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep generic type information for classes with TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken { *; }
+
+
+####################################
+# COROUTINES
+####################################
+-dontwarn kotlinx.coroutines.**
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-keep class kotlinx.coroutines.** { *; }
+
+####################################
+# HILT / DAGGER (si présent ou futur)
+####################################
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-dontwarn dagger.hilt.**
+
+####################################
+# RETROFIT / OKHTTP (si API)
+####################################
+-keep class retrofit2.** { *; }
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+-dontwarn retrofit2.**
+-dontwarn okhttp3.**
+
+####################################
+# REMOVE WARNINGS SAFE
+####################################
+-dontwarn java.lang.invoke.**
+-dontwarn org.jetbrains.annotations.**
+
+
+
+
+# Google Mobile Ads SDK
+-keep class com.google.android.gms.ads.** { *; }
+-keep interface com.google.android.gms.ads.** { *; }
+
+-keep class com.google.android.gms.common.** { *; }
+-keep interface com.google.android.gms.common.** { *; }
+
+-keep class com.google.android.gms.internal.ads.** { *; }
+-keep interface com.google.android.gms.internal.ads.** { *; }

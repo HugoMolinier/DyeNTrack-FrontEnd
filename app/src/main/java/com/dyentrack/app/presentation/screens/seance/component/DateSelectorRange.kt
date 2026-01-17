@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dyentrack.app.domain.model.enums.SaveType
 import com.dyentrack.app.presentation.screens.seance.SeanceUiState
 import com.dyentrack.app.presentation.screens.seance.SeanceViewModel
-import com.dyentrack.app.presentation.theme.addColor
+import com.dyentrack.app.presentation.theme.AddColor
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 import com.dyentrack.app.presentation.utils.toIsoDate
 import java.time.LocalDate
@@ -73,7 +73,7 @@ fun DateSelectorRange(
             val hasSeance = uiState.seancesParJour[day.dateFormat]?.exercisesInSceance?.isNotEmpty() ?: false
 
             val isToday = today == day.dateFormat
-            val isAfterToday = day.dateLocal?.isAfter(todayDate) ?: false
+            val isAfterToday = day.dateLocal.isAfter(todayDate)
             val saveStatus = uiState.seancesParJour[day.dateFormat]?.saveAPI
             val dotColor = when {
                 !hasSeance -> null
@@ -81,7 +81,7 @@ fun DateSelectorRange(
                 saveStatus == SaveType.LocalSAVE || fetchStatus == SaveType.LocalSAVE -> Color(
                     0xFFFFC107
                 ) // jaune : local seulement
-                saveStatus == SaveType.NOTSAVE || fetchStatus == SaveType.NOTSAVE -> addColor.setEch // rouge : échec
+                saveStatus == SaveType.NOTSAVE || fetchStatus == SaveType.NOTSAVE -> AddColor.setEch // rouge : échec
                 else -> null
             }
             val (borderColor, backgroundColor, textColor) = remember(
