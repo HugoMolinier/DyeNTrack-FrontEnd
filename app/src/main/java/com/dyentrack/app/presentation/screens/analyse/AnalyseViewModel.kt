@@ -11,6 +11,7 @@ import com.dyentrack.app.domain.model.RateSetSomme
 import com.dyentrack.app.domain.model.UserPreference
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
+import com.dyentrack.app.domain.model.enums.AnalyseModeLine
 import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.preset.Preset
 import com.dyentrack.app.domain.usecase.GetRadarDataUseCase
@@ -68,9 +69,12 @@ class AnalyseViewModel @Inject constructor(
                 }
 
                 var minDate: LocalDate? = null
+                val caloriesByDay = mutableMapOf<String, Int>()
                 allSeanceByDay.clear()
                 list.forEach { dayData ->
                     val seance = dayData.seanceTrack
+                    val calories = dayData.nutritionTrack?.calories ?: 0
+                    caloriesByDay[dayData.dayData] = calories
                     if (seance?.plannedExercises?.isNotEmpty() == true) {
                         allSeanceByDay[dayData.dayData] = seance to dayData.localDate
                         val currentDate = dayData.localDate
@@ -82,7 +86,8 @@ class AnalyseViewModel @Inject constructor(
 
                 _uiState.update {
                     it.copy(
-                        dateRange = it.dateRange.copy(minExistingDate = minDate)
+                        dateRange = it.dateRange.copy(minExistingDate = minDate),
+                        caloriesMap = caloriesByDay
                     )
                 }
                 computeMuscleRateByDay()
@@ -202,6 +207,11 @@ class AnalyseViewModel @Inject constructor(
         }
     }
 
+    fun changeMode(mode : AnalyseModeLine){
+        _uiState.update {
+            it.copy(modeAnalyse=mode)
+        }
+    }
     fun applyDateRange(rangeInDays: Long) {
         _uiState.update {
             it.copy(
@@ -279,11 +289,26 @@ class AnalyseViewModel @Inject constructor(
         val barValues = data.values.map {
             convertWeight(it.rateSetSomme?.sommePond, MesureUnit.KG, userUnit)?.toFloat() ?: 0f
         }
-        val lineValues = data.values.map {
-            val totalSet = it.numberSet
-            val failSet = it.rateSetSomme?.numberSetFail ?: 0
-            if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+
+        val lineValues = when (uiState.value.modeAnalyse) {
+
+            AnalyseModeLine.RATIO -> {
+                data.values.map {
+                    val totalSet = it.numberSet
+                    val failSet = it.rateSetSomme?.numberSetFail ?: 0
+                    if (totalSet > 0) failSet.toFloat() / totalSet else 0f
+                }
+            }
+
+            AnalyseModeLine.CALORIE -> {
+                labels.map { day ->
+                    uiState.value.caloriesMap[day]?.toFloat() ?: 0f
+                }
+            }
+
+            null -> emptyList()
         }
+
         return ChartData(
             labels = labels,
             barValues = barValues,

@@ -31,7 +31,7 @@ fun CombinedChartMP(
     lineValues: List<Float>,
     showValueBar:Boolean=true,
     showValueLine:Boolean=true,
-
+    axisMaximumLine : Float=1f,
     barLegendLabel: String = "legend Bar",
     barLegendColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
     lineLegendLabel: String = "legend Line",
@@ -118,7 +118,7 @@ fun CombinedChartMP(
             // Axe droite
             chart.axisRight.apply {
                 axisMinimum = 0f
-                axisMaximum = 1f
+                axisMaximum = axisMaximumLine
                 setDrawGridLines(false)
                 textColor = secondaryTextColor.toArgb()
             }

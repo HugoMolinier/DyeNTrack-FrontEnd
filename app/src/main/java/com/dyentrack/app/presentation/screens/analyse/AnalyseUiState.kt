@@ -4,6 +4,7 @@ import com.dyentrack.app.domain.model.MasterDataMaps
 import com.dyentrack.app.domain.model.MuscleRate
 import com.dyentrack.app.domain.model.PresetId
 import com.dyentrack.app.domain.model.dayData.SeanceTrack
+import com.dyentrack.app.domain.model.enums.AnalyseModeLine
 import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
 import com.dyentrack.app.domain.model.preset.Preset
 import java.time.LocalDate
@@ -14,12 +15,13 @@ data class AnalyseUiState(
     val mapSeance: Map<String, SeanceTrack> = emptyMap(),
     //plusieur car evite le recalcule si on change de range
     val muscleRateByDay: Map<String, DayExerciseData> = emptyMap(), // jour -> presetId + exercises
-
+    val caloriesMap: Map<String, Int> = emptyMap(),
     val dateRange: DateRangeSelected = DateRangeSelected(),
     val masterDataMaps: MasterDataMaps? = MasterDataMaps(),
 
     val exerciceChose: Long? = 0L,
     val presetChose: Preset? = null,
+    val modeAnalyse :AnalyseModeLine?=AnalyseModeLine.RATIO,
 
     val notIncludeGroupMuscle: Set<Long>? = emptySet(),
     val isBottomSheetVisible: BottomSheetVisibleType = BottomSheetVisibleType.NO,

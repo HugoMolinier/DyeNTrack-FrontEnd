@@ -52,13 +52,17 @@ import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.MesureUnit
 import com.dyentrack.app.domain.model.MuscleRate
+import com.dyentrack.app.domain.model.UserPreference
+import com.dyentrack.app.domain.model.enums.AnalyseModeLine
 import com.dyentrack.app.domain.model.enums.BottomSheetVisibleType
+import com.dyentrack.app.domain.model.enums.SyncPerformanceMode
 import com.dyentrack.app.domain.model.getName
 import com.dyentrack.app.presentation.components.ChipDropDownFlowRow
 import com.dyentrack.app.presentation.components.DateRangePickerDialog
 import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ProgressLine
 import com.dyentrack.app.presentation.components.SectionSelector
+import com.dyentrack.app.presentation.components.SingleCircleSelector
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetPreset
 import com.dyentrack.app.presentation.components.bottomSheet.BottomSheetSelectionExercise
@@ -116,7 +120,10 @@ fun AnalysePage(
         mutableStateOf(analyseViewModel.computeGlobalMuscleRate(filteredData))
     }
     var showRangePicker by remember { mutableStateOf(false) }
-
+    val graphOption = listOf(
+        stringResource(R.string.fail_set_ratio) to AnalyseModeLine.RATIO,
+        stringResource(R.string.calories) to AnalyseModeLine.CALORIE,
+    )
     val noPresetText = stringResource(R.string.no_preset)
     val moyenneSetParEx = analyseViewModel.moyenneSetParEx(globalMuscleRate)
     val proportionSetFail = analyseViewModel.proportionSetFail(globalMuscleRate)
@@ -361,8 +368,17 @@ fun AnalysePage(
                 ) {
                     val allStatByDay: Map<String, MuscleRate> =
                         filteredData.mapValues { it.value.AllStat }
-                    val chartData = analyseViewModel.getCombinedChartData(allStatByDay, userUnit)
-
+                    val chartData = remember(
+                        allStatByDay,
+                        userUnit,
+                        state.modeAnalyse,
+                        state.caloriesMap
+                    ) {
+                        analyseViewModel.getCombinedChartData(
+                            allStatByDay,
+                            userUnit
+                        )
+                    }
                     CombinedChartMP(
                         labels = chartData.labels,
                         barValues = chartData.barValues,
@@ -370,9 +386,46 @@ fun AnalysePage(
                         showValueBar = chartData.showValueBar,
                         showValueLine = chartData.showValueLine,
                         modifier = Modifier.fillMaxWidth(),
+                        axisMaximumLine =      if (state.modeAnalyse == AnalyseModeLine.CALORIE) {
+                            val maxValue = chartData.lineValues.maxOrNull() ?: 0f
+                            if (maxValue == 0f) 100f else maxValue * 1.1f
+                        } else 1f,
                         barLegendLabel = stringResource(R.string.weighted_sum),
-                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
+                        lineLegendLabel =
+                            if (state.modeAnalyse == AnalyseModeLine.CALORIE)
+                                stringResource(R.string.calories)
+                            else
+                                stringResource(R.string.fail_set_ratio)
                     )
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp,top=12.dp, bottom = 8.dp)
+                ) {
+
+                    graphOption.forEach { (label, mode) ->
+                        val isSelected = (state.modeAnalyse
+                            ?: AnalyseModeLine.RATIO) == mode
+                        Row (
+                            horizontalArrangement =  Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = label, style = MaterialTheme.typography.bodySmall
+                            )
+
+                            SingleCircleSelector(
+                                isSelected = isSelected, onClick = {
+                                    analyseViewModel.changeMode(mode)
+                                }, enabled = !isSelected
+                            )
+                        }
+                    }
                 }
             }
             item {
@@ -545,9 +598,17 @@ fun AnalysePage(
                                 .mapValues { it.value.AllStat }
                         } ?: emptyMap()
 
-                        val chartDataPreset = analyseViewModel.getCombinedChartData(
-                            data = presetData, userUnit = userUnit
-                        )
+                        val chartDataPreset = remember(
+                            presetData,
+                            userUnit,
+                            state.modeAnalyse,
+                            state.caloriesMap
+                        ) {
+                            analyseViewModel.getCombinedChartData(
+                                data = presetData,
+                                userUnit = userUnit
+                            )
+                        }
                         CombinedChartMP(
                             labels = chartDataPreset.labels,
                             barValues = chartDataPreset.barValues,
@@ -555,8 +616,16 @@ fun AnalysePage(
                             showValueBar = chartDataPreset.showValueBar,
                             showValueLine = chartDataPreset.showValueLine,
                             modifier = Modifier.fillMaxWidth(),
+                            axisMaximumLine =      if (state.modeAnalyse == AnalyseModeLine.CALORIE) {
+                                val maxValue = chartDataPreset.lineValues.maxOrNull() ?: 0f
+                                if (maxValue == 0f) 100f else maxValue * 1.1f
+                            } else 1f,
                             barLegendLabel = stringResource(R.string.weighted_sum),
-                            lineLegendLabel = stringResource(R.string.fail_set_ratio)
+                            lineLegendLabel =
+                                if (state.modeAnalyse == AnalyseModeLine.CALORIE)
+                                    stringResource(R.string.calories)
+                                else
+                                    stringResource(R.string.fail_set_ratio)
                         )
                     }
 
@@ -719,9 +788,17 @@ fun AnalysePage(
                             dayData.perExerciseStat[state.exerciceChose]?.let { day to it }
                         }.toMap()
 
-                    val chartDataExercise = analyseViewModel.getCombinedChartData(
-                        data = allDataExercise, userUnit = userUnit
-                    )
+                    val chartDataExercise = remember(
+                        allDataExercise,
+                        userUnit,
+                        state.modeAnalyse,
+                        state.caloriesMap
+                    ) {
+                        analyseViewModel.getCombinedChartData(
+                            data = allDataExercise,
+                            userUnit = userUnit
+                        )
+                    }
 
                     CombinedChartMP(
                         labels = chartDataExercise.labels,
@@ -731,8 +808,16 @@ fun AnalysePage(
                         showValueLine = chartDataExercise.showValueLine,
                         modifier = Modifier.fillMaxWidth(),
                         barLegendColor = BlueExercise.copy(alpha = 0.8f),
+                        axisMaximumLine =      if (state.modeAnalyse == AnalyseModeLine.CALORIE) {
+                            val maxValue = chartDataExercise.lineValues.maxOrNull() ?: 0f
+                            if (maxValue == 0f) 100f else maxValue * 1.1f
+                        } else 1f,
                         barLegendLabel = stringResource(R.string.weighted_sum),
-                        lineLegendLabel = stringResource(R.string.fail_set_ratio)
+                        lineLegendLabel =
+                            if (state.modeAnalyse == AnalyseModeLine.CALORIE)
+                                stringResource(R.string.calories)
+                            else
+                                stringResource(R.string.fail_set_ratio)
                     )
                 }
 
