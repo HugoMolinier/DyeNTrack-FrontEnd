@@ -481,7 +481,7 @@ fun SeancePage(
             viewModel.setPreset(preset.idLocal, preset.idPreset)
 
             viewModel.toggleBottomSheet(BottomSheetVisibleType.NO)
-            if(todaySeance?.exercisesInSceance?.isEmpty()==true) {
+            if(todaySeance?.exercisesInSceance?.isEmpty()==true||todaySeance?.exercisesInSceance == null) {
                 viewModel.addExerciseFromPresetForDaySelected(presets)
             } else {
                 activeMenu = ActiveMenu(

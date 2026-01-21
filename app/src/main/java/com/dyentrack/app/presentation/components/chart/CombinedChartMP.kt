@@ -77,7 +77,7 @@ fun CombinedChartMP(
             val lineDataSet = LineDataSet(lineEntries, lineLegendLabel).apply {
                 color = lineLegendColor.toArgb()
                 lineWidth = 2f
-                setDrawCircles(true)
+                setDrawCircles(showValueLine)
                 setDrawValues(showValueLine)
                 valueTextColor = colorScheme.onSurface.toArgb()
                 axisDependency = YAxis.AxisDependency.RIGHT

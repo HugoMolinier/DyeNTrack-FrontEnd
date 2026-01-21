@@ -27,7 +27,10 @@ object ExerciseImages {
         27L to R.drawable.rowing,
         28L to R.drawable.exercise_curlmarteau,
         32L to R.drawable.exercise_neckcurl,
-        33L to R.drawable.exercise_curlincline
+        33L to R.drawable.exercise_curlincline,
+        37L to R.drawable.exercise_squat,
+        38L to R.drawable.exercise_squat,
+
 
 
         )
