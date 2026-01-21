@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dyentrack.app.presentation.theme.secondaryTextColor
 
@@ -19,12 +20,13 @@ import com.dyentrack.app.presentation.theme.secondaryTextColor
 fun SingleCircleSelector(
     isSelected: Boolean,
     onClick: () -> Unit,
-    enabled:Boolean = true
+    enabled:Boolean = true,
+    size: Dp = 18.dp
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(18.dp)
+            .size(size)
             .alpha(if (enabled) 1f else 0.8f)
             .border(
                 width = 2.dp,

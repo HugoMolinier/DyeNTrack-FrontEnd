@@ -422,7 +422,7 @@ fun AnalysePage(
                             SingleCircleSelector(
                                 isSelected = isSelected, onClick = {
                                     analyseViewModel.changeMode(mode)
-                                }, enabled = !isSelected
+                                }, enabled = !isSelected,size=14.dp
                             )
                         }
                     }

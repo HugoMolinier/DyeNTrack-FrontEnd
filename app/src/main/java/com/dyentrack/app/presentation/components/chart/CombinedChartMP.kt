@@ -82,9 +82,11 @@ fun CombinedChartMP(
                 valueTextColor = colorScheme.onSurface.toArgb()
                 axisDependency = YAxis.AxisDependency.RIGHT
 
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return "${(value * 100).toInt()}%"
+                if(axisMaximumLine==1f) {
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            return "${(value * 100).toInt()}%"
+                        }
                     }
                 }
             }
