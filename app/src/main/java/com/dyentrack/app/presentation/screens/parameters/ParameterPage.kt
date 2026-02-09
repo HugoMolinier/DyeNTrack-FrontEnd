@@ -1,5 +1,6 @@
 package com.dyentrack.app.presentation.screens.parameters
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
 import com.dyentrack.app.domain.model.ActiveMenu
+import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.ParameterIcon
 import com.dyentrack.app.domain.model.ParameterItem
 import com.dyentrack.app.domain.model.enums.EmphasisType
@@ -54,16 +56,22 @@ import com.dyentrack.app.presentation.components.MenuItemData
 import com.dyentrack.app.presentation.components.ParameterBox
 import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
+import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
+import java.util.Locale
 
 @Composable
 fun ParameterPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
-) {
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    userPreferenceViewModel: UserPreferenceViewModel = hiltViewModel<UserPreferenceViewModel>(),
 
+    ) {
+    val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
+    val languageUser = userPreference?.language?: LANGUAGE.FR
+    Log.d("aaa",languageUser.toString())
     val authState by authViewModel.authState.collectAsState()
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
 
@@ -71,7 +79,6 @@ fun ParameterPage(
     val noText = stringResource(R.string.no)
     val resetTitle = stringResource(R.string.reset_data_title)
     val resetDescription = stringResource(R.string.reset_data_description)
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
@@ -251,20 +258,13 @@ fun ParameterPage(
                         )
                         ParameterBox(
                             listOf(
-                                /* ParameterItem(
-                                     { }, stringResource(R.string.accessibility),
-                                     ParameterIcon.Vector(Icons.Outlined.Accessibility)
-                                 ),*/
                                 ParameterItem(
-                                    { navController.navigate("privacy") },
+                                    {
+                                        navController.navigate("web?url=http://4.233.56.101:8080/privacy.html?fromApp=yes&languageApp=${languageUser}")
+                                    },
                                     stringResource(R.string.privacy),
                                     ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
-                                ),
-                                ParameterItem(
-                                    { navController.navigate("legal") },
-                                    stringResource(R.string.legal_notices),
-                                    ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
-                                ),
+                                )
                             )
                         )
                     }

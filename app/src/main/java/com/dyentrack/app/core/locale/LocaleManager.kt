@@ -12,13 +12,13 @@ object LocaleManager {
         val prefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val json = prefs.getString("user_preference", null)
 
-        val language = json
+        val language  = json
             ?.let { Gson().fromJson(it, UserPreference::class.java).language }
-            ?: LANGUAGE.FR
+            ?:getSystemLanguage(context)
 
         val locale = when (language) {
-            LANGUAGE.EN -> Locale.ENGLISH
             LANGUAGE.FR -> Locale.FRENCH
+            else  -> Locale.ENGLISH
         }
         Locale.setDefault(locale)
 
@@ -28,12 +28,16 @@ object LocaleManager {
         return context.createConfigurationContext(config)
     }
 
-
-
+    private fun getSystemLanguage(context: Context): LANGUAGE {
+        val locale = context.resources.configuration.locales[0]
+        return when (locale.language.lowercase()) {
+            "fr" -> LANGUAGE.FR
+            else -> LANGUAGE.EN
+        }
+    }
     fun getCurrentLanguage(): LANGUAGE =
         when(Locale.getDefault().language.lowercase()) {
             "fr" -> LANGUAGE.FR
-            "en" -> LANGUAGE.EN
-            else -> LANGUAGE.FR
+            else -> LANGUAGE.EN
         }
 }

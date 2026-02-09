@@ -16,11 +16,16 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
     defaultConfig {
         applicationId = "com.dyentrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
+        versionCode = 13
         versionName = "1.0.1"
 
         val secretsFile = rootProject.file("local.properties")
@@ -115,6 +120,7 @@ dependencies {
     implementation(libs.play.services.ads.api)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.ui)
 
 
     // Navigation

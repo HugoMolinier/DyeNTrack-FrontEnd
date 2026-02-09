@@ -46,7 +46,7 @@
     <string name="sleep">Sommeil</string>
     <string name="sleep_hours">Heure de sommeil</string>
     <string name="weight">Poids</string>
-    <string name="last">Dernière occurence :</string>
+    <string name="last">Dernière occurrence :</string>
 
     <string name="proteins">Protéines</string>
     <string name="carbohydrates">Glucides</string>
@@ -232,82 +232,6 @@
     <string name="auto_sync_desc">Synchronisation à chaque démarrage si opérationnel et autorisé</string>
     <string name="home">Accueil</string>
     <string name="workout">Séance</string>
-
-    <string name="privacy_title">Politique de confidentialité</string>
-
-    <!-- Point 1 -->
-    <string name="privacy_heading_1">1. Responsable du traitement</string>
-    <string name="privacy_text_1_1">Les données personnelles collectées via l’application sont traitées par l’éditeur de l’application, responsable du traitement au sens du Règlement Général sur la Protection des Données (RGPD).</string>
-    <!-- Point 2 -->
-    <string name="privacy_heading_2">2. Données collectées</string>
-    <string name="privacy_text_2_1">Nous collectons uniquement les données strictement nécessaires au fonctionnement de l’application :</string>
-    <string name="privacy_text_2_2">Cela inclut l’adresse email, les informations de profil (taille, sexe, date de naissance), les préférences utilisateur ainsi que les données liées à l’activité, la nutrition, le poids et le sommeil.</string>
-    <string name="privacy_text_2_3">Les données de santé sont collectées uniquement après obtention du consentement explicite de l’utilisateur, notamment lors de l’activation de services de synchronisation avec des applications tierces telles que Health Connect.</string>
-
-    <!-- Point 3 -->
-    <string name="privacy_heading_3">3. Utilisation des données</string>
-    <string name="privacy_text_3_1">Les données sont utilisées pour permettre la création et la gestion du compte utilisateur.</string>
-    <string name="privacy_text_3_2">Elles servent également à assurer le suivi de ton activité physique, de ta nutrition et de ton sommeil, ainsi qu’à personnaliser ton expérience dans l’application.</string>
-    <string name="privacy_text_3_3">Aucune donnée n’est utilisée à des fins publicitaires ou commerciales.</string>
-
-    <!-- Point 4 -->
-    <string name="privacy_heading_4">4. Utilisation hors connexion</string>
-    <string name="privacy_text_4_1">Lorsque l’utilisateur n’est pas connecté à un compte, aucune donnée n’est transmise vers un serveur distant.</string>
-    <string name="privacy_text_4_2">Dans ce cas, l’ensemble des données est stocké exclusivement en local sur l’appareil de l’utilisateur, afin de permettre l’utilisation de l’application en mode hors ligne.</string>
-    <string name="privacy_text_4_3">Aucune synchronisation, transmission ou traitement serveur n’est effectué sans authentification préalable.</string>
-
-    <!-- Point 5 -->
-    <string name="privacy_heading_5">5. Adresse email</string>
-    <string name="privacy_text_5_1">L’adresse email est collectée uniquement pour l’identification et la sécurisation du compte utilisateur.</string>
-    <string name="privacy_text_5_2">Aucun email, notification promotionnelle ou communication commerciale ne sera envoyé à l’adresse fournie.</string>
-    <string name="privacy_text_5_3">L’adresse email n’est jamais partagée avec des tiers.</string>
-
-    <!-- Point 6 -->
-    <string name="privacy_heading_6">6. Partage des données</string>
-    <string name="privacy_text_6_1">Les données personnelles ne sont ni vendues, ni louées, ni cédées à des tiers.</string>
-    <string name="privacy_text_6_2">Aucun partage de données n’est effectué à des fins commerciales ou publicitaires.</string>
-    <string name="privacy_text_6_3">Les services tiers intégrés à l’application n’accèdent aux données qu’après autorisation explicite de l’utilisateur.</string>
-
-    <!-- Point 7 -->
-    <string name="privacy_heading_7">7. Sécurité des données</string>
-    <string name="privacy_text_7_1">Des mesures techniques et organisationnelles appropriées sont mises en place afin de garantir la sécurité des données.</string>
-    <string name="privacy_text_7_2">L’accès aux données est strictement limité aux besoins du fonctionnement de l’application.</string>
-    <string name="privacy_text_7_3">Toute tentative d’accès non autorisé est empêchée par des mécanismes de sécurité adaptés.</string>
-
-    <!-- Point 8 -->
-    <string name="privacy_heading_8">8. Conservation des données</string>
-    <string name="privacy_text_8_1">Les données personnelles sont conservées uniquement pendant la durée d’utilisation du compte utilisateur.</string>
-    <string name="privacy_text_8_2">En cas de suppression du compte, l’ensemble des données associées est supprimé de manière définitive.</string>
-    <string name="privacy_text_8_3">Les données stockées localement sont supprimées lors de la désinstallation de l’application.</string>
-
-    <!-- Point 9 -->
-    <string name="privacy_heading_9">9. Droits de l’utilisateur</string>
-    <string name="privacy_text_9_1">Conformément au RGPD, l’utilisateur dispose d’un droit d’accès, de rectification et de suppression de ses données.</string>
-    <string name="privacy_text_9_2">L’utilisateur peut également demander la limitation ou l’opposition au traitement de ses données.</string>
-    <string name="privacy_text_9_3">Ces droits peuvent être exercés directement depuis l’application.</string>
-
-    <!-- Point 10 -->
-    <string name="privacy_heading_10">10. Modification de la politique</string>
-    <string name="privacy_text_10_1">La présente politique de confidentialité peut être mise à jour à tout moment.</string>
-    <string name="privacy_text_10_2">Toute modification substantielle fera l’objet d’une information au sein de l’application.</string>
-    <string name="privacy_text_10_3">La poursuite de l’utilisation de l’application vaut acceptation de la politique mise à jour.</string>
-
-    <string name="legal_title">Mentions légales</string>
-
-    <string name="legal_heading_1">1. Éditeur</string>
-    <string name="legal_text_1_1">Cette application est éditée par Dyentrack App, responsable du contenu et de la maintenance du logiciel.</string>
-
-    <string name="legal_heading_2">2. Propriété intellectuelle</string>
-    <string name="legal_text_2_1">L’ensemble du contenu, des graphiques, logos et du code inclus dans cette application est protégé par le droit d’auteur et la propriété intellectuelle.</string>
-    <string name="legal_text_2_2">Toute reproduction ou distribution sans autorisation préalable est interdite.</string>
-
-    <string name="legal_heading_3">3. Responsabilité</string>
-    <string name="legal_text_3_1">L’éditeur ne peut être tenu responsable de tout dommage direct ou indirect résultant de l’utilisation de cette application.</string>
-
-    <string name="legal_heading_4">4. Mises à jour</string>
-    <string name="legal_text_4_1">L’application peut être mise à jour régulièrement pour améliorer ses fonctionnalités ou sa sécurité.</string>
-    <string name="legal_text_4_2">Il est recommandé d’utiliser la dernière version pour des performances optimales.</string>
-    <string name="legal_text_4_3">La poursuite de l’utilisation de l’application vaut acceptation des présentes mentions légales.</string>
 
     <string name="advanced">Avancé</string>
 
