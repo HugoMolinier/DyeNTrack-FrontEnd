@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.preset
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyentrack.app.core.locale.LocaleManager
@@ -113,7 +112,6 @@ class PresetPageViewModel @Inject constructor(
                 )
             )
         }
-        Log.d("state", "${_uiState.value.currentPreset}")
     }
 
     fun changeNbSet(exerciseId: Long, delta: Int) {
@@ -154,7 +152,6 @@ class PresetPageViewModel @Inject constructor(
     fun updateExerciseRange(
         exerciseId: Long, rangeRepInf: Int? = null, rangeRepSup: Int? = null
     ) {
-        Log.d("range", "${rangeRepInf}_${rangeRepSup}")
         updateExercise(exerciseId) { ex ->
             val min = rangeRepInf?.coerceAtLeast(1)
             val max = rangeRepSup?.coerceAtLeast(1)

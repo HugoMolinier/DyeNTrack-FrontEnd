@@ -1,6 +1,5 @@
 package com.dyentrack.app.presentation.screens.parameters
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.DatasetLinked
 import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.Outbox
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Straighten
@@ -58,7 +58,6 @@ import com.dyentrack.app.presentation.components.TopNavigationBar
 import com.dyentrack.app.presentation.globalViewModel.AuthViewModel
 import com.dyentrack.app.presentation.globalViewModel.UserPreferenceViewModel
 import com.dyentrack.app.presentation.theme.secondaryTextColor
-import java.util.Locale
 
 @Composable
 fun ParameterPage(
@@ -69,9 +68,7 @@ fun ParameterPage(
 
     ) {
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
-
-    val languageUser = userPreference?.language?: LANGUAGE.FR
-    Log.d("aaa",languageUser.toString())
+    val languageUser = userPreference?.language ?: LANGUAGE.FR
     val authState by authViewModel.authState.collectAsState()
     var activeMenu by remember { mutableStateOf<ActiveMenu?>(null) }
 
@@ -82,7 +79,7 @@ fun ParameterPage(
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             TopNavigationBar(
-                text=stringResource(R.string.parameter), rightSide = {
+                text = stringResource(R.string.parameter), rightSide = {
                     Icon(
                         Icons.Default.Close,
                         stringResource(R.string.back_to_menu),
@@ -156,12 +153,12 @@ fun ParameterPage(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 CustomButton(
-                                    label=stringResource(R.string.signup),
+                                    label = stringResource(R.string.signup),
                                     modifier = modifier.fillMaxWidth(),
                                     size = SizeType.MEDIUM,
                                     onClick = { navController.navigate("inscription") })
                                 CustomButton(
-                                    label=stringResource(R.string.login),
+                                    label = stringResource(R.string.login),
                                     variant = VariantType.OUTLINED,
                                     emphasis = EmphasisType.SECONDARY,
                                     modifier = modifier.fillMaxWidth(),
@@ -257,14 +254,20 @@ fun ParameterPage(
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         ParameterBox(
-                            listOf(
+                            listOfNotNull(
                                 ParameterItem(
                                     {
                                         navController.navigate("web?url=http://4.233.56.101:8080/privacy.html?fromApp=yes&languageApp=${languageUser}")
                                     },
                                     stringResource(R.string.privacy),
                                     ParameterIcon.Vector(Icons.AutoMirrored.Outlined.Assignment)
-                                )
+                                ),
+                                if (authState.isConnected)
+                                    ParameterItem(
+                                        { navController.navigate("exportData") },
+                                        stringResource(R.string.export_data),
+                                        ParameterIcon.Vector(Icons.Outlined.Outbox)
+                                    ) else null
                             )
                         )
                     }
@@ -276,7 +279,7 @@ fun ParameterPage(
                         Button(
                             onClick = {
                                 activeMenu = ActiveMenu(
-                                    title =resetTitle,
+                                    title = resetTitle,
                                     description = resetDescription,
                                     content = listOf(
                                         MenuItemData(noText, onClick = { activeMenu = null }),
@@ -287,7 +290,7 @@ fun ParameterPage(
                                         })
                                     )
                                 )
-                                      },
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 12.dp),

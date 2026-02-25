@@ -2,6 +2,7 @@ package com.dyentrack.app.presentation.globalViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.AuthState
 import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.domain.repository.UserConnectionRepository
@@ -10,6 +11,7 @@ import com.dyentrack.app.domain.usecase.auth.LoginUserUseCase
 import com.dyentrack.app.domain.usecase.auth.LogoutUseCase
 import com.dyentrack.app.domain.usecase.auth.RegisterUserUseCase
 import com.dyentrack.app.domain.usecase.auth.UpdateUserUseCase
+import com.dyentrack.app.domain.usecase.daydata.LauchGenerationExcelUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +26,8 @@ class AuthViewModel @Inject constructor(
     private val updateUserUseCase: UpdateUserUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val deleteUserUseCase: DeleteUserUseCase,
-    repository: UserConnectionRepository
+    repository: UserConnectionRepository,
+    private val lauchGenerationExcelUseCase: LauchGenerationExcelUseCase
 
 ) : ViewModel() {
 
@@ -66,6 +69,16 @@ class AuthViewModel @Inject constructor(
             _requestState.value = deleteUserUseCase()
 
 
+        }
+    }
+
+    fun requestDataUser(startDate: String, endDate: String, isFullExport: Boolean) {
+        if (!isFullExport && (endDate.isBlank() || startDate.isBlank())) {
+            _requestState.value = RequestState.Error(AuthError.INVALID_ARGUMENT);return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            _requestState.value = RequestState.Loading
+            _requestState.value = lauchGenerationExcelUseCase(startDate, endDate)
         }
     }
 

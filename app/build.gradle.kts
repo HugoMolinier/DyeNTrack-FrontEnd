@@ -25,8 +25,8 @@ android {
         applicationId = "com.dyentrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 13
-        versionName = "1.0.1"
+        versionCode = 16
+        versionName = "1.0.2"
 
         val secretsFile = rootProject.file("local.properties")
         val properties = Properties()
@@ -60,6 +60,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true // false car 1er prod
             isShrinkResources = true// false car 1er prod
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

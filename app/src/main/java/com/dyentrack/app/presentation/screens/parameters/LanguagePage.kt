@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dyentrack.app.R
+import com.dyentrack.app.core.locale.LocaleManager.getCurrentLanguage
 import com.dyentrack.app.core.utils.findActivity
 import com.dyentrack.app.domain.model.LANGUAGE
 import com.dyentrack.app.domain.model.ParameterItem
@@ -46,7 +47,7 @@ fun LanguagePage(
     val focusManager = LocalFocusManager.current
     val userPreference by userPreferenceViewModel.userPreference.collectAsState()
 
-    val languageUser = userPreference?.language?: LANGUAGE.FR
+    val languageUser = userPreference?.language ?: getCurrentLanguage()
     val context = LocalContext.current
     val activity = context.findActivity()
 
@@ -65,7 +66,7 @@ fun LanguagePage(
                 }) {
             Column {
                 TopNavigationBar(
-                    text=stringResource(R.string.language),
+                    text = stringResource(R.string.language),
                     leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                     onClickLeft = { navController.popBackStack() },
                     rightSide = {

@@ -17,7 +17,6 @@ class RequestHealthConnectPermissionsUseCase @Inject constructor() {
         return setOf(
             HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(NutritionRecord::class),
-            HealthPermission.getWritePermission(ExerciseSessionRecord::class),
             HealthPermission.getReadPermission(SleepSessionRecord::class),
         )
     }

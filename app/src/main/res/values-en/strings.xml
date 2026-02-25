@@ -27,7 +27,24 @@
     <string name="weighted_sum">Weighted sum</string>
     <string name="not_editable">Not editable : Auto-Sync </string>
     <string name="fail_set_ratio">Fail / set ratio</string>
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+    <string name="export_period">Période d’export</string>
+    <string name="export_mode">Export mode</string>
+    <string name="export_full">Full export</string>
+    <string name="export_partial">Partial export</string>
+    <string name="get">Send the request</string>
+    <string name="get_loading">Send…</string>
+    <string name="success">
+    Success !
+</string>
+    <string name="export_success">
+    Your export has been launched. You will receive an email within 5 minutes.
+</string>
 
+    <string name="export_success_button">
+    Got it
+</string>
     <string name="you">You</string>
     <string name="a_user">A user</string>
     <string name="back">Back to previous screen</string>
@@ -347,7 +364,16 @@
     <string name="sort_by_name">By name</string>
     <string name="sort_by_creation_date">By creation date</string>
     <string name="sort_by_last_occurrence">Last occurrence</string>
+    <string name="error_unauthorized">Incorrect email or password</string>
+    <string name="error_not_connected">You are not connected</string>
+    <string name="error_invalid_dates">One of the two dates is missing</string>
+<string name="excel_generate_info">
+    Generate an Excel file and receive it by email sent to the address provided at registration.
+</string>
 
+<string name="excel_generate_details">
+    It contains session data and a visual summary of nutrition and physiological information.
+</string>
     <string name="ascending">Ascending</string>
     <string name="reset_data_title">You are about to delete your data</string>
     <string name="reset_data_description">

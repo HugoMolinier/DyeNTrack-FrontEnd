@@ -29,4 +29,5 @@ class UserPreferenceViewModel @Inject constructor(
         saveUserPreferenceUseCase(newPref)
         fetchUserPreferenceUseCase()
     }
+
 }

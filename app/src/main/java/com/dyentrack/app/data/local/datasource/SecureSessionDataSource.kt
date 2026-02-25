@@ -100,12 +100,10 @@ class SecureSessionDataSource @Inject constructor(
     }
 
     fun clearSession() {
-        Log.d("clear", "cleaejkiozrjz")
         prefs.edit { remove(KEY_SESSION) }
     }
 
     fun clearAll() {
-        Log.d("clearall", "cleaejkiozrjz")
         prefs.edit { clear() }
     }
 }

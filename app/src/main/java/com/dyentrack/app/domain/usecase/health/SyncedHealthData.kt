@@ -1,14 +1,17 @@
 package com.dyentrack.app.domain.usecase.health
 
 import androidx.health.connect.client.HealthConnectClient
-import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.dayData.NutritionTrack
 import com.dyentrack.app.domain.model.dayData.PhysioTrack
+import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.usecase.daydata.GetDayDataDayLocalUseCase
+import com.dyentrack.app.domain.usecase.daydata.GetDayDataUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToApiUseCase
 import com.dyentrack.app.domain.usecase.daydata.UpdateDayDataToLocalUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -24,13 +27,19 @@ class SyncHealthDataUseCase @Inject constructor(
     private val getDataHealthUseCase: GetDataHealthUseCase,
     private val updateDayDataToLocalUseCase: UpdateDayDataToLocalUseCase,
     private val updateDayDataToApiUseCase: UpdateDayDataToApiUseCase,
-    private val getDayDataDayLocalUseCase: GetDayDataDayLocalUseCase
+    private val getDayDataDayLocalUseCase: GetDayDataDayLocalUseCase,
+    private val getDayDataUseCase: GetDayDataUseCase
+
 ) {
 
     suspend operator fun invoke(
         client: HealthConnectClient,
         daySelected: LocalDate
     ): SyncedHealthData {
+        getDayDataUseCase.dayDataReady
+            .filter { it }
+            .first()
+
         return withContext(Dispatchers.IO) {
             val start = daySelected.atStartOfDay(ZoneOffset.UTC).toInstant()
             val end = daySelected.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()

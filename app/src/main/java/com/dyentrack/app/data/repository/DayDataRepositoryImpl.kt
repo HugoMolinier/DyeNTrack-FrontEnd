@@ -4,14 +4,20 @@ import android.util.Log
 import com.dyentrack.app.data.local.database.AppDatabase
 import com.dyentrack.app.data.local.database.SeanceDao
 import com.dyentrack.app.data.network.ApiInterface
+import com.dyentrack.app.data.network.dto.PeriodSelection
+import com.dyentrack.app.domain.model.AuthError
 import com.dyentrack.app.domain.model.AuthStatus
-import com.dyentrack.app.domain.model.enums.TypeOfAction
+import com.dyentrack.app.domain.model.RequestState
 import com.dyentrack.app.domain.model.dayData.DayDataRequest
 import com.dyentrack.app.domain.model.enums.SaveType
+import com.dyentrack.app.domain.model.enums.TypeOfAction
 import com.dyentrack.app.domain.repository.DayDataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import retrofit2.HttpException
 import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +33,9 @@ class DayDataRepositoryImpl @Inject constructor(
 
     private val _apiFetchStatus = MutableStateFlow(SaveType.NOTSAVE)
     override val apiFetchStatus: StateFlow<SaveType> = _apiFetchStatus
+
+    private val _dayDataReady = MutableStateFlow(false)
+    override val dayDataReady: StateFlow<Boolean> = _dayDataReady
 
     override suspend fun fetchDayData() {
         // 1. récupère le local
@@ -50,11 +59,12 @@ class DayDataRepositoryImpl @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                Log.e("DayDataRepository", "Erreur fetchDayData: ${e.message}")
+                //Log.e("DayDataRepository", "Erreur fetchDayData: ${e.message}")
                 return
             }
 
         }
+        _dayDataReady.value = true
     }
 
 
@@ -132,15 +142,47 @@ class DayDataRepositoryImpl @Inject constructor(
             if (response.status in listOf(200, 201)) {
                 200
             } else {
-                Log.d("Api response Error", "$response")
+                //Log.d("Api response Error", "$response")
                 100
             }
         } catch (e: Exception) {
-            Log.d("Api response Error", "$e")
+            //Log.d("Api response Error", "$e")
             100
         }
     }
 
+
+    override suspend fun launchGenerationExcel(
+        startDate: String?,
+        endDate: String?
+    ): RequestState {
+        val finalStartDate = startDate
+            ?.takeIf { it.isNotBlank() }
+            ?.let { LocalDate.parse(it) }
+            ?: LocalDate.of(2025, 1, 1)
+
+        val finalEndDate = endDate
+            ?.takeIf { it.isNotBlank() }
+            ?.let { LocalDate.parse(it) }
+            ?: LocalDate.of(9999, 12, 31)
+
+        return try {
+            api.generateExcel(
+                PeriodSelection(
+                    finalStartDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    finalEndDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                )
+            )
+            RequestState.Success
+        } catch (e: HttpException) {
+            RequestState.Error(
+                if (e.code() == 401) AuthError.UNAUTHORIZED
+                else AuthError.ERROR_API
+            )
+        } catch (_: Exception) {
+            RequestState.Error(AuthError.ERROR_API)
+        }
+    }
 
     override suspend fun updateToLocal(
         dayData: DayDataRequest,

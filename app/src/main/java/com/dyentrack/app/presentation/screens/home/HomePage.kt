@@ -1,7 +1,6 @@
 package com.dyentrack.app.presentation.screens.home
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -754,7 +753,6 @@ fun HomePage(
         officialExercise = masterData?.officialExercise,
         infoMapUser = infoMapUser,
         onClickExercise = { exercice ->
-            Log.d("aa", "${exercice.idExercise}")
             navController.navigate("exercise/${exercice.idExercise}")
         },
         onClickFavorite = {

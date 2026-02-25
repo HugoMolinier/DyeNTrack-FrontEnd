@@ -45,6 +45,7 @@ import com.dyentrack.app.presentation.screens.home.HomePage
 import com.dyentrack.app.presentation.screens.parameters.AdvanceParamPage
 import com.dyentrack.app.presentation.screens.parameters.ConnectedAppPage
 import com.dyentrack.app.presentation.screens.parameters.ConnexionPage
+import com.dyentrack.app.presentation.screens.parameters.ExportPage
 import com.dyentrack.app.presentation.screens.parameters.InformationPage
 import com.dyentrack.app.presentation.screens.parameters.LanguagePage
 import com.dyentrack.app.presentation.screens.parameters.MesureUnitPage
@@ -168,6 +169,8 @@ fun MyApp() {
             composable("mesureUnit") { MesureUnitPage(navController = navController) }
             composable("language") { LanguagePage(navController = navController) }
             composable("advanceParam") { AdvanceParamPage(navController = navController) }
+            composable("exportData") { ExportPage(navController = navController) }
+
             composable("web?url={url}") { backStackEntry ->
                 val url = backStackEntry.arguments?.getString("url") ?: ""
                 WebPrivacyPage(url,navController)

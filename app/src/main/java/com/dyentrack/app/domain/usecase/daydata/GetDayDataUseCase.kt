@@ -13,6 +13,7 @@ class GetDayDataUseCase @Inject constructor(
 ) {
     val dayDataFlow: StateFlow<List<DayDataRequest>?> = repository.dayDataFlow
     val apiFetchStatus: StateFlow<SaveType> = repository.apiFetchStatus
+    val dayDataReady: StateFlow<Boolean> = repository.dayDataReady
 
     suspend operator fun invoke() {
         repository.fetchDayData()

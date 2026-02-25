@@ -2,6 +2,7 @@ package com.dyentrack.app.data.network
 
 import com.dyentrack.app.data.network.dto.IdentificationRequest
 import com.dyentrack.app.data.network.dto.InfoExerciseUserContentRequest
+import com.dyentrack.app.data.network.dto.PeriodSelection
 import com.dyentrack.app.data.network.dto.UserUpdate
 import com.dyentrack.app.domain.model.ApiResponse
 import com.dyentrack.app.domain.model.InfoExerciseUser
@@ -26,6 +27,10 @@ interface ApiInterface {
 
     @POST("daydata/save")
     suspend fun saveDayData(@Body dayDataRequest: DayDataRequest): ApiResponse<DayDataRequest>
+
+    @POST("daydata/generateExcel")
+    suspend fun generateExcel(@Body periodSelection: PeriodSelection): ApiResponse<String>
+
 
     @GET("daydata/getAll")
     suspend fun getAllDayDataByDay(): ApiResponse<List<DayDataRequest>>

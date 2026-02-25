@@ -23,7 +23,7 @@ import com.dyentrack.app.R
 
 
 @Composable
-fun DatePickerInput(birthday: MutableState<String>,enable:Boolean=true) {
+fun DatePickerInput(modifier: Modifier= Modifier, birthday: MutableState<String>, enable:Boolean=true,text:String="Date") {
     val context = LocalContext.current
     val displayFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE) }
     val serverFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.FRANCE) }
@@ -53,23 +53,18 @@ fun DatePickerInput(birthday: MutableState<String>,enable:Boolean=true) {
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(color = TertiaOne, shape = RoundedCornerShape(12.dp))
-            .border(
-                width = 1.dp,
-                color = Color(0xFF9CA3AF).copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
-            )
             .then(if (enable) Modifier.clickable { datePickerDialog.show() } else Modifier)
             .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Text(
-            text = if (birthday.value.isEmpty()) "Sélectionner la date"
+            text = if (birthday.value.isEmpty()) text
             else displayFormat.format(serverFormat.parse(birthday.value) ?: Date()),
             modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (enable) MaterialTheme .colorScheme.onSurface else secondaryTextColor.copy(alpha= 0.8f)
+            color = if (enable) secondaryTextColor.copy(alpha= 0.8f) else secondaryTextColor.copy(alpha= 0.5f)
         )
     }
 }

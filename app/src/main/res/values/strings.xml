@@ -11,6 +11,35 @@
     <string name="add_note">Ajouter une note</string>
     <string name="details">Détails</string>
     <string name="made_by">Crée par %1$s</string>
+    <string name="error_unauthorized">Email ou mot de passe incorrect</string>
+    <string name="error_not_connected">Vous n’êtes pas connecté</string>
+    <string name="error_invalid_dates">Une des deux dates est manquante</string>
+    <string name="excel_generate_info">
+    Générez un fichier Excel et recevez-le par email à l’adresse fournie lors de l’inscription.
+</string>
+
+    <string name="excel_generate_details">
+    Il contient les données de séance ainsi qu’un récapitulatif visuel des informations nutritionnelles et physiologiques.
+</string>
+    <string name="success">
+    Succès !
+</string>
+    <string name="get">Envoyer la requête</string>
+    <string name="get_loading">Envoie…</string>
+    <string name="start_date">Date de début</string>
+    <string name="end_date">Date de fin</string>
+    <string name="export_period">Période d’export</string>
+    <string name="export_mode">Mode d’export</string>
+    <string name="export_full">Export complet</string>
+    <string name="export_partial">Export partiel</string>
+
+    <string name="export_success">
+    Votre exportation a été lancée. Vous recevrez un email dans les 5 minutes.
+</string>
+
+    <string name="export_success_button">
+    Je comprends
+</string>
 
     <string name="explanation">Explication</string>
     <string name="statistics">Statistique</string>

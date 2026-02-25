@@ -64,8 +64,6 @@ class HealthConnectViewModel @Inject constructor(
                             syncHealthData()
                             syncHealthData(LocalDate.now().minusDays(1L))
                             syncHealthData(LocalDate.now().minusDays(2L))
-
-
                         }
                     } else {
                         _etat.value = HealthConnectEtat.AUTORISER
@@ -111,6 +109,8 @@ class HealthConnectViewModel @Inject constructor(
                     requestHealthConnectPermissionsUseCase.arePermissionsGranted(client)
                 if (permissionsGranted) {
                     syncHealthDataUseCase(client, daySelected)
+                } else {
+                    requestPermissions()
                 }
             }
         }

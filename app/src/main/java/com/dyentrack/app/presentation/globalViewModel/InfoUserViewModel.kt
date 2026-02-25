@@ -12,7 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InfoUserViewModel @Inject constructor(
     getInfoExerciseUserUseCase: GetInfoExerciseUserUseCase,
-    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase,
+    private val updateInfoExerciseUserUseCase: UpdateInfoExerciseUserUseCase
 ) : ViewModel() {
 
     //Flow à la vue
@@ -26,4 +26,5 @@ class InfoUserViewModel @Inject constructor(
             updateInfoExerciseUserUseCase(info)
         }
     }
+
 }

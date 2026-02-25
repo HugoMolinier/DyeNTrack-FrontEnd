@@ -23,7 +23,7 @@ class AuthInterceptor @Inject constructor(
                 }
             }.build()
 
-        Log.d("AuthInterceptor", "request: $request")
+        //Log.d("AuthInterceptor", "request: $request")
 
 
         return chain.proceed(request)

@@ -73,21 +73,22 @@ fun ConnexionPage(
     val errorText = when ((requestState as? RequestState.Error)?.error) {
         AuthError.NOT_PASSWORD -> stringResource(R.string.error_invalid_password)
         AuthError.NOT_EMAILFORMAT -> stringResource(R.string.error_invalid_email)
-        AuthError.UNAUTHORIZED -> "Email ou mot de passe incorect"
+        AuthError.UNAUTHORIZED -> stringResource(R.string.error_unauthorized)
         AuthError.ERROR_API -> stringResource(R.string.error_api)
         else -> ""
     }
     val focusManager = LocalFocusManager.current
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectTapGestures(onTap = {
-                focusManager.clearFocus()
-            })
-        }) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }) {
         Column {
             TopNavigationBar(
-                text=stringResource(R.string.login),
+                text = stringResource(R.string.login),
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onClickLeft = { navController.popBackStack() },
                 rightSide = {

@@ -29,6 +29,7 @@ class AppViewModel @Inject constructor(
         }
         appScope.scope.launch(Dispatchers.IO) {
             getDayDataUseCase()
+            //ici lancer le syncdu HealthViewModel ici après
         }
 
 
